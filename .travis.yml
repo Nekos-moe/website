@@ -1,0 +1,11 @@
+language: node_js
+node_js:
+  - "7"
+before_install:
+  - npm install -g node-gyp eslint
+script:
+  - npm run test
+dist: trusty
+sudo: false
+notifications:
+  email: false
