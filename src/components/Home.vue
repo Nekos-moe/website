@@ -42,20 +42,35 @@
 		max-width: 1024px
 		flex-basis: 1024px
 		margin-left: 1rem
-		display: flex
-		flex-wrap: wrap
-		justify-content: space-around
-		div
+		.navigation-buttons
+			text-align: center
+			button
+				padding: 5px 10px
+				border-radius: 3px
+				background-color: #2de58c
+				color: #FFF
+				box-shadow: 0 0 3px rgba(45, 229, 140, .2)
+				border: none
+				font-size: 1rem
+				font-family: sans-serif
+				margin: .5rem
+				&:hover
+					cursor: pointer
+		.images
 			display: flex
-			justify-content: center
-			align-items: center
-			align-self: center
-			margin: .3rem
-			height: 400px
-			width: 300px
-			img
-				max-height: 100%
-				max-width: 100%
+			flex-wrap: wrap
+			justify-content: space-around
+			div
+				display: flex
+				justify-content: center
+				align-items: center
+				align-self: center
+				margin: .3rem 0
+				//height: 400px
+				width: 310px
+				img
+					max-height: 100%
+					max-width: 100%
 
 </style>
 
@@ -65,7 +80,8 @@ import { recentImages } from '../store/api';
 export default {
 	data() {
 		return {
-			images: []
+			images: [],
+			page: 1
 		};
 	},
 	computed: {
@@ -76,10 +92,18 @@ export default {
 	methods: {
 		getUser(e) {
 			this.$store.commit('message', e.target.value);
+		},
+		previous() {
+			if (this.page !== 1)
+				this.page--;
+		},
+		next() {
+			if (this.page < this.images.length / 9)
+				this.page++;
 		}
 	},
 	beforeMount() {
-		recentImages(9).then(images => this.$data.images = images);
+		recentImages(27).then(images => this.images = this.images.concat(images));
 	}
 }
 </script>
@@ -105,8 +129,18 @@ export default {
 			</div>
 		</div>
 		<div class="images-wrapper">
-			<div v-for="image of images">
-				<img :src="image">
+			<div class="navigation-buttons">
+				<button @click="previous">Previous</button>
+				<button @click="next">Next</button>
+			</div>
+			<div class="images">
+				<div v-for="(image, index) of images" v-show="~~(index / 9) === page - 1">
+					<img :src="image">
+				</div>
+			</div>
+			<div class="navigation-buttons">
+				<button @click="previous">Previous</button>
+				<button @click="next">Next</button>
 			</div>
 		</div>
 	</div>
