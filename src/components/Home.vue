@@ -39,7 +39,7 @@
 </template>
 
 <script>
-import { recentImages } from '../store/api';
+import { api } from '../store';
 
 export default {
 	data() {
@@ -67,7 +67,7 @@ export default {
 		}
 	},
 	beforeMount() {
-		recentImages(27).then(images => { this.images = this.images.concat(images); });
+		api.recentImages(27).then(images => { this.images = this.images.concat(images); });
 	}
 }
 </script>

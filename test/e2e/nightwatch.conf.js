@@ -35,6 +35,24 @@ module.exports = {
 			}
 		},
 
+		travis: {
+			desiredCapabilities: {
+				browserName : "chrome",
+				javascriptEnabled: true,
+				databaseEnabled: true,
+				locationContextEnabled: true,
+				applicationCacheEnabled: true,
+				browserConnectionEnabled: true,
+				webStorageEnabled: true,
+				acceptSslCerts: true,
+				rotatable: true,
+				nativeEvents: true,
+				chromeOptions: {
+					args: ["disable-web-security", "ignore-certificate-errors", "no-sandbox"]
+				}
+			}
+		},
+
 		firefox: {
 			desiredCapabilities: {
 				browserName: 'firefox',
