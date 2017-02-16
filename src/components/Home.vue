@@ -1,3 +1,77 @@
+<template>
+<body>
+	<div id="base">
+		<div class="account-view">
+			<div class="icon-text-wrapper user">
+				<img :src="user.avatar" class="avatar-small">
+				<span class="username">{{ user.username }}</span>
+			</div>
+			<div class="icon-text-wrapper mess">
+				<img src="http://placehold.it/20x20">
+				<span>{{ user.notifications | humanize }} Notifications</span>
+			</div>
+			<div class="icon-text-wrapper like">
+				<img src="http://placehold.it/20x20">
+				<span>{{ user.likes | humanize }} Likes</span>
+			</div>
+			<div class="icon-text-wrapper fav">
+				<img src="http://placehold.it/20x20">
+				<span>{{ user.favorites | humanize }} Favorites</span>
+			</div>
+		</div>
+		<div class="images-wrapper">
+			<div class="navigation-buttons">
+				<button @click="previous">Previous</button>
+				<button @click="next">Next</button>
+			</div>
+			<div class="images">
+				<div v-for="(image, index) of images" v-show="~~(index / 9) === page - 1">
+					<img :src="image">
+				</div>
+			</div>
+			<div class="navigation-buttons">
+				<button @click="previous">Previous</button>
+				<button @click="next">Next</button>
+			</div>
+		</div>
+	</div>
+</body>
+</template>
+
+<script>
+import { recentImages } from '../store/api';
+
+export default {
+	data() {
+		return {
+			images: [],
+			page: 1
+		};
+	},
+	computed: {
+		user() {
+			return this.$store.state.user
+		}
+	},
+	methods: {
+		getUser(e) {
+			this.$store.commit('message', e.target.value);
+		},
+		previous() {
+			if (this.page !== 1)
+				this.page--;
+		},
+		next() {
+			if (this.page < this.images.length / 9)
+				this.page++;
+		}
+	},
+	beforeMount() {
+		recentImages(27).then(images => { this.images = this.images.concat(images); });
+	}
+}
+</script>
+
 <style lang="sass" scoped>
 #base
 	display: flex
@@ -73,75 +147,3 @@
 					max-width: 100%
 
 </style>
-
-<script>
-import { recentImages } from '../store/api';
-
-export default {
-	data() {
-		return {
-			images: [],
-			page: 1
-		};
-	},
-	computed: {
-		user() {
-			return this.$store.state.user
-		}
-	},
-	methods: {
-		getUser(e) {
-			this.$store.commit('message', e.target.value);
-		},
-		previous() {
-			if (this.page !== 1)
-				this.page--;
-		},
-		next() {
-			if (this.page < this.images.length / 9)
-				this.page++;
-		}
-	},
-	beforeMount() {
-		recentImages(27).then(images => this.images = this.images.concat(images));
-	}
-}
-</script>
-
-<template>
-	<div id="base">
-		<div class="account-view">
-			<div class="icon-text-wrapper user">
-				<img :src="user.avatar" class="avatar-small">
-				<span class="username">{{ user.username }}</span>
-			</div>
-			<div class="icon-text-wrapper mess">
-				<img src="http://placehold.it/20x20">
-				<span>{{ user.notifications | humanize }} Notifications</span>
-			</div>
-			<div class="icon-text-wrapper like">
-				<img src="http://placehold.it/20x20">
-				<span>{{ user.likes | humanize }} Likes</span>
-			</div>
-			<div class="icon-text-wrapper fav">
-				<img src="http://placehold.it/20x20">
-				<span>{{ user.favorites | humanize }} Favorites</span>
-			</div>
-		</div>
-		<div class="images-wrapper">
-			<div class="navigation-buttons">
-				<button @click="previous">Previous</button>
-				<button @click="next">Next</button>
-			</div>
-			<div class="images">
-				<div v-for="(image, index) of images" v-show="~~(index / 9) === page - 1">
-					<img :src="image">
-				</div>
-			</div>
-			<div class="navigation-buttons">
-				<button @click="previous">Previous</button>
-				<button @click="next">Next</button>
-			</div>
-		</div>
-	</div>
-</template>

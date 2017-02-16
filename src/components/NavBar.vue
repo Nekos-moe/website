@@ -1,3 +1,12 @@
+<template>
+	<div class="nav-wrap">
+		<router-link to="/" exact class="brand">Catgirls</router-link>
+		<div class="nav">
+			<slot></slot>
+		</div>
+	</div>
+</template>
+
 <style lang="sass" scoped>
 	.nav-wrap
 		font-family: sans-serif
@@ -26,12 +35,3 @@
 			flex-wrap: nowrap
 			justify-content: center
 </style>
-
-<template lang="html">
-	<div class="nav-wrap">
-		<router-link to="/" exact class="brand">Catgirls</router-link>
-		<div class="nav">
-			<slot></slot>
-		</div>
-	</div>
-</tamplate>

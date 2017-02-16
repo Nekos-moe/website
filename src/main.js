@@ -6,7 +6,7 @@ import store from './store';
 import axios from 'axios';
 import * as filters from './filters';
 
-import App from './App.vue';
+import App from './App';
 
 import NavBar from './components/NavBar';
 
