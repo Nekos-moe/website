@@ -1,11 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 
-let api;
-if (DEV_API === true)
-	api = require('./devApi');
-else
-	api = require('./api');
+import { getUser } from './api';
 
 Vue.use(Vuex);
 
@@ -21,7 +17,7 @@ const store = new Vuex.Store({
 	},
 	actions: {
 		getUser({ commit }) {
-			api.getUser().then(user => commit('user', user));
+			getUser().then(user => commit('user', user));
 		}
 	},
 	mutations: {
@@ -34,4 +30,3 @@ const store = new Vuex.Store({
 });
 
 export default store;
-export { api };

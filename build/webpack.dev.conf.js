@@ -20,7 +20,8 @@ module.exports = merge(baseWebpackConfig, {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': config.dev.env,
-      DEV_API: true
+      API_BASE_URL: JSON.stringify('http://localhost:8082/api/v1/'),
+      IMAGE_BASE_URL: JSON.stringify('http://localhost:8082/image/')
     }),
     // https://github.com/glenjamin/webpack-hot-middleware#installation--usage
     new webpack.HotModuleReplacementPlugin(),

@@ -27,7 +27,8 @@ var webpackConfig = merge(baseWebpackConfig, {
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new webpack.DefinePlugin({
       'process.env': env,
-      DEV_API: false
+      API_BASE_URL: JSON.stringify('https://nekos.brussell.me/api/v1/'),
+      IMAGE_BASE_URL: JSON.stringify('https://nekos.brussell.me/image/')
     }),
     new webpack.optimize.UglifyJsPlugin({
       compress: {

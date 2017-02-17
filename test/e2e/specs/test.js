@@ -11,7 +11,7 @@ module.exports = {
 		browser
 			.maximizeWindow()
 			.url(devServer)
-			.waitForElementVisible('#app', 5000)
+			.waitForElementVisible('#app', 20000)
 			.pause(5000)
 			.assert.elementPresent('.account-view')
 			.assert.containsText('.username', 'Brussell')

@@ -11,7 +11,7 @@ import App from './App';
 import NavBar from './components/NavBar';
 
 import Home from './components/Home';
-import About from './components/About';
+import SearchImages from './components/SearchImages';
 import NotFoundComponent from './components/404';
 
 Vue.prototype.$http = axios;
@@ -26,7 +26,7 @@ Vue.use(VueRouter);
 
 const routes = [
 	{ path: '/', component: Home },
-	{ path: '/about', component: About },
+	{ path: '/search/images', component: SearchImages },
 	{ path: '*', component: NotFoundComponent }
 ];
 

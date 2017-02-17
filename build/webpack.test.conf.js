@@ -14,7 +14,8 @@ var webpackConfig = merge(baseConfig, {
   plugins: [
     new webpack.DefinePlugin({
       'process.env': require('../config/test.env'),
-      DEV_API: true
+      API_BASE_URL: JSON.stringify('https://nekos.brussell.me/api/v1/'),
+      IMAGE_BASE_URL: JSON.stringify('https://nekos.brussell.me/image/')
     })
   ]
 })

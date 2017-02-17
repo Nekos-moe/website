@@ -2,7 +2,7 @@
 	<div id="app">
 		<nav-bar>
 			<router-link to="/" exact>Home</router-link>
-			<router-link to="/about">About</router-link>
+			<router-link to="/search/images">Search</router-link>
 		</nav-bar>
 		<div class="body-wrapper">
 			<transition name="fade" mode="out-in">
@@ -13,11 +13,11 @@
 </template>
 
 <script>
-	export default {
-		beforeMount() {
-			this.$store.dispatch('getUser');
-		}
+export default {
+	beforeMount() {
+		this.$store.dispatch('getUser');
 	}
+}
 </script>
 
 <style lang="sass">

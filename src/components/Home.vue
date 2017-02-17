@@ -26,7 +26,7 @@
 			</div>
 			<div class="images">
 				<div v-for="(image, index) of images" v-show="~~(index / 9) === page - 1">
-					<img :src="image">
+					<img :src="IMAGE_BASE_URL + image.id">
 				</div>
 			</div>
 			<div class="navigation-buttons">
@@ -39,11 +39,10 @@
 </template>
 
 <script>
-import { api } from '../store';
-
 export default {
 	data() {
 		return {
+			IMAGE_BASE_URL,
 			images: [],
 			page: 1
 		};
@@ -54,9 +53,6 @@ export default {
 		}
 	},
 	methods: {
-		getUser(e) {
-			this.$store.commit('message', e.target.value);
-		},
 		previous() {
 			if (this.page !== 1)
 				this.page--;
@@ -67,7 +63,17 @@ export default {
 		}
 	},
 	beforeMount() {
-		api.recentImages(27).then(images => { this.images = this.images.concat(images); });
+		this.$http.post(API_BASE_URL + 'images/search', {
+			sort: 'recent',
+			limit: 27
+		}, {
+			responseType: 'json',
+			headers: {
+				'Authorization': localStorage.getItem('token')
+			}
+		}).then(response => {
+			this.images = this.images.concat(response.data.images);
+		}).catch(console.error);
 	}
 }
 </script>
