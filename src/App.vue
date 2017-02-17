@@ -15,7 +15,7 @@
 <script>
 export default {
 	beforeMount() {
-		this.$store.dispatch('getUser');
+		this.$store.dispatch('getSelf');
 	}
 }
 </script>

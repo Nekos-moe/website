@@ -2,7 +2,7 @@
 <body>
 	<div id="base">
 		<div class="search-wrapper">
-			<input type="text" id="tags" value="" placeholder="Search" @change="getResults">
+			<input type="text" id="tags" value="" placeholder="Tags" @change="getResults">
 			<button type="button" @click="getResults">Search</button>
 		</div>
 		<div class="images-wrapper">

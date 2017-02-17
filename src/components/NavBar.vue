@@ -25,7 +25,6 @@
 				color: #FFF
 			&.brand
 				float: left
-				position: fixed
 				color: #FFF
 				font-weight: bold
 			&:hover

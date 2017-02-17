@@ -1,9 +1,9 @@
 <template>
 <body>
 	<div id="base">
-		<div class="account-view">
+		<div class="account-view" v-if="loggedIn">
 			<div class="icon-text-wrapper user">
-				<img :src="user.avatar" class="avatar-small">
+				<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
 				<span class="username">{{ user.username }}</span>
 			</div>
 			<div class="icon-text-wrapper mess">
@@ -17,6 +17,20 @@
 			<div class="icon-text-wrapper fav">
 				<img src="http://placehold.it/20x20">
 				<span>{{ user.favorites | humanize }} Favorites</span>
+			</div>
+		</div>
+		<div class="account-view" v-if="hasToken && loggedIn === null">
+			<div class="icon-text-wrapper user">
+				<img src="http://placehold.it/32x32" class="avatar-small">
+				<span class="username">Loading...</span>
+			</div>
+		</div>
+		<div class="account-view" v-if="!hasToken || loggedIn === false">
+			<div class="login">
+				<input id="login-user" type="text" value="" placeholder="Username">
+				<input id="login-pass" type="password" value="" placeholder="Password">
+				<button type="button" @click="login">Log in</button>
+				<p class="error" v-if="loginError">{{ loginError }}</p>
 			</div>
 		</div>
 		<div class="images-wrapper">
@@ -44,12 +58,19 @@ export default {
 		return {
 			IMAGE_BASE_URL,
 			images: [],
-			page: 1
+			page: 1,
+			loginError: null
 		};
 	},
 	computed: {
 		user() {
-			return this.$store.state.user
+			return this.$store.state.user;
+		},
+		hasToken() {
+			return this.$store.state.hasToken;
+		},
+		loggedIn() {
+			return this.$store.state.loggedIn;
 		}
 	},
 	methods: {
@@ -60,20 +81,46 @@ export default {
 		next() {
 			if (this.page < this.images.length / 9)
 				this.page++;
+		},
+		async login() {
+			let username = document.getElementById('login-user').value;
+			let password = document.getElementById('login-pass').value;
+
+			try {
+				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password }, { responseType: 'json' })
+
+				this.loginError = null;
+				this.$store.commit('hasToken', true);
+				localStorage.setItem('token', token);
+				this.$store.dispatch('getSelf');
+			} catch(error) {
+				if (!error.response) {
+					console.error(error.message);
+					this.loginError = 'Encountered an error';
+				} else if (!error.response.data.message) {
+					console.error(error.response);
+					this.loginError = 'Encountered an error';
+				} else
+					this.loginError = error.response.data.message;
+			}
 		}
 	},
-	beforeMount() {
-		this.$http.post(API_BASE_URL + 'images/search', {
-			sort: 'recent',
-			limit: 27
-		}, {
-			responseType: 'json',
-			headers: {
-				'Authorization': localStorage.getItem('token')
-			}
-		}).then(response => {
+	async beforeMount() {
+		try {
+			let response = await this.$http.post(API_BASE_URL + 'images/search', {
+				sort: 'recent',
+				limit: 27
+			}, {
+				responseType: 'json',
+				headers: {
+					'Authorization': localStorage.getItem('token')
+				}
+			});
+
 			this.images = this.images.concat(response.data.images);
-		}).catch(console.error);
+		} catch(error) {
+			console.error(error);
+		}
 	}
 }
 </script>
@@ -81,6 +128,8 @@ export default {
 <style lang="sass" scoped>
 #base
 	display: flex
+	.error
+		color: #A22
 	.account-view
 		box-sizing: border-box
 		// max-width: 256px

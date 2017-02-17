@@ -14,14 +14,14 @@ module.exports = {
 			.waitForElementVisible('#app', 20000)
 			.pause(5000)
 			.assert.elementPresent('.account-view')
-			.assert.containsText('.username', 'Brussell')
-			.assert.elementCount('.images img', 27)
-			.click('.navigation-buttons button + button').pause(1000)
-			.click('.navigation-buttons button + button').pause(1000)
-			.assert.hidden('.images div:first-of-type img')
-			.assert.visible('.images div:last-of-type img')
-			.click('.navigation-buttons button + button').pause(500)
-			.assert.visible('.images div:last-of-type img')
+			// .assert.containsText('.username', 'Brussell')
+			// .assert.elementCount('.images img', 27)
+			// .click('.navigation-buttons button + button').pause(1000)
+			// .click('.navigation-buttons button + button').pause(1000)
+			// .assert.hidden('.images div:first-of-type img')
+			// .assert.visible('.images div:last-of-type img')
+			// .click('.navigation-buttons button + button').pause(500)
+			// .assert.visible('.images div:last-of-type img')
 			.end();
 	},
 };
