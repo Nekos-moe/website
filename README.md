@@ -1,4 +1,4 @@
-# catgirls-website
+# catgirls-website [![Build Status](https://travis-ci.org/brussell98/catgirls-website.svg?branch=master)](https://travis-ci.org/brussell98/catgirls-website)
 
 > A website for catgirl lovers
 

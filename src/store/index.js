@@ -7,13 +7,8 @@ const store = new Vuex.Store({
 	state: {
 		hasToken: !!localStorage.getItem('token'),
 		loggedIn: null,
-		user: {} /* {
-			username: "Loading...",
-			notifications: 0,
-			likes: 0,
-			favorites: 0,
-			avatar: "http://placehold.it/32x32"
-		} */
+		user: {},
+		preferences: localStorage.hasOwnProperty('preferences') ? JSON.parse(localStorage.getItem('preferences')) : {}
 	},
 	actions: {
 		async getSelf({ commit }) {
@@ -56,6 +51,12 @@ const store = new Vuex.Store({
 		}
 	},
 	getters: {
+		NSFWImages(state) {
+			return state.preferences.allowNSFW === true ? undefined : false;
+		},
+		blacklist(state) {
+			return state.preferences.blacklist && state.preferences.blacklist.map(tag => `-"${tag}"`).join(' ') || undefined;
+		}
 	}
 });
 

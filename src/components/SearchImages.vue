@@ -3,6 +3,14 @@
 	<div id="base">
 		<div class="search-wrapper">
 			<input type="text" id="tags" value="" placeholder="Tags" @change="getResults">
+			<br>
+			<label for="nsfw">NSFW Results</label>
+			<select id="nsfw" name="nsfw"  @change="getResults">
+				<option value="undefined">I Don't Care</option>
+				<option value="true">Only NSFW</option>
+				<option value="false" selected>Block NSFW</option>
+			</select>
+			<br>
 			<button type="button" @click="getResults">Search</button>
 		</div>
 		<div class="images-wrapper">
@@ -50,11 +58,16 @@ export default {
 		},
 		getResults() {
 			let tags = document.getElementById('tags').value;
+			let nsfw = {
+				'undefined': undefined,
+				'false': false,
+				'true': true
+			}[document.getElementById('nsfw').value];
 
-			if (tags === '')
-				return;
-
-			this.$http.post(API_BASE_URL + 'images/search', { tags }, {
+			this.$http.post(API_BASE_URL + 'images/search', {
+				tags: tags ? tags + ' ' + this.$store.getters.blacklist : this.$store.getters.blacklist,
+				nsfw
+			}, {
 				responseType: 'json',
 				headers: {
 					'Authorization': localStorage.getItem('token')

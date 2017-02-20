@@ -109,7 +109,9 @@ export default {
 		try {
 			let response = await this.$http.post(API_BASE_URL + 'images/search', {
 				sort: 'recent',
-				limit: 27
+				limit: 27,
+				nsfw: this.$store.getters.NSFWImages,
+				tags: this.$store.getters.blacklist
 			}, {
 				responseType: 'json',
 				headers: {
