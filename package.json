@@ -18,7 +18,9 @@
 		"vue": "^2.1.10",
 		"vue-router": "^2.2.0",
 		"axios": "^0.15.3",
-		"vuex": "^2.1.2"
+		"vuex": "^2.1.2",
+		"vue-progressbar": "^0.7.1",
+		"promise-polyfill": "^6.0.2"
 	},
 	"devDependencies": {
 		"autoprefixer": "^6.7.2",

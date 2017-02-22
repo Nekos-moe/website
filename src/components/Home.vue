@@ -130,11 +130,8 @@ export default {
 <style lang="sass" scoped>
 #base
 	display: flex
-	.error
-		color: #A22
 	.account-view
 		box-sizing: border-box
-		// max-width: 256px
 		flex-basis: 256px
 		padding: 1rem
 		box-shadow: 0 0 3px #CCC
@@ -169,38 +166,10 @@ export default {
 		.fav
 			color: #ed4778
 	.images-wrapper
-		box-sizing: border-box
 		max-width: 1024px
 		flex-basis: 1024px
 		margin-left: 1rem
-		.navigation-buttons
-			text-align: center
-			button
-				padding: 5px 10px
-				border-radius: 3px
-				background-color: #2de58c
-				color: #FFF
-				box-shadow: 0 0 3px rgba(45, 229, 140, .2)
-				border: none
-				font-size: 1rem
-				font-family: sans-serif
-				margin: .5rem
-				&:hover
-					cursor: pointer
-		.images
-			display: flex
-			flex-wrap: wrap
-			justify-content: space-around
-			div
-				display: flex
-				justify-content: center
-				align-items: center
-				align-self: center
-				margin: .3rem 0
-				//height: 400px
-				width: 310px
-				img
-					max-height: 100%
-					max-width: 100%
+		.images div
+			width: 310px
 
 </style>
