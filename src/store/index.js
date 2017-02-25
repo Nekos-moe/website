@@ -48,6 +48,12 @@ const store = new Vuex.Store({
 		},
 		hasToken(state, value) {
 			state.hasToken = value;
+		},
+		logout(state) {
+			state.loggedIn = false;
+			state.hasToken = false;
+			state.user = {};
+			localStorage.removeItem('token');
 		}
 	},
 	getters: {

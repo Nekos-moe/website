@@ -32,7 +32,7 @@ const routes = [
 		path: '/login',
 		component: Login,
 		beforeEnter(to, from, next) {
-			if (store.state.loggedIn)
+			if (!store.state.loggedIn)
 				return next();
 			Vue.prototype.$Progress.fail();
 			return next('/');

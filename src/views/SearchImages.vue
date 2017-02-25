@@ -119,7 +119,7 @@ export default {
 				border-radius: 3px
 				background-color: #2de58c
 				color: #FFF
-				box-shadow: 0 0 3px rgba(45, 229, 140, .2)
+				box-shadow: 0 0 3px rgba(45, 229, 140, .4)
 				border: none
 				font-size: 1rem
 				font-family: sans-serif
@@ -174,6 +174,7 @@ export default {
 				font-size: 16px
 				color: #FFF
 				background-color: #4ACFFF
+				box-shadow: 0 0 3px rgba(#4ACFFF, .4)
 				border: none
 				border-radius: 3px
 				transition: background .3s

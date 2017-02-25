@@ -135,6 +135,34 @@ export default {
 		box-shadow: 0 0 3px #CCC
 		border-radius: .25rem
 		font-family: sans-serif
+		input
+			box-sizing: border-box
+			margin-bottom: .5rem
+			padding: 4px 8px
+			width: 100%
+			font-size: 14px
+			border: 1px solid #CCC
+			border-radius: 3px
+			outline: #4ACFFF auto 0
+			margin-bottom: .5rem
+			&:focus
+				border-color: #4ACFFF
+				outline: #4ACFFF auto 5px
+		button
+			margin-top: .5rem
+			padding: 5px 10px
+			width: 100%
+			cursor: pointer
+			font-size: 16px
+			color: #FFF
+			background-color: #4ACFFF
+			box-shadow: 0 0 3px rgba(#4ACFFF, .4)
+			border: none
+			border-radius: 3px
+			transition: background .3s
+			&:hover, &:focus
+				background: darken(#4ACFFF, 15)
+
 		.icon-text-wrapper
 			display: table
 			margin-bottom: .5rem
@@ -175,10 +203,9 @@ export default {
 				border-radius: 3px
 				background-color: #2de58c
 				color: #FFF
-				box-shadow: 0 0 3px rgba(45, 229, 140, .2)
+				box-shadow: 0 0 3px rgba(45, 229, 140, .4)
 				border: none
 				font-size: 1rem
-				font-family: sans-serif
 				margin: .5rem
 				width: 100px
 				transition: background .3s

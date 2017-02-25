@@ -4,6 +4,9 @@
 		<a :href="'/post/' + image.id">
 			<p class="uploader"><strong>Uploaded by</strong> {{ image.uploader }}</p>
 			<p class="tags"><strong>Tags:</strong> {{ image.tags.replace(/,/g, ', ') }}</p>
+			<p class="favorites"><strong>Favorites:</strong> {{ image.favorites | humanize }}</p>
+			<p class="likes"><strong>Likes:</strong> {{ image.likes | humanize }}</p>
+			<p class="at"><strong>Uploaded at:</strong> {{ new Date(image.createdAt).toLocaleString() }}</p>
 		</a>
 	</div>
 </template>
@@ -43,7 +46,7 @@ export default {
 		background-color: rgba(0, 0, 0, 0)
 		text-decoration: none
 		&:hover
-			background-color: rgba(0, 0, 0, .5)
+			background-color: rgba(0, 0, 0, .6)
 			p
 				opacity: 1
 		p
@@ -53,8 +56,8 @@ export default {
 			font-family: monospace
 			font-size: 14px
 			color: #EEE
-			&.tags
-				margin-top: 1rem
+			& ~ p
+				margin-top: .5rem
 			strong
 				font-family: sans-serif
 </style>
