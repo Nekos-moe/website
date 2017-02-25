@@ -3,6 +3,7 @@
 		<nav-bar>
 			<router-link to="/" exact>Home</router-link>
 			<router-link to="/search/images">Search</router-link>
+			<router-link to="/upload">Upload</router-link>
 		</nav-bar>
 		<div class="body-wrapper">
 			<transition name="fade" mode="out-in">
@@ -56,36 +57,5 @@ export default {
 	#base
 		.error
 			color: #A22
-		.images-wrapper
-			box-sizing: border-box
-			.navigation-buttons
-				text-align: center
-				button
-					padding: 5px 10px
-					border-radius: 3px
-					background-color: #2de58c
-					color: #FFF
-					box-shadow: 0 0 3px rgba(45, 229, 140, .2)
-					border: none
-					font-size: 1rem
-					font-family: sans-serif
-					margin: .5rem
-					width: 100px
-					transition: background .3s
-					&:hover
-						cursor: pointer
-						background-color: darken(#2de58c, 15)
-			.images
-				display: flex
-				flex-wrap: wrap
-				justify-content: space-around
-				div
-					display: flex
-					justify-content: center
-					align-items: center
-					align-self: center
-					margin: .3rem 0
-					img
-						max-height: 100%
-						max-width: 100%
+
 </style>

@@ -35,9 +35,7 @@
 			</div>
 			<!-- Todo: Show match score -->
 			<div class="images">
-				<div v-for="(image, index) of images" v-show="~~(index / 9) === page - 1">
-					<img :src="IMAGE_BASE_URL + image.id">
-				</div>
+				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image"></image-preview>
 			</div>
 			<div class="navigation-buttons">
 				<button @click="previous">Previous</button>
@@ -109,8 +107,32 @@ export default {
 	align-items: center
 	flex-wrap: wrap
 	flex-direction: column
-	.images-wrapper .images div
-		width: 30%
+	.images-wrapper
+		max-width: 1024px
+		flex-basis: 1024px
+		margin-left: 1rem
+		box-sizing: border-box
+		.navigation-buttons
+			text-align: center
+			button
+				padding: 5px 10px
+				border-radius: 3px
+				background-color: #2de58c
+				color: #FFF
+				box-shadow: 0 0 3px rgba(45, 229, 140, .2)
+				border: none
+				font-size: 1rem
+				font-family: sans-serif
+				margin: .5rem
+				width: 100px
+				transition: background .3s
+				&:hover
+					cursor: pointer
+					background-color: darken(#2de58c, 15)
+		.images
+			display: flex
+			flex-wrap: wrap
+			justify-content: space-around
 	.search-wrapper
 		margin-bottom: 1rem
 		label

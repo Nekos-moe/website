@@ -39,9 +39,7 @@
 				<button @click="next">Next</button>
 			</div>
 			<div class="images">
-				<div v-for="(image, index) of images" v-show="~~(index / 9) === page - 1">
-					<img :src="IMAGE_BASE_URL + image.id">
-				</div>
+				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image"></image-preview>
 			</div>
 			<div class="navigation-buttons">
 				<button @click="previous">Previous</button>
@@ -91,7 +89,7 @@ export default {
 
 				this.loginError = null;
 				this.$store.commit('hasToken', true);
-				localStorage.setItem('token', token);
+				localStorage.setItem('token', response.data.token);
 				this.$store.dispatch('getSelf');
 			} catch(error) {
 				if (!error.response) {
@@ -169,7 +167,27 @@ export default {
 		max-width: 1024px
 		flex-basis: 1024px
 		margin-left: 1rem
-		.images div
-			width: 310px
+		box-sizing: border-box
+		.navigation-buttons
+			text-align: center
+			button
+				padding: 5px 10px
+				border-radius: 3px
+				background-color: #2de58c
+				color: #FFF
+				box-shadow: 0 0 3px rgba(45, 229, 140, .2)
+				border: none
+				font-size: 1rem
+				font-family: sans-serif
+				margin: .5rem
+				width: 100px
+				transition: background .3s
+				&:hover
+					cursor: pointer
+					background-color: darken(#2de58c, 15)
+		.images
+			display: flex
+			flex-wrap: wrap
+			justify-content: space-around
 
 </style>
