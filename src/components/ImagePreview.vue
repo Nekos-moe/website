@@ -3,6 +3,7 @@
 		<img :src="url" alt="">
 		<a :href="'/post/' + image.id">
 			<p class="uploader"><strong>Uploaded by</strong> {{ image.uploader }}</p>
+			<p class="uploader" v-if="image.artist"><strong>Artist:</strong> {{ image.artist }}</p>
 			<p class="tags"><strong>Tags:</strong> {{ image.tags.replace(/,/g, ', ') }}</p>
 			<p class="favorites"><strong>Favorites:</strong> {{ image.favorites | humanize }}</p>
 			<p class="likes"><strong>Likes:</strong> {{ image.likes | humanize }}</p>

@@ -1,14 +1,16 @@
-import './promise-polyfill';
+import '@/promise-polyfill';
 import Vue from 'vue';
-import router from './router';
-import store from './store';
+import router from '@/router';
+import store from '@/store';
 import axios from 'axios';
-import * as filters from './filters';
+import * as filters from '@/filters';
 import VueProgressBar from 'vue-progressbar';
 
-import App from './App';
-import NavBar from './components/NavBar';
-import ImagePreview from './components/ImagePreview';
+import App from '@/App';
+import NavBar from '@/components/NavBar';
+import ImagePreview from '@/components/ImagePreview';
+
+Vue.config.productionTip = false;
 
 Vue.use(VueProgressBar, {
 	color: '#2de58c',

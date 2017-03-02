@@ -35,7 +35,7 @@
 			</div>
 			<!-- Todo: Show match score -->
 			<div class="images">
-				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image"></image-preview>
+				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
 			</div>
 			<div class="navigation-buttons">
 				<button @click="previous">Previous</button>

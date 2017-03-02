@@ -39,7 +39,7 @@
 				<button @click="next">Next</button>
 			</div>
 			<div class="images">
-				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image"></image-preview>
+				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
 			</div>
 			<div class="navigation-buttons">
 				<button @click="previous">Previous</button>
@@ -101,26 +101,32 @@ export default {
 				} else
 					this.loginError = error.response.data.message;
 			}
+		},
+		async getImages() {
+			try {
+				let response = await this.$http.post(API_BASE_URL + 'images/search', {
+					sort: 'recent',
+					limit: 27,
+					nsfw: this.$store.getters.NSFWImages,
+					tags: this.$store.getters.blacklist
+				}, {
+					responseType: 'json',
+					headers: {
+						'Authorization': localStorage.getItem('token')
+					}
+				});
+
+				this.images = this.images.concat(response.data.images);
+			} catch(error) {
+				console.error(error);
+			}
 		}
 	},
-	async beforeMount() {
-		try {
-			let response = await this.$http.post(API_BASE_URL + 'images/search', {
-				sort: 'recent',
-				limit: 27,
-				nsfw: this.$store.getters.NSFWImages,
-				tags: this.$store.getters.blacklist
-			}, {
-				responseType: 'json',
-				headers: {
-					'Authorization': localStorage.getItem('token')
-				}
-			});
-
-			this.images = this.images.concat(response.data.images);
-		} catch(error) {
-			console.error(error);
-		}
+	created() {
+		this.getImages();
+	},
+	watch: {
+		'$route': 'getImages'
 	}
 }
 </script>
@@ -134,7 +140,7 @@ export default {
 		padding: 1rem
 		box-shadow: 0 0 3px #CCC
 		border-radius: .25rem
-		font-family: sans-serif
+		font-family: 'Nunito', sans-serif
 		input
 			box-sizing: border-box
 			margin-bottom: .5rem
@@ -205,7 +211,9 @@ export default {
 				color: #FFF
 				box-shadow: 0 0 3px rgba(45, 229, 140, .4)
 				border: none
+				font-family: 'Nunito', sans-serif
 				font-size: 1rem
+				font-weight: bold
 				margin: .5rem
 				width: 100px
 				transition: background .3s

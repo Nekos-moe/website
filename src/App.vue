@@ -1,5 +1,6 @@
 <template>
 	<div id="app">
+		<vue-progress-bar></vue-progress-bar>
 		<nav-bar>
 			<router-link to="/" exact>Home</router-link>
 			<router-link to="/search/images">Search</router-link>
@@ -10,7 +11,10 @@
 				<router-view></router-view>
 			</transition>
 		</div>
-		<vue-progress-bar></vue-progress-bar>
+		<footer>
+			&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com" target="_blank">Contact</a><br>
+			Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="http://jk" target="_blank">API docs here</a>
+		</footer>
 	</div>
 </template>
 
@@ -42,6 +46,7 @@ export default {
 
 <style lang="sass">
 #app
+	font-family: 'Nunito', sans-serif
 	max-width: 1280px
 	margin: auto
 	margin-top: 2rem
@@ -58,4 +63,12 @@ export default {
 		.error
 			color: #A22
 
+footer
+	text-align: center
+	color: #777
+	font-family: 'Nunito', sans-serif
+	margin-top: 1rem
+	a
+		color: #2de58c !important
+		text-decoration: none
 </style>

@@ -39,13 +39,14 @@ export default {
 
 <style lang="sass" scoped>
 .nav-wrap
-	font-family: sans-serif
+	font-family: 'Nunito', sans-serif
 	background-color: #2de58c
 	box-shadow: 0 0 3px rgba(45, 229, 140, .2)
 	padding: 0 1rem
 	border-radius: .25rem
+	z-index: 2
 	a
-		font-size: 1.5rem
+		font-size: 24px
 		color: rgba(255, 255, 255, .75)
 		text-decoration: none
 		transition: color .2s
@@ -96,7 +97,7 @@ export default {
 				cursor: pointer
 				box-sizing: border-box
 				display: block
-				font-size: 1.2rem
+				font-size: 19px
 				text-align: center
 				width: 100%
 				padding: 3px 30px
@@ -113,18 +114,18 @@ export default {
 				visibility: visible
 				transform: translateY(0)
 				opacity: 1
-				z-index: 1
+				z-index: 2
 				transition-delay: 0s, 0s, .3s
 	.dropdown-content
 		background-color: #2de58c
 		box-shadow: 0 0 3px rgba(45, 229, 140, .2)
-		margin-top: 18px
+		margin-top: 22px
 		border-radius: 0 0 .25rem .25rem
 		visibility: hidden
 		opacity: 0
 		position: absolute
-		z-index: -1
+		z-index: 1
 		right: 0
 		transform: translateY(-2em)
-		transition: all .3s ease-in-out, visibility 0s linear .3s, z-index 0s linear .01s
+		transition: all .3s ease-in-out, visibility 0s linear .3s, z-index 0s linear .3s
 </style>

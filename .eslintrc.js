@@ -59,7 +59,7 @@ module.exports = {
 			"SwitchCase": 1
 		}],
 		'array-callback-return': 'error',
-		'consistent-return': 'error',
+		// 'consistent-return': 'error',
 		eqeqeq: ['warn', 'always', { null: 'ignore' }],
 		'no-empty-function': ['error', {
 			allow: [
