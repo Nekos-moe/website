@@ -1,6 +1,9 @@
 <template>
 	<div id="app">
 		<vue-progress-bar></vue-progress-bar>
+		<transition name="modal-animation">
+			<modal v-if="modalMessage" :message="modalMessage"></modal>
+		</transition>
 		<nav-bar>
 			<router-link to="/" exact>Home</router-link>
 			<router-link to="/search/images">Search</router-link>
@@ -20,6 +23,11 @@
 
 <script>
 export default {
+	data() {
+		return {
+			modalMessage: null
+		};
+	},
 	beforeMount() {
 		this.$store.dispatch('getSelf');
 	},
@@ -35,11 +43,11 @@ export default {
 			// start the progress bar
 			this.$Progress.start();
 			next();
-		})
+		});
 		// hook the progress bar to finish after we've finished moving router-view
 		this.$router.afterEach((to, from) => {
 			this.$Progress.finish();
-		})
+		});
 	}
 }
 </script>
@@ -54,6 +62,14 @@ export default {
 		transition: all .2s ease
 	.fade-enter, .fade-leave-active
 		opacity: 0
+	.modal-animation-enter-active, .modal-animation-leave-active
+		transition: all .6s ease-in-out
+		.modal, .header
+			transition: all .6s ease-in-out
+	.modal-animation-enter, .modal-animation-leave-active
+		opacity: 0
+		.modal, .header
+			transform: translateY(-100px)
 	.body-wrapper
 		box-shadow: 0 0 3px #CCC
 		margin-top: 1rem

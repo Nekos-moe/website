@@ -9,6 +9,7 @@ import VueProgressBar from 'vue-progressbar';
 import App from '@/App';
 import NavBar from '@/components/NavBar';
 import ImagePreview from '@/components/ImagePreview';
+import Modal from '@/components/Modal';
 
 Vue.config.productionTip = false;
 
@@ -26,6 +27,7 @@ Object.keys(filters).forEach(key => {
 
 Vue.component('NavBar', NavBar);
 Vue.component('ImagePreview', ImagePreview);
+Vue.component('Modal', Modal);
 
 const app = new Vue({
 	el: '#app',

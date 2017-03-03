@@ -60,5 +60,5 @@ export default {
 			& ~ p
 				margin-top: .5rem
 			strong
-				font-family: sans-serif
+				font-family: 'Nunito', sans-serif
 </style>
