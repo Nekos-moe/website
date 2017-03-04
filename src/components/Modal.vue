@@ -3,7 +3,8 @@
 	<div class="header" :class="{ warning: message.type === 'warning', error: message.type === 'error' }"></div>
 	<div class="modal">
 		<h4 v-if="message.title">{{ message.title }}</h4>
-		<p v-html="message.body"></p>
+		<p v-if="message.body">{{ message.body }}</p>
+		<router-link v-if="message.link" :to="message.link" @click="close">{{ message.linkText || 'View' }}</router-link>
 		<button @click="close" :class="{ warning: message.type === 'warning', error: message.type === 'error' }">{{ message.button || 'Ok' }}</button>
 	</div>
 </div>
@@ -16,6 +17,9 @@ export default {
 		close() {
 			this.$parent.$data.modalMessage = null;
 		}
+	},
+	watch: {
+		'$route': 'close'
 	}
 }
 </script>
@@ -43,18 +47,22 @@ export default {
 		color: #222
 		font-family: 'Nunito', sans-serif
 		text-align: center
+		a
+			margin-right: 1rem !important
+			text-decoration: none
+			&:hover, &:active, &:focus
+				color: #FFF
 		h4
 			text-align: center
 			font-size: 2rem
 			margin: 1rem
 			margin-top: 0
-		p
-
-		button
+		button, a
 			margin: auto
 			margin-top: .5rem
 			padding: 5px 10px
 			cursor: pointer
+			font-family: 'Nunito', sans-serif
 			font-size: 1.25rem
 			color: #FFF
 			background-color: #2DE58C

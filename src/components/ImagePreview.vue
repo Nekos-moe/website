@@ -2,12 +2,13 @@
 <div class="image-preview-wrap">
 	<img :src="url" alt="">
 	<router-link :to="'/post/' + image.id">
-		<p><strong>Uploaded by</strong> {{ image.uploader.username }}</p>
+		<p>Uploaded by {{ image.uploader.username }}<br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
+		<p>
+			<strong>Favorites:</strong> {{ image.favorites | humanize }}<br>
+			<strong>Likes:</strong> {{ image.likes | humanize }}
+		</p>
 		<p v-if="image.artist"><strong>Artist:</strong> {{ image.artist }}</p>
 		<p><strong>Tags:</strong> {{ image.tags.replace(/,/g, ', ') }}</p>
-		<p><strong>Favorites:</strong> {{ image.favorites | humanize }}</p>
-		<p><strong>Likes:</strong> {{ image.likes | humanize }}</p>
-		<p><strong>Uploaded on:</strong> {{ new Date(image.createdAt).toLocaleString() }}</p>
 	</router-link>
 </div>
 </template>

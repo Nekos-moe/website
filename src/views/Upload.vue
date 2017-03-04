@@ -7,8 +7,13 @@
 	</div>
 	<div class="form">
 		<h4>Details</h4>
+		<div class="import">
+			<button v-show="!promptingUser" @click="promptingUser = true">Import data from danbooru</button>
+			<input v-show="promptingUser" id="importId" type="number" placeholder="Post ID" value="" @keyup.enter="importTags">
+			<button v-show="promptingUser" @click="importTags">Import</button>
+		</div>
 		<label for="tags"><strong>Tags:</strong> Seperate with a comma. Use spaces, not underscores or dashes</label>
-		<input type="text" id="tags" placeholder="cat girls, best girls" name="tags">
+		<textarea type="text" id="tags" placeholder="cat girls, best girls" name="tags"></textarea>
 		<label for="artist"><strong>Artist:</strong> Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</label>
 		<input type="text" id="artist" placeholder="Artist" name="artist">
 		<label for="nsfw"><strong>Adult content?</strong></label>
@@ -22,7 +27,8 @@
 export default {
 	data() {
 		return {
-			hasImage: false
+			hasImage: false,
+			promptingUser: false
 		};
 	},
 	computed: {
@@ -32,7 +38,15 @@ export default {
 	},
 	methods: {
 		upload() {
-			if (document.getElementById('image').files[0].size > 3145728) {
+			let imageInput = document.getElementById('image');
+			if (!imageInput.files[0]) {
+				this.$parent.$data.modalMessage = {
+					body: 'Please select an image',
+					type: 'warning'
+				};
+				return;
+			}
+			if (imageInput.files[0].size > 3145728) {
 				this.$parent.$data.modalMessage = {
 					body: 'The image you selected is too large. It must be less than 3MB',
 					type: 'warning'
@@ -43,7 +57,7 @@ export default {
 			this.$Progress.start();
 
 			let data = new FormData();
-			data.append('image', document.getElementById('image').files[0]);
+			data.append('image', imageInput.files[0]);
 			data.append('artist', document.getElementById('artist').value);
 			data.append('tags', document.getElementById('tags').value);
 			if (document.getElementById('nsfw').checked)
@@ -65,7 +79,8 @@ export default {
 				this.hasImage = false;
 				this.$parent.$data.modalMessage = {
 					title: 'Image Uploaded',
-					body: 'You can view it at <router-link to="/posts/' + response.data.image.id + '"></router-link>'
+					link: '/post/' + response.data.image.id,
+					linkText: 'View post'
 				};
 			}).catch(error => {
 				this.$Progress.fail();
@@ -81,8 +96,12 @@ export default {
 			document.getElementById('image').click();
 		},
 		previewImage(e) {
-			if (!e.target.files || !e.target.files[0])
+			if (!e.target.files || !e.target.files[0]) {
+				document.getElementById('image-select').style.backgroundImage = '';
+				document.getElementById('image-details').textContent = '';
+				this.hasImage = false;
 				return;
+			}
 
 			let reader = new FileReader(),
 				filename = e.target.files[0].name.replace(/\..+?$/, ''),
@@ -103,6 +122,30 @@ export default {
 			}
 
 			return reader.readAsDataURL(e.target.files[0]);
+		},
+		importTags() {
+			let id = document.getElementById('importId').value;
+
+			this.$Progress.start();
+			this.$http.get(`https://danbooru.donmai.us/posts/${id}.json`).then(response => {
+				this.$Progress.finish();
+				this.promptingUser = false;
+
+				document.getElementById('tags').value = response.data.tag_string
+					.replace(response.data.tag_string_artist, '')
+					.replace(/ +/g, ', ');
+				document.getElementById('artist').value = response.data.tag_string_artist;
+			}).catch(error => {
+				this.$Progress.fail();
+				this.promptingUser = false;
+
+				console.error(error);
+				this.$parent.$data.modalMessage = {
+					title: 'Error',
+					body: error.response && error.response.data.message || error.message,
+					type: 'error'
+				};
+			});
 		}
 	}
 }
@@ -127,10 +170,11 @@ export default {
 		vertical-align: middle
 		margin-left: 5px
 		margin-top: 1rem
-	input
+	input, textarea
 		margin: .5rem 0 1rem 0
 		padding: 4px 8px
 		width: 100%
+		font-family: 'Nunito', sans-serif
 		font-size: 14px
 		border: 1px solid #CCC
 		border-radius: 3px
@@ -138,12 +182,15 @@ export default {
 		&:focus
 			border-color: #4ACFFF
 			outline: #4ACFFF auto 5px
+	textarea
+		height: 68px
+		resize: vertical
 	button
-		margin: auto
-		margin-top: .5rem
+		margin: .5rem auto
 		padding: 5px 10px
 		cursor: pointer
-		font-size: 20px
+		font-family: 'Nunito', sans-serif
+		font-size: 18px
 		color: #FFF
 		background-color: #4ACFFF
 		box-shadow: 0 0 3px rgba(#4ACFFF, .4)
@@ -155,6 +202,19 @@ export default {
 	a
 		color: #2de58c !important
 		text-decoration: none
+	.import
+		margin: .5rem 0 1rem 0
+		display: flex
+		align-items: center
+		*
+			margin: 0
+			display: inline-block
+		button
+			font-size: 17px
+			padding: 3px 8px
+		input
+			margin-right: .5rem
+			width: 100px
 
 .image-picker
 	margin: 2rem auto
