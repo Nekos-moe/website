@@ -1,49 +1,47 @@
 <template>
-<body>
-	<div id="base">
-		<div class="search-wrapper">
-			<textarea type="text" id="tags" value="" placeholder="Tags"></textarea>
-			<br>
-			<label for="nsfw">NSFW Results</label>
-			<select id="nsfw" name="nsfw">
-				<option value="undefined">I Don't Care</option>
-				<option value="true">Only NSFW</option>
-				<option value="false" selected>Block NSFW</option>
-			</select>
-			<br>
-			<label for="sort">Sort</label>
-			<select id="sort" name="sort">
-				<option value="default" selected>Default</option>
-				<option value="recent">Recent</option>
-				<option value="likes">Likes</option>
-			</select>
-			<br>
-			<!-- posted_before -->
-			<!-- posted_after -->
-			<input type="text" id="artist" value="" placeholder="Artist">
-			<br>
-			<input type="text" id="uploader" value="" placeholder="Uploader">
-			<br>
-			<div class="button-wrapper">
-				<button type="button" @click="getResults">Search</button>
-			</div>
-		</div>
-		<div class="images-wrapper">
-			<div class="navigation-buttons">
-				<button @click="previous">Previous</button>
-				<button @click="next">Next</button>
-			</div>
-			<!-- Todo: Show match score -->
-			<div class="images">
-				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
-			</div>
-			<div class="navigation-buttons">
-				<button @click="previous">Previous</button>
-				<button @click="next">Next</button>
-			</div>
+<div id="base">
+	<div class="search-wrapper">
+		<textarea type="text" id="tags" value="" placeholder="Tags"></textarea>
+		<br>
+		<label for="nsfw">NSFW Results</label>
+		<select id="nsfw" name="nsfw">
+			<option value="undefined">I Don't Care</option>
+			<option value="true">Only NSFW</option>
+			<option value="false" selected>Block NSFW</option>
+		</select>
+		<br>
+		<label for="sort">Sort</label>
+		<select id="sort" name="sort">
+			<option value="default" selected>Default</option>
+			<option value="recent">Recent</option>
+			<option value="likes">Likes</option>
+		</select>
+		<br>
+		<!-- posted_before -->
+		<!-- posted_after -->
+		<input type="text" id="artist" value="" placeholder="Artist">
+		<br>
+		<input type="text" id="uploader" value="" placeholder="Uploader">
+		<br>
+		<div class="button-wrapper">
+			<button type="button" @click="getResults">Search</button>
 		</div>
 	</div>
-</body>
+	<div class="images-wrapper">
+		<div class="navigation-buttons">
+			<button @click="previous">Previous</button>
+			<button @click="next">Next</button>
+		</div>
+		<!-- Todo: Show match score -->
+		<div class="images">
+			<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
+		</div>
+		<div class="navigation-buttons">
+			<button @click="previous">Previous</button>
+			<button @click="next">Next</button>
+		</div>
+	</div>
+</div>
 </template>
 
 <script>

@@ -1,12 +1,12 @@
 <template>
-	<div class="modal-wrap">
-		<div class="header" :class="{ warning: message.type === 'warning', error: message.type === 'error' }"></div>
-		<div class="modal">
-			<h4 v-if="message.title">{{ message.title }}</h4>
-			<p>{{ message.body }}</p>
-			<button @click="close" :class="{ warning: message.type === 'warning', error: message.type === 'error' }">{{ message.button || 'Ok' }}</button>
-		</div>
+<div class="modal-wrap">
+	<div class="header" :class="{ warning: message.type === 'warning', error: message.type === 'error' }"></div>
+	<div class="modal">
+		<h4 v-if="message.title">{{ message.title }}</h4>
+		<p v-html="message.body"></p>
+		<button @click="close" :class="{ warning: message.type === 'warning', error: message.type === 'error' }">{{ message.button || 'Ok' }}</button>
 	</div>
+</div>
 </template>
 
 <script>

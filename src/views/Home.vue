@@ -1,53 +1,51 @@
 <template>
-<body>
-	<div id="base">
-		<div class="account-view" v-if="loggedIn">
-			<div class="icon-text-wrapper user">
-				<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
-				<span class="username">{{ user.username }}</span>
-			</div>
-			<div class="icon-text-wrapper mess">
-				<img src="http://placehold.it/20x20">
-				<span>{{ user.notifications | humanize }} Notifications</span>
-			</div>
-			<div class="icon-text-wrapper like">
-				<img src="http://placehold.it/20x20">
-				<span>{{ user.likes | humanize }} Likes</span>
-			</div>
-			<div class="icon-text-wrapper fav">
-				<img src="http://placehold.it/20x20">
-				<span>{{ user.favorites | humanize }} Favorites</span>
-			</div>
+<div id="base">
+	<div class="account-view" v-if="loggedIn">
+		<div class="icon-text-wrapper user">
+			<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
+			<span class="username">{{ user.username }}</span>
 		</div>
-		<div class="account-view" v-if="hasToken && loggedIn === null">
-			<div class="icon-text-wrapper user">
-				<img src="http://placehold.it/32x32" class="avatar-small">
-				<span class="username">Loading...</span>
-			</div>
+		<div class="icon-text-wrapper mess">
+			<img src="http://placehold.it/20x20">
+			<span>{{ user.notifications | humanize }} Notifications</span>
 		</div>
-		<div class="account-view" v-if="!hasToken || loggedIn === false">
-			<div class="login">
-				<input id="login-user" type="text" value="" placeholder="Username">
-				<input id="login-pass" type="password" value="" placeholder="Password">
-				<button type="button" @click="login">Log in</button>
-				<p class="error" v-if="loginError">{{ loginError }}</p>
-			</div>
+		<div class="icon-text-wrapper like">
+			<img src="http://placehold.it/20x20">
+			<span>{{ user.likes | humanize }} Likes</span>
 		</div>
-		<div class="images-wrapper">
-			<div class="navigation-buttons">
-				<button @click="previous">Previous</button>
-				<button @click="next">Next</button>
-			</div>
-			<div class="images">
-				<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
-			</div>
-			<div class="navigation-buttons">
-				<button @click="previous">Previous</button>
-				<button @click="next">Next</button>
-			</div>
+		<div class="icon-text-wrapper fav">
+			<img src="http://placehold.it/20x20">
+			<span>{{ user.favorites | humanize }} Favorites</span>
 		</div>
 	</div>
-</body>
+	<div class="account-view" v-if="hasToken && loggedIn === null">
+		<div class="icon-text-wrapper user">
+			<img src="http://placehold.it/32x32" class="avatar-small">
+			<span class="username">Loading...</span>
+		</div>
+	</div>
+	<div class="account-view" v-if="!hasToken || loggedIn === false">
+		<div class="login">
+			<input id="login-user" type="text" value="" placeholder="Username">
+			<input id="login-pass" type="password" value="" placeholder="Password">
+			<button type="button" @click="login">Log in</button>
+			<p class="error" v-if="loginError">{{ loginError }}</p>
+		</div>
+	</div>
+	<div class="images-wrapper">
+		<div class="navigation-buttons">
+			<button @click="previous">Previous</button>
+			<button @click="next">Next</button>
+		</div>
+		<div class="images">
+			<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
+		</div>
+		<div class="navigation-buttons">
+			<button @click="previous">Previous</button>
+			<button @click="next">Next</button>
+		</div>
+	</div>
+</div>
 </template>
 
 <script>
@@ -122,11 +120,8 @@ export default {
 			}
 		}
 	},
-	created() {
+	beforeMount() {
 		this.getImages();
-	},
-	watch: {
-		'$route': 'getImages'
 	}
 }
 </script>

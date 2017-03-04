@@ -1,23 +1,21 @@
 <template>
-<body>
-	<div id="base">
-		<div class="image-picker">
-			<input type="file" id="image" accept=".png,.jpg,.jpeg" @change="previewImage">
-			<button :class="{ 'has-image': hasImage }" id="image-select" @click="clickImage">Select Image</button>
-			<p :class="{ 'has-image': hasImage }" id="image-details"></p>
-		</div>
-		<div class="form">
-			<h4>Details</h4>
-			<label for="tags"><strong>Tags:</strong> Seperate with a comma. Use spaces, not underscores or dashes</label>
-			<input type="text" id="tags" placeholder="cat girls, best girls" name="tags">
-			<label for="artist"><strong>Artist:</strong> Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</label>
-			<input type="text" id="artist" placeholder="Artist" name="artist">
-			<label for="nsfw"><strong>Adult content?</strong></label>
-			<input type="checkbox" id="nsfw" name="nsfw">
-			<button type="button" @click="upload()">Upload</button>
-		</div>
+<div id="base">
+	<div class="image-picker">
+		<input type="file" id="image" accept=".png,.jpg,.jpeg" @change="previewImage">
+		<button :class="{ 'has-image': hasImage }" id="image-select" @click="clickImage">Select Image</button>
+		<p :class="{ 'has-image': hasImage }" id="image-details"></p>
 	</div>
-</body>
+	<div class="form">
+		<h4>Details</h4>
+		<label for="tags"><strong>Tags:</strong> Seperate with a comma. Use spaces, not underscores or dashes</label>
+		<input type="text" id="tags" placeholder="cat girls, best girls" name="tags">
+		<label for="artist"><strong>Artist:</strong> Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</label>
+		<input type="text" id="artist" placeholder="Artist" name="artist">
+		<label for="nsfw"><strong>Adult content?</strong></label>
+		<input type="checkbox" id="nsfw" name="nsfw">
+		<button type="button" @click="upload()">Upload</button>
+	</div>
+</div>
 </template>
 
 <script>
@@ -34,16 +32,25 @@ export default {
 	},
 	methods: {
 		upload() {
+			if (document.getElementById('image').files[0].size > 3145728) {
+				this.$parent.$data.modalMessage = {
+					body: 'The image you selected is too large. It must be less than 3MB',
+					type: 'warning'
+				};
+				return;
+			}
+
 			this.$Progress.start();
 
 			let data = new FormData();
 			data.append('image', document.getElementById('image').files[0]);
 			data.append('artist', document.getElementById('artist').value);
 			data.append('tags', document.getElementById('tags').value);
-			data.append('nsfw', document.getElementById('nsfw').checked);
+			if (document.getElementById('nsfw').checked)
+				data.append('nsfw', 'true');
 
 			this.$http.post(API_BASE_URL + 'images', data, {
-				responseType: 'arraybuffer',
+				responseType: 'json',
 				headers: {
 					'Authorization': localStorage.getItem('token')
 				},
@@ -56,12 +63,18 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
-				// TODO: Image uploaded ot fklbgarhligbaerlihgaelbgrt
-				// Display that in some fancy way
+				this.$parent.$data.modalMessage = {
+					title: 'Image Uploaded',
+					body: 'You can view it at <router-link to="/posts/' + response.data.image.id + '"></router-link>'
+				};
 			}).catch(error => {
 				this.$Progress.fail();
 				console.error(error);
-				// TODO: Display that too
+				this.$parent.$data.modalMessage = {
+					title: 'Error Uploading Image',
+					body: error.response && error.response.data.message || error.message,
+					type: 'error'
+				};
 			});
 		},
 		clickImage() {

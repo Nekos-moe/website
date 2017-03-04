@@ -1,24 +1,24 @@
 <template>
-	<div id="app">
-		<vue-progress-bar></vue-progress-bar>
-		<transition name="modal-animation">
-			<modal v-if="modalMessage" :message="modalMessage"></modal>
+<div id="app">
+	<vue-progress-bar></vue-progress-bar>
+	<transition name="modal-animation">
+		<modal v-if="modalMessage" :message="modalMessage"></modal>
+	</transition>
+	<nav-bar>
+		<router-link to="/" exact>Home</router-link>
+		<router-link to="/search/images">Search</router-link>
+		<router-link to="/upload">Upload</router-link>
+	</nav-bar>
+	<div class="body-wrapper">
+		<transition name="fade" mode="out-in">
+			<router-view></router-view>
 		</transition>
-		<nav-bar>
-			<router-link to="/" exact>Home</router-link>
-			<router-link to="/search/images">Search</router-link>
-			<router-link to="/upload">Upload</router-link>
-		</nav-bar>
-		<div class="body-wrapper">
-			<transition name="fade" mode="out-in">
-				<router-view></router-view>
-			</transition>
-		</div>
-		<footer>
-			&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com" target="_blank">Contact</a><br>
-			Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="http://jk" target="_blank">API docs here</a>
-		</footer>
 	</div>
+	<footer>
+		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com" target="_blank">Contact</a><br>
+		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="http://jk" target="_blank">API docs here</a>
+	</footer>
+</div>
 </template>
 
 <script>
@@ -53,6 +53,12 @@ export default {
 </script>
 
 <style lang="sass">
+*, *:before, *:after
+	box-sizing: border-box
+
+html
+	font-size: 100%
+
 #app
 	font-family: 'Nunito', sans-serif
 	max-width: 1280px

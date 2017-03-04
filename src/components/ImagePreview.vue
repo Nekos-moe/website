@@ -1,15 +1,15 @@
 <template>
-	<div class="image-preview-wrap">
-		<img :src="url" alt="">
-		<a :href="'/post/' + image.id">
-			<p class="uploader"><strong>Uploaded by</strong> {{ image.uploader }}</p>
-			<p class="uploader" v-if="image.artist"><strong>Artist:</strong> {{ image.artist }}</p>
-			<p class="tags"><strong>Tags:</strong> {{ image.tags.replace(/,/g, ', ') }}</p>
-			<p class="favorites"><strong>Favorites:</strong> {{ image.favorites | humanize }}</p>
-			<p class="likes"><strong>Likes:</strong> {{ image.likes | humanize }}</p>
-			<p class="at"><strong>Uploaded at:</strong> {{ new Date(image.createdAt).toLocaleString() }}</p>
-		</a>
-	</div>
+<div class="image-preview-wrap">
+	<img :src="url" alt="">
+	<router-link :to="'/post/' + image.id">
+		<p><strong>Uploaded by</strong> {{ image.uploader.username }}</p>
+		<p v-if="image.artist"><strong>Artist:</strong> {{ image.artist }}</p>
+		<p><strong>Tags:</strong> {{ image.tags.replace(/,/g, ', ') }}</p>
+		<p><strong>Favorites:</strong> {{ image.favorites | humanize }}</p>
+		<p><strong>Likes:</strong> {{ image.likes | humanize }}</p>
+		<p><strong>Uploaded on:</strong> {{ new Date(image.createdAt).toLocaleString() }}</p>
+	</router-link>
+</div>
 </template>
 
 <script>
@@ -46,6 +46,7 @@ export default {
 		transition: background-color .5s ease-in-out
 		background-color: rgba(0, 0, 0, 0)
 		text-decoration: none
+		overflow-y: hidden
 		&:hover
 			background-color: rgba(0, 0, 0, .6)
 			p

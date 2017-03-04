@@ -6,6 +6,7 @@ import Home from '@/views/Home';
 import SearchImages from '@/views/SearchImages';
 import Upload from '@/views/Upload';
 import Login from '@/views/Login';
+import Post from '@/views/Post';
 import NotFoundComponent from '@/views/404';
 
 Vue.use(VueRouter);
@@ -37,6 +38,10 @@ const routes = [
 			Vue.prototype.$Progress.fail();
 			return next('/');
 		}
+	},
+	{
+		path: '/post/:id',
+		component: Post
 	},
 	{
 		path: '*',

@@ -1,21 +1,21 @@
 <template>
-	<div class="nav-wrap">
-		<router-link to="/" exact class="brand">Catgirls</router-link>
-		<router-link to="/login" class="login" v-if="!loggedIn">Login</router-link>
-		<div class="account dropdown" v-if="loggedIn">
-			<img :src="user.avatar || 'http://placehold.it/32x32'">
-			<span>{{ user.username }}</span>
-			<div class="arrow"></div>
-			<div class="dropdown-content">
-				<a href="#">Account</a>
-				<a href="#">Settings</a>
-				<a id="logout" @click="logoutUser()">Logout</a>
-			</div>
-		</div>
-		<div class="nav">
-			<slot></slot>
+<div class="nav-wrap">
+	<router-link to="/" exact class="brand">Catgirls</router-link>
+	<router-link to="/login" class="login" v-if="!loggedIn">Login</router-link>
+	<div class="account dropdown" v-if="loggedIn">
+		<img :src="user.avatar || 'http://placehold.it/32x32'">
+		<span>{{ user.username }}</span>
+		<div class="arrow"></div>
+		<div class="dropdown-content">
+			<a href="#">Account</a>
+			<a href="#">Settings</a>
+			<a id="logout" @click="logoutUser()">Logout</a>
 		</div>
 	</div>
+	<div class="nav">
+		<slot></slot>
+	</div>
+</div>
 </template>
 
 <script>
@@ -58,7 +58,7 @@ export default {
 			float: left
 			color: #FFF
 			font-weight: bold
-			width: 100px
+			padding-right: 2rem
 		&.login
 			float: right
 			width: 100px

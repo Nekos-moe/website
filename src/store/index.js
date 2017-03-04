@@ -30,12 +30,12 @@ const store = new Vuex.Store({
 
 				commit('user', response.data.user);
 				return commit('loggedIn', true);
-			} catch (e) {
+			} catch (error) {
 				if (!error.response)
 					return console.error(error.message);
 				if (error.response.status !== 401)
 					return console.error(error.response);
-				return commit('loggedIn', false);
+				return commit('logout');
 			}
 		}
 	},
