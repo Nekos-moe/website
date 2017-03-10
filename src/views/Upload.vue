@@ -84,6 +84,15 @@ export default {
 				};
 			}).catch(error => {
 				this.$Progress.fail();
+				if (error.response && error.response.data.id) {
+					this.$parent.$data.modalMessage = {
+						title: 'Image Already Uploaded',
+						body: 'Sorry, someone else beat you to it.',
+						link: '/post/' + error.response.data.id,
+						linkText: 'View post'
+					};
+					return;
+				}
 				console.error(error);
 				this.$parent.$data.modalMessage = {
 					title: 'Error Uploading Image',
@@ -124,10 +133,10 @@ export default {
 			return reader.readAsDataURL(e.target.files[0]);
 		},
 		importTags() {
-			let id = document.getElementById('importId').value;
+			let id = document.getElementById('importId');
 
 			this.$Progress.start();
-			this.$http.get(`https://danbooru.donmai.us/posts/${id}.json`).then(response => {
+			this.$http.get(`https://danbooru.donmai.us/posts/${id.value}.json`).then(response => {
 				this.$Progress.finish();
 				this.promptingUser = false;
 
@@ -135,6 +144,7 @@ export default {
 					.replace(response.data.tag_string_artist, '')
 					.replace(/ +/g, ', ');
 				document.getElementById('artist').value = response.data.tag_string_artist;
+				id.value = null;
 			}).catch(error => {
 				this.$Progress.fail();
 				this.promptingUser = false;

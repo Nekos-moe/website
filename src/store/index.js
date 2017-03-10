@@ -8,7 +8,8 @@ const store = new Vuex.Store({
 		hasToken: !!localStorage.getItem('token'),
 		loggedIn: null,
 		user: {},
-		preferences: localStorage.hasOwnProperty('preferences') ? JSON.parse(localStorage.getItem('preferences')) : {}
+		preferences: localStorage.hasOwnProperty('preferences') ? JSON.parse(localStorage.getItem('preferences')) : {},
+		lastUpdateMessage: localStorage.getItem('lastUpdateMessage')
 	},
 	actions: {
 		async getSelf({ commit }) {
@@ -54,6 +55,10 @@ const store = new Vuex.Store({
 			state.hasToken = false;
 			state.user = {};
 			localStorage.removeItem('token');
+		},
+		lastUpdateMessage(state, value) {
+			localStorage.setItem('lastUpdateMessage', value);
+			state.lastUpdateMessage = value;
 		}
 	},
 	getters: {

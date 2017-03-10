@@ -48,6 +48,14 @@ export default {
 		this.$router.afterEach((to, from) => {
 			this.$Progress.finish();
 		});
+
+		if (this.$store.state.lastUpdateMessage !== 'beta1') {
+			this.$data.modalMessage = {
+				title: 'Welcome to the beta!',
+				body: "We are excited to welcome you to the new catgirls site! (We're still thinking of a name)<br>Lots of features are still in development, so check back once in a while to see what's changed. If you encounter any issues you can report them at <a href=\"https://github.com/brussell98/catgirls-website\" target=\"_blank\">the GitHub repo</a>"
+			};
+			this.$store.commit('lastUpdateMessage', 'beta1');
+		}
 	}
 }
 </script>

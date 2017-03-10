@@ -3,7 +3,7 @@
 	<div class="header" :class="{ warning: message.type === 'warning', error: message.type === 'error' }"></div>
 	<div class="modal">
 		<h4 v-if="message.title">{{ message.title }}</h4>
-		<p v-if="message.body">{{ message.body }}</p>
+		<p v-if="message.body" v-html="message.body"></p>
 		<router-link v-if="message.link" :to="message.link" @click="close">{{ message.linkText || 'View' }}</router-link>
 		<button @click="close" :class="{ warning: message.type === 'warning', error: message.type === 'error' }">{{ message.button || 'Ok' }}</button>
 	</div>

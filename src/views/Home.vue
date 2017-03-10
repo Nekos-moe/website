@@ -28,7 +28,9 @@
 		<div class="login">
 			<input id="login-user" type="text" value="" placeholder="Username">
 			<input id="login-pass" type="password" value="" placeholder="Password">
-			<button type="button" @click="login">Log in</button>
+			<button @click="login">Log in</button>
+			<hr>
+			<button @click="$router.push('/register')">Register</button>
 			<p class="error" v-if="loginError">{{ loginError }}</p>
 		</div>
 	</div>
@@ -77,6 +79,10 @@ export default {
 		next() {
 			if (this.page < this.images.length / 9)
 				this.page++;
+			else if (this.images.length / 9 === this.page) {
+				this.getResults();
+				this.page++;
+			}
 		},
 		async login() {
 			let username = document.getElementById('login-user').value;
@@ -105,6 +111,7 @@ export default {
 				let response = await this.$http.post(API_BASE_URL + 'images/search', {
 					sort: 'recent',
 					limit: 27,
+					skip: this.page !== 1 ? this.page * 9 : 0,
 					nsfw: this.$store.getters.NSFWImages,
 					tags: this.$store.getters.blacklist
 				}, {
@@ -115,8 +122,15 @@ export default {
 				});
 
 				this.images = this.images.concat(response.data.images);
+
+				return response;
 			} catch(error) {
 				console.error(error);
+				this.$parent.$data.modalMessage = {
+					title: 'Request Error',
+					body: error.response && error.response.data.message || error.message,
+					type: 'error'
+				};
 			}
 		}
 	},
@@ -141,6 +155,7 @@ export default {
 			margin-bottom: .5rem
 			padding: 4px 8px
 			width: 100%
+			font-family: 'Nunito', sans-serif
 			font-size: 14px
 			border: 1px solid #CCC
 			border-radius: 3px
@@ -154,6 +169,7 @@ export default {
 			padding: 5px 10px
 			width: 100%
 			cursor: pointer
+			font-family: 'Nunito', sans-serif
 			font-size: 16px
 			color: #FFF
 			background-color: #4ACFFF
@@ -163,6 +179,14 @@ export default {
 			transition: background .3s
 			&:hover, &:focus
 				background: darken(#4ACFFF, 15)
+		hr
+			box-sizing: content-box
+			margin-left: -1rem
+			margin-right: -1rem
+			border: none
+			border-top: 1px solid #ECECEC
+		hr ~ button
+			margin-top: 0
 
 		.icon-text-wrapper
 			display: table

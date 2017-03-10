@@ -44,7 +44,7 @@ export default {
 		width: 100%
 		height: 100%
 		border-radius: 2px
-		transition: background-color .5s ease-in-out
+		transition: background-color .3s ease-in-out
 		background-color: rgba(0, 0, 0, 0)
 		text-decoration: none
 		overflow-y: hidden
@@ -55,7 +55,7 @@ export default {
 		p
 			padding: 0 1rem
 			opacity: 0
-			transition: opacity .5s ease-in-out
+			transition: opacity .3s ease-in-out
 			font-family: monospace
 			font-size: 14px
 			color: #EEE

@@ -1,6 +1,9 @@
 # catgirls-website [![Build Status](https://travis-ci.org/brussell98/catgirls-website.svg?branch=master)](https://travis-ci.org/brussell98/catgirls-website)
 
-> A website for catgirl lovers
+A website for cat girl lovers
+
+[API repo](https://github.com/brussell98/catgirls-api)   
+[Trello board](https://trello.com/b/R14Gr3ae/catgirls-website)
 
 ## Build Setup
 

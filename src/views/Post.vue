@@ -2,7 +2,7 @@
 <div id="base">
 	<div class="post-info" v-if="image">
 		<p>
-			Uploaded by <router-link :to="'/users/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>
+			Uploaded by <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>
 			on {{ new Date(image.createdAt).toLocaleString() }}
 		</p>
 		<p>
@@ -45,6 +45,11 @@ export default {
 				this.image = response.data.image;
 			} catch(error) {
 				console.error(error);
+				this.$parent.$data.modalMessage = {
+					title: 'Request Error',
+					body: error.response && error.response.data.message || error.message,
+					type: 'error'
+				};
 			}
 		}
 	},
@@ -69,7 +74,7 @@ export default {
 		flex-basis: 65%
 		display: flex
 		justify-content: center
-		align-items: center
+		align-items: flex-start
 		img
 			max-width: 100%
 			max-height: 100%

@@ -24,7 +24,7 @@
 		<input type="text" id="uploader" value="" placeholder="Uploader">
 		<br>
 		<div class="button-wrapper">
-			<button type="button" @click="getResults">Search</button>
+			<button type="button" @click="getResults(true)">Search</button>
 		</div>
 	</div>
 	<div class="images-wrapper">
@@ -66,34 +66,55 @@ export default {
 		next() {
 			if (this.page < this.images.length / 9)
 				this.page++;
+			else if (this.images.length !== 0 && this.images.length % 27 === 0 && this.images.length / 9 === this.page) {
+				this.getResults(false);
+				this.page++;
+			}
 		},
-		getResults() {
+		async getResults(isNew = false) {
 			this.$Progress.start();
 			let tags = document.getElementById('tags').value,
 				nsfw = {
 					'undefined': undefined,
 					'false': false,
 					'true': true
-				}[document.getElementById('nsfw').value];
+				}[document.getElementById('nsfw').value],
+				blacklist = this.$store.getters.blacklist;
 
-			this.$http.post(API_BASE_URL + 'images/search', {
-				nsfw,
-				tags: tags ? tags + ' ' + this.$store.getters.blacklist : this.$store.getters.blacklist,
-				sort: document.getElementById('sort').value,
-				artist: document.getElementById('artist').value,
-				uploader: document.getElementById('uploader').value
-			}, {
-				responseType: 'json',
-				headers: {
-					'Authorization': localStorage.getItem('token')
-				}
-			}).then(response => {
-				this.images = response.data.images;
+			try {
+				let response = await this.$http.post(API_BASE_URL + 'images/search', {
+					nsfw,
+					limit: 27,
+					skip: !isNew && this.page !== 1 ? this.page * 9 : 0,
+					tags: tags
+						? tags + (blacklist ? ' ' + blacklist : '')
+						: this.$store.getters.blacklist,
+					sort: document.getElementById('sort').value,
+					artist: document.getElementById('artist').value,
+					uploader: document.getElementById('uploader').value
+				}, {
+					responseType: 'json',
+					headers: { 'Authorization': localStorage.getItem('token') }
+				});
+
+				if (isNew) {
+					this.page = 1;
+					this.images = response.data.images;
+				} else
+					this.images = this.images.concat(response.data.images);
+
 				this.$Progress.finish();
-			}).catch(error => {
+
+				return response;
+			} catch (error) {
 				this.$Progress.fail();
 				console.error(error);
-			});
+				this.$parent.$data.modalMessage = {
+					title: 'Request Error',
+					body: error.response && error.response.data.message || error.message,
+					type: 'error'
+				};
+			}
 		}
 	}
 }
@@ -107,7 +128,6 @@ export default {
 	flex-direction: column
 	.images-wrapper
 		max-width: 1024px
-		flex-basis: 1024px
 		margin-left: 1rem
 		box-sizing: border-box
 		.navigation-buttons

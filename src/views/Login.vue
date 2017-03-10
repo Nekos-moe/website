@@ -2,7 +2,7 @@
 <body>
 	<div id="base">
 		<div class="login">
-			<input id="login-user" type="text" value="" placeholder="Username">
+			<input id="login-user" type="text" value="" placeholder="Username" autofocus="on">
 			<input id="login-pass" type="password" value="" placeholder="Password">
 			<button type="button" @click="login">Log in</button>
 			<p class="error" v-if="loginError">{{ loginError }}</p>
@@ -24,7 +24,7 @@ export default {
 			let password = document.getElementById('login-pass').value;
 
 			try {
-				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password }, { responseType: 'json' })
+				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password });
 
 				this.loginError = null;
 				this.$store.commit('hasToken', true);
