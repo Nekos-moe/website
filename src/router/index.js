@@ -5,6 +5,7 @@ import store from '@/store';
 import Home from '@/views/Home';
 import SearchImages from '@/views/SearchImages';
 import Upload from '@/views/Upload';
+import UploadingGuidelines from '@/views/UploadingGuidelines';
 import Post from '@/views/Post';
 import Login from '@/views/Login';
 import Register from '@/views/Register';
@@ -29,6 +30,10 @@ const routes = [
 				return next();
 			return next('/login');
 		}
+	},
+	{
+		path: '/uploading-guidelines',
+		component: UploadingGuidelines
 	},
 	{
 		path: '/post/:id',

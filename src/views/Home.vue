@@ -40,7 +40,11 @@
 			<button @click="next">Next</button>
 		</div>
 		<div class="images">
-			<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
+			<transition-group name="slide-in">
+				<div class="image-page" v-for="(im, i) of images" v-show="i === page - 1" v-if="Math.abs(i - (page - 1)) < 2" :key="i">
+					<image-preview v-for="image of im" :image="image" :key="image.id"></image-preview>
+				</div>
+			</transition-group>
 		</div>
 		<div class="navigation-buttons">
 			<button @click="previous">Previous</button>
@@ -57,7 +61,8 @@ export default {
 			IMAGE_BASE_URL,
 			images: [],
 			page: 1,
-			loginError: null
+			loginError: null,
+			direction: 'right'
 		};
 	},
 	computed: {
@@ -73,14 +78,18 @@ export default {
 	},
 	methods: {
 		previous() {
-			if (this.page !== 1)
+			if (this.page !== 1) {
+				this.direction = 'left';
 				this.page--;
+			}
 		},
 		next() {
-			if (this.page < this.images.length / 9)
+			if (this.page < this.images.length) {
+				this.direction = 'right';
 				this.page++;
-			else if (this.images.length / 9 === this.page) {
+			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1] % 9 === 0 && this.images.length === this.page) {
 				this.getResults();
+				this.direction = 'right';
 				this.page++;
 			}
 		},
@@ -121,7 +130,8 @@ export default {
 					}
 				});
 
-				this.images = this.images.concat(response.data.images);
+				while (response.data.images.length > 0)
+					this.images.push(response.data.images.splice(0, 9));
 
 				return response;
 			} catch(error) {
@@ -239,9 +249,20 @@ export default {
 				&:hover
 					cursor: pointer
 					background-color: darken(#2de58c, 15)
-		.images
+		.image-page
 			display: flex
 			flex-wrap: wrap
 			justify-content: space-around
+			&.slide-in-leave-active > div
+				animation: slide-out-bck-center 0.4s cubic-bezier(0.550, 0.085, 0.680, 0.530) both
+
+		// Once other element leaves, enter new element
+		.image-page:not(.slide-in-leave-active) + .image-page, .image-page:first-of-type
+			div
+				animation: slide-in-fwd-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
+
+		// Hide entering element until other leaves
+		.slide-in-leave-active + .image-page, .image-page + .slide-in-leave-active
+			display: none
 
 </style>

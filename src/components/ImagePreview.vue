@@ -18,7 +18,7 @@ export default {
 	props: ['image'],
 	computed: {
 		url() {
-			return IMAGE_BASE_URL + this.image.id
+			return IMAGE_BASE_URL + this.image.id;
 		}
 	}
 }

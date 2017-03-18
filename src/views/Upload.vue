@@ -7,6 +7,7 @@
 	</div>
 	<div class="form">
 		<h4>Details</h4>
+		<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
 		<div class="import">
 			<button v-show="!promptingUser" @click="promptingUser = true">Import data from danbooru</button>
 			<input v-show="promptingUser" id="importId" type="number" placeholder="Post ID" value="" @keyup.enter="importTags">
@@ -209,9 +210,6 @@ export default {
 		transition: background .3s
 		&:hover, &:focus
 			background: darken(#4ACFFF, 15)
-	a
-		color: #2de58c !important
-		text-decoration: none
 	.import
 		margin: .5rem 0 1rem 0
 		display: flex

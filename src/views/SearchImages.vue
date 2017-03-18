@@ -34,7 +34,11 @@
 		</div>
 		<!-- Todo: Show match score -->
 		<div class="images">
-			<image-preview v-for="(image, index) of images" v-show="~~(index / 9) === page - 1" :image="image" :key="image.id"></image-preview>
+			<transition-group name="slide-in">
+				<div class="image-page" v-for="(im, i) of images" v-show="i === page - 1" v-if="Math.abs(i - (page - 1)) < 2" :key="i">
+					<image-preview v-for="image of im" :image="image" :key="image.id"></image-preview>
+				</div>
+			</transition-group>
 		</div>
 		<div class="navigation-buttons">
 			<button @click="previous">Previous</button>
@@ -45,12 +49,15 @@
 </template>
 
 <script>
+import Vue from 'vue';
+
 export default {
 	data() {
 		return {
 			IMAGE_BASE_URL,
 			images: [],
-			page: 1
+			page: 1,
+			direction: 'right'
 		};
 	},
 	computed: {
@@ -60,14 +67,18 @@ export default {
 	},
 	methods: {
 		previous() {
-			if (this.page !== 1)
+			if (this.page !== 1) {
+				this.direction = 'left';
 				this.page--;
+			}
 		},
 		next() {
-			if (this.page < this.images.length / 9)
+			if (this.page < this.images.length) {
+				this.direction = 'right';
 				this.page++;
-			else if (this.images.length !== 0 && this.images.length % 27 === 0 && this.images.length / 9 === this.page) {
+			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === this.page) {
 				this.getResults(false);
+				this.direction = 'right';
 				this.page++;
 			}
 		},
@@ -99,9 +110,13 @@ export default {
 
 				if (isNew) {
 					this.page = 1;
-					this.images = response.data.images;
-				} else
-					this.images = this.images.concat(response.data.images);
+					this.images = [];
+					while (response.data.images.length > 0)
+						this.images.push(response.data.images.splice(0, 9));
+				} else {
+					while (response.data.images.length > 0)
+						this.images.push(response.data.images.splice(0, 9));
+				}
 
 				this.$Progress.finish();
 
@@ -114,6 +129,7 @@ export default {
 					body: error.response && error.response.data.message || error.message,
 					type: 'error'
 				};
+				return;
 			}
 		}
 	}
@@ -128,6 +144,7 @@ export default {
 	flex-direction: column
 	.images-wrapper
 		max-width: 1024px
+		width: 100%
 		margin-left: 1rem
 		box-sizing: border-box
 		.navigation-buttons
@@ -147,10 +164,21 @@ export default {
 				&:hover
 					cursor: pointer
 					background-color: darken(#2de58c, 15)
-		.images
+		.image-page
 			display: flex
 			flex-wrap: wrap
 			justify-content: space-around
+			&.slide-in-leave-active > div
+				animation: slide-out-bck-center 0.4s cubic-bezier(0.550, 0.085, 0.680, 0.530) both
+
+		// Once other element leaves, enter new element
+		.image-page:not(.slide-in-leave-active) + .image-page, .image-page:first-of-type
+			div
+				animation: slide-in-fwd-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
+
+		// Hide entering element until other leaves
+		.slide-in-leave-active + .image-page, .image-page + .slide-in-leave-active
+			display: none
 	.search-wrapper
 		margin-bottom: 1rem
 		label
