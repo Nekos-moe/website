@@ -7,6 +7,8 @@ import SearchImages from '@/views/SearchImages';
 import Upload from '@/views/Upload';
 import UploadingGuidelines from '@/views/UploadingGuidelines';
 import Post from '@/views/Post';
+import Profile from '@/views/Profile';
+import Settings from '@/views/Settings';
 import Login from '@/views/Login';
 import Register from '@/views/Register';
 import NotFoundComponent from '@/views/404';
@@ -40,6 +42,19 @@ const routes = [
 		component: Post
 	},
 	{
+		path: '/user/:id',
+		component: Profile
+	},
+	{
+		path: '/settings',
+		component: Settings,
+		beforeEnter(to, from, next) {
+			if (store.state.hasToken)
+				return next();
+			return next('/login');
+		}
+	},
+	{
 		path: '/login',
 		component: Login,
 		beforeEnter(to, from, next) {
@@ -58,10 +73,6 @@ const routes = [
 			Vue.prototype.$Progress.fail();
 			return next('/');
 		}
-	},
-	{
-		path: '/register/verify/:id',
-		redirect: '/'
 	},
 	{
 		path: '*',

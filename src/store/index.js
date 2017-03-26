@@ -21,7 +21,7 @@ const store = new Vuex.Store({
 			}
 
 			try {
-				let response = await Vue.prototype.$http.get(API_BASE_URL + 'users/@me', {
+				let response = await Vue.prototype.$http.get(API_BASE_URL + 'user/@me', {
 					responseType: 'json',
 					headers: { 'Authorization': token }
 				});

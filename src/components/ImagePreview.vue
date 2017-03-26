@@ -29,7 +29,7 @@ export default {
 	position: relative
 	margin: .3rem 0
 	width: 32%
-	max-height: 420px
+	height: 420px
 	border-radius: 2px
 	display: flex
 	justify-content: center

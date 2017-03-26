@@ -5,10 +5,6 @@
 			<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
 			<span class="username">{{ user.username }}</span>
 		</div>
-		<div class="icon-text-wrapper mess">
-			<img src="http://placehold.it/20x20">
-			<span>{{ user.notifications | humanize }} Notifications</span>
-		</div>
 		<div class="icon-text-wrapper like">
 			<img src="http://placehold.it/20x20">
 			<span>{{ user.likes | humanize }} Likes</span>
@@ -87,7 +83,7 @@ export default {
 			if (this.page < this.images.length) {
 				this.direction = 'right';
 				this.page++;
-			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1] % 9 === 0 && this.images.length === this.page) {
+			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === this.page) {
 				this.getResults();
 				this.direction = 'right';
 				this.page++;
@@ -136,7 +132,7 @@ export default {
 				return response;
 			} catch(error) {
 				console.error(error);
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					title: 'Request Error',
 					body: error.response && error.response.data.message || error.message,
 					type: 'error'
@@ -220,8 +216,6 @@ export default {
 				vertical-align: middle
 			.username
 				font-size: 1.2rem
-		.mess
-			color: #5ee03a
 		.like
 			color: #47dced
 		.fav

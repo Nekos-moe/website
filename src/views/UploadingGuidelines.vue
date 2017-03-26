@@ -18,6 +18,9 @@
 			<strong>3D:</strong> Images of real people (or your cat) are not allowed. Unfortunately, cat girls do not exist in real life yet.
 		</p>
 		<p>
+			<strong>Spoilers:</strong> Images containing spoilers should not be uploaded. Repeated violations of this rule will result in a ban.
+		</p>
+		<p>
 			<strong>Adult Content:</strong> You are allowed to upload images containing <u>moderate</u> amounts of sexual content.
 			These are referred to as "NSFW" (Not Safe for Work).
 			If you are not sure if an image should be labeled as "NSFW", then it should.<br>

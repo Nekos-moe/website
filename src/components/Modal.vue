@@ -1,21 +1,25 @@
 <template>
 <div class="modal-wrap">
-	<div class="header" :class="{ warning: message.type === 'warning', error: message.type === 'error' }"></div>
+	<div class="header" :class="{ warning: data.type === 'warning', error: data.type === 'error' }"></div>
 	<div class="modal">
-		<h4 v-if="message.title">{{ message.title }}</h4>
-		<p v-if="message.body" v-html="message.body"></p>
-		<router-link v-if="message.link" :to="message.link" @click="close">{{ message.linkText || 'View' }}</router-link>
-		<button @click="close" :class="{ warning: message.type === 'warning', error: message.type === 'error' }">{{ message.button || 'Ok' }}</button>
+		<h4 v-if="data.title">{{ data.title }}</h4>
+		<p v-if="data.body" v-html="data.body"></p>
+		<router-link v-if="data.link" :to="data.link" @click="close">{{ data.linkText || 'View' }}</router-link>
+		<button v-if="data.buttons" v-for="button of data.buttons" @click="close" :class="{ warning: button.type === 'warning', error: button.type === 'error' }">{{ button.text }}</button>
+		<button v-if="!data.buttons" @click="close" :class="{ warning: data.type === 'warning', error: data.type === 'error' }">{{ data.button || 'Ok' }}</button>
 	</div>
 </div>
 </template>
 
 <script>
 export default {
-	props: ['message'],
+	props: ['data'],
 	methods: {
-		close() {
-			this.$parent.$data.modalMessage = null;
+		close(e) {
+			if (this.data.callback)
+				this.data.callback(e);
+
+			this.$parent.$data.modalData = null;
 		}
 	},
 	watch: {
@@ -48,10 +52,11 @@ export default {
 		font-family: 'Nunito', sans-serif
 		text-align: center
 		a
-			margin-right: 1rem !important
 			text-decoration: none
 			&:hover, &:active, &:focus
 				color: #FFF
+		button + button, a + button
+			margin-left: 1rem !important
 		h4
 			text-align: center
 			font-size: 2rem

@@ -29,7 +29,7 @@ export default {
 				email = document.getElementById('email').value;
 
 			if (!username || !password || !email) {
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					body: 'You need to fill in each field',
 					type: 'warning'
 				};
@@ -41,9 +41,9 @@ export default {
 
 				this.registerError = null;
 
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					title: 'Account created',
-					body: `Welcome ${username}! Before you can start using your account you'll need to verify your email using the link we've sent you. It make take a minute to show up.`,
+					body: `Welcome ${username}! Before you can start using your account you'll need to verify your email using the link we've sent you. It may take a minute to show up.`,
 					link: '/',
 					linkText: 'Return to home'
 				};

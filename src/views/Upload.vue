@@ -41,14 +41,14 @@ export default {
 		upload() {
 			let imageInput = document.getElementById('image');
 			if (!imageInput.files[0]) {
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					body: 'Please select an image',
 					type: 'warning'
 				};
 				return;
 			}
 			if (imageInput.files[0].size > 3145728) {
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					body: 'The image you selected is too large. It must be less than 3MB',
 					type: 'warning'
 				};
@@ -78,7 +78,7 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					title: 'Image Uploaded',
 					link: '/post/' + response.data.image.id,
 					linkText: 'View post'
@@ -86,7 +86,7 @@ export default {
 			}).catch(error => {
 				this.$Progress.fail();
 				if (error.response && error.response.data.id) {
-					this.$parent.$data.modalMessage = {
+					this.$parent.$data.modalData = {
 						title: 'Image Already Uploaded',
 						body: 'Sorry, someone else beat you to it.',
 						link: '/post/' + error.response.data.id,
@@ -95,7 +95,7 @@ export default {
 					return;
 				}
 				console.error(error);
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					title: 'Error Uploading Image',
 					body: error.response && error.response.data.message || error.message,
 					type: 'error'
@@ -151,7 +151,7 @@ export default {
 				this.promptingUser = false;
 
 				console.error(error);
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					title: 'Error',
 					body: error.response && error.response.data.message || error.message,
 					type: 'error'

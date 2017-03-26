@@ -124,7 +124,7 @@ export default {
 			} catch (error) {
 				this.$Progress.fail();
 				console.error(error);
-				this.$parent.$data.modalMessage = {
+				this.$parent.$data.modalData = {
 					title: 'Request Error',
 					body: error.response && error.response.data.message || error.message,
 					type: 'error'
