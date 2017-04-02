@@ -8,10 +8,7 @@
 			<button v-if="editMode" class="btn" @click="saveChanges">Save Changes</button>
 			<button v-if="editMode" class="btn warn" @click="editMode = false">Cancel</button>
 		</div>
-		<p>
-			Uploaded by <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>
-			on {{ new Date(image.createdAt).toLocaleString() }}
-		</p>
+		<p>Uploaded by <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 		<p>
 			<strong>Favorites:</strong> {{ image.favorites | humanize }}<br>
 			<strong>Likes:</strong> {{ image.likes | humanize }}

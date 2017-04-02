@@ -15,9 +15,9 @@
 	</div>
 	<div class="images-wrapper" v-if="profile">
 		<div class="tabs">
-			<button class="active">Uploads</button>
-			<button>Likes</button>
-			<button>Favorites</button>
+			<button id="uploads" @click="changeTab" class="active-tab">Uploads</button>
+			<button id="likes" @click="changeTab">Likes</button>
+			<button id="favorites" @click="changeTab">Favorites</button>
 		</div>
 		<hr>
 		<div class="navigation-buttons">
@@ -47,7 +47,8 @@ export default {
 			images: [],
 			page: 1,
 			direction: 'right',
-			profile: null
+			profile: null,
+			mode: 'uploads'
 		};
 	},
 	computed: {
@@ -67,7 +68,10 @@ export default {
 				this.direction = 'right';
 				this.page++;
 			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === this.page) {
-				this.getUploads();
+				if (this.mode === 'uploads')
+					this.getUploads();
+				else
+					this.getImages();
 				this.direction = 'right';
 				this.page++;
 			}
@@ -99,7 +103,10 @@ export default {
 				if (!this.profile)
 					return;
 
-				let response = await this.$http.post(API_BASE_URL + 'batch/images', { ids: this.profile.likes }, {
+				let ids = this.mode === 'likes' ? this.profile.likes : this.profile.favorites;
+				ids = ids.slice(9 * (this.page - 1), 9 * (this.page - 1) + 27);
+
+				let response = await this.$http.post(API_BASE_URL + 'batch/images', { ids }, {
 					headers: {
 						'Authorization': localStorage.getItem('token')
 					}
@@ -148,16 +155,46 @@ export default {
 					type: 'error'
 				};
 			}
+		},
+		changeTab(e) {
+			switch (e.target.id) {
+				case 'uploads':
+					this.mode = 'uploads';
+					break;
+				case 'likes':
+					this.mode = 'likes';
+					break;
+				case 'favorties':
+					this.mode = 'favorties';
+					break;
+			}
+
+			document.getElementsByClassName('active-tab')[0].classList.remove('active-tab');
+			e.target.classList.add('active-tab');
+			this.page = 1;
+			this.images = [];
+			this.direction = 'right';
+
+			if (this.mode === 'uploads')
+				this.getUploads();
+			else
+				this.getImages();
 		}
 	},
 	async mounted() {
 		await this.getUser();
-		this.getUploads();
+		if (this.mode === 'uploads')
+			this.getUploads();
+		else
+			this.getImages();
 	},
 	watch: {
 		async $route() {
 			await this.getUser();
-			this.getUploads();
+			if (this.mode === 'uploads')
+				this.getUploads();
+			else
+				this.getImages();
 		}
 	}
 }
@@ -213,7 +250,7 @@ export default {
 				outline: none !important
 				&:hover
 					cursor: pointer
-				&:not(.active)
+				&:not(.active-tab)
 					border-bottom: 1px solid #666
 		hr
 			margin: 0 auto

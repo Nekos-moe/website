@@ -16,7 +16,7 @@
 	</div>
 	<footer>
 		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com" target="_blank">Contact</a><br>
-		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="http://jk" target="_blank">API docs here</a>
+		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="/api-docs" target="_blank">API docs here</a>
 	</footer>
 </div>
 </template>

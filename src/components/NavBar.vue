@@ -7,7 +7,7 @@
 		<span>{{ user.username }}</span>
 		<div class="arrow"></div>
 		<div class="dropdown-content">
-			<a href="#">Account</a>
+			<router-link :to="'/user/' + user.id">Account</router-link>
 			<a href="#">Settings</a>
 			<a id="logout" @click="logoutUser()">Logout</a>
 		</div>
