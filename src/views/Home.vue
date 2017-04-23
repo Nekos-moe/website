@@ -1,18 +1,21 @@
 <template>
 <div id="base">
 	<div class="account-view" v-if="loggedIn">
-		<div class="icon-text-wrapper user">
-			<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
-			<span class="username">{{ user.username }}</span>
-		</div>
-		<div class="icon-text-wrapper like">
-			<img src="http://placehold.it/20x20">
-			<span>{{ user.likes | humanize }} Likes</span>
-		</div>
-		<div class="icon-text-wrapper fav">
-			<img src="http://placehold.it/20x20">
-			<span>{{ user.favorites | humanize }} Favorites</span>
-		</div>
+		<Row class="user">
+			<Col span="5">
+				<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
+			</Col>
+			<Col span="19">
+				<span class="username">{{ user.username }}</span>
+			</Col>
+		</Row>
+
+		<Icon type="thumbsup" size="20" color="#47dced" />
+		<span class="likes">{{ user.likes | humanize }} Likes</span>
+
+		<br>
+		<Icon type="android-favorite" size="20" color="#ed4778" />
+		<span class="favorites">{{ user.favorites | humanize }} Favorites</span>
 	</div>
 	<div class="account-view" v-if="hasToken && loggedIn === null">
 		<div class="icon-text-wrapper user">
@@ -21,19 +24,24 @@
 		</div>
 	</div>
 	<div class="account-view" v-if="!hasToken || loggedIn === false">
-		<div class="login">
-			<input id="login-user" type="text" value="" placeholder="Username">
-			<input id="login-pass" type="password" value="" placeholder="Password">
-			<button @click="login">Log in</button>
-			<hr>
-			<button @click="$router.push('/register')">Register</button>
-			<p class="error" v-if="loginError">{{ loginError }}</p>
-		</div>
+		<Form>
+			<Form-item label="Username" :style="{ marginBottom: '5px' }">
+				<Input type="text" name="login-user" placeholder="username" icon="person"></Input>
+			</Form-item>
+			<Form-item label="Password">
+				<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
+			</Form-item>
+			<Form-item :error="loginError">
+				<Button type="success" @click="login" long>Log in</Button>
+			</Form-item>
+			<Form-item>
+				<Button type="info" @click="$router.push('/register')" long>Register</Button>
+			</Form-item>
+		</Form>
 	</div>
 	<div class="images-wrapper">
-		<div class="navigation-buttons">
-			<button @click="previous">Previous</button>
-			<button @click="next">Next</button>
+		<div class="page-wrapper">
+			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
 		</div>
 		<div class="images">
 			<transition-group name="slide-in">
@@ -42,9 +50,8 @@
 				</div>
 			</transition-group>
 		</div>
-		<div class="navigation-buttons">
-			<button @click="previous">Previous</button>
-			<button @click="next">Next</button>
+		<div class="page-wrapper">
+			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
 		</div>
 	</div>
 </div>
@@ -58,7 +65,8 @@ export default {
 			images: [],
 			page: 1,
 			loginError: null,
-			direction: 'right'
+			direction: 'right',
+			hitEnd: false
 		};
 	},
 	computed: {
@@ -73,25 +81,23 @@ export default {
 		}
 	},
 	methods: {
-		previous() {
-			if (this.page !== 1) {
+		changePage(page) {
+			if (page < this.age && page !== 1)
 				this.direction = 'left';
-				this.page--;
+			else if (page > this.page) {
+				if (page < this.images.length)
+					this.direction = 'right';
+				else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === page) {
+					this.getResults();
+					this.direction = 'right';
+				} else
+					this.hitEnd = true
 			}
-		},
-		next() {
-			if (this.page < this.images.length) {
-				this.direction = 'right';
-				this.page++;
-			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === this.page) {
-				this.getResults();
-				this.direction = 'right';
-				this.page++;
-			}
+			this.page = page;
 		},
 		async login() {
-			let username = document.getElementById('login-user').value;
-			let password = document.getElementById('login-pass').value;
+			let username = document.getElementsByName('login-user')[0].value,
+				password = document.getElementsByName('login-pass')[0].value;
 
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password }, { responseType: 'json' })
@@ -126,17 +132,23 @@ export default {
 					}
 				});
 
-				while (response.data.images.length > 0)
-					this.images.push(response.data.images.splice(0, 9));
+				if (response.data.images.length === 0)
+					this.hitEnd = true;
+				else {
+					while (response.data.images.length > 0)
+						this.images.push(response.data.images.splice(0, 9));
+
+					if (this.images[this.images.length - 1].length !== 9)
+						this.hitEnd = true;
+				}
 
 				return response;
 			} catch(error) {
 				console.error(error);
-				this.$parent.$data.modalData = {
-					title: 'Request Error',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+				this.$Modal.error({
+					title: 'Error Requesting Image Data',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
 			}
 		}
 	},
@@ -156,55 +168,6 @@ export default {
 		box-shadow: 0 0 3px #CCC
 		border-radius: .25rem
 		font-family: 'Nunito', sans-serif
-		input
-			box-sizing: border-box
-			margin-bottom: .5rem
-			padding: 4px 8px
-			width: 100%
-			font-family: 'Nunito', sans-serif
-			font-size: 14px
-			border: 1px solid #CCC
-			border-radius: 3px
-			outline: #4ACFFF auto 0
-			margin-bottom: .5rem
-			&:focus
-				border-color: #4ACFFF
-				outline: #4ACFFF auto 5px
-		button
-			margin-top: .5rem
-			padding: 5px 10px
-			width: 100%
-			cursor: pointer
-			font-family: 'Nunito', sans-serif
-			font-size: 16px
-			color: #FFF
-			background-color: #4ACFFF
-			box-shadow: 0 0 3px rgba(#4ACFFF, .4)
-			border: none
-			border-radius: 3px
-			transition: background .3s
-			&:hover, &:focus
-				background: darken(#4ACFFF, 15)
-		hr
-			box-sizing: content-box
-			margin-left: -1rem
-			margin-right: -1rem
-			border: none
-			border-top: 1px solid #ECECEC
-		hr ~ button
-			margin-top: 0
-
-		.icon-text-wrapper
-			display: table
-			margin-bottom: .5rem
-			img
-				vertical-align: middle
-			span
-				display: table-cell
-				vertical-align: middle
-				padding-left: .5rem
-			&:last-of-type
-				margin-bottom: 0
 		.user
 			margin-bottom: 1rem
 			overflow: hidden
@@ -216,33 +179,23 @@ export default {
 				vertical-align: middle
 			.username
 				font-size: 1.2rem
-		.like
+		.likes
 			color: #47dced
-		.fav
+			font-size: 20px
+			margin-left: 6px
+		.favorites
 			color: #ed4778
+			font-size: 20px
+			margin-left: 4.75px
 	.images-wrapper
 		max-width: 1024px
 		flex-basis: 1024px
 		margin-left: 1rem
 		box-sizing: border-box
-		.navigation-buttons
+		.page-wrapper
 			text-align: center
-			button
-				padding: 5px 10px
-				border-radius: 3px
-				background-color: #2de58c
-				color: #FFF
-				box-shadow: 0 0 3px rgba(45, 229, 140, .4)
-				border: none
-				font-family: 'Nunito', sans-serif
-				font-size: 1rem
-				font-weight: bold
-				margin: .5rem
-				width: 100px
-				transition: background .3s
-				&:hover
-					cursor: pointer
-					background-color: darken(#2de58c, 15)
+			.page
+				display: inline-block
 		.image-page
 			display: flex
 			flex-wrap: wrap

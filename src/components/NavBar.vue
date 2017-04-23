@@ -1,21 +1,24 @@
 <template>
-<div class="nav-wrap">
-	<router-link to="/" exact class="brand">Catgirls</router-link>
-	<router-link to="/login" class="login" v-if="!loggedIn">Login</router-link>
-	<div class="account dropdown" v-if="loggedIn">
-		<img :src="user.avatar || 'http://placehold.it/32x32'">
-		<span>{{ user.username }}</span>
-		<div class="arrow"></div>
-		<div class="dropdown-content">
-			<router-link :to="'/user/' + user.id">Account</router-link>
-			<a href="#">Settings</a>
-			<a id="logout" @click="logoutUser()">Logout</a>
-		</div>
+<Menu class="navbar" mode="horizontal" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
+	<div class="navbar-brand">
+		<h1>Catgirls</h1>
 	</div>
-	<div class="nav">
-		<slot></slot>
+	<div class="navbar-user">
+		<!-- <img :src="user.avatar || 'http://placehold.it/32x32'"> -->
+		<Submenu v-if="loggedIn" name="profile">
+			<template slot="title">{{ user.username }}</template>
+			<Menu-item :name="'/user/' + user.id">Profile</Menu-item>
+			<Menu-item name="/settings">Settings</Menu-item>
+			<Menu-item name="/logout">Logout</Menu-item>
+		</Submenu>
+		<Menu-item v-if="!loggedIn" name="/login">Login</Menu-item>
 	</div>
-</div>
+	<div class="navbar-nav">
+		<Menu-item name="/">Home</Menu-item>
+		<Menu-item name="/search/images">Search</Menu-item>
+		<Menu-item name="/upload">Upload</Menu-item>
+	</div>
+</Menu>
 </template>
 
 <script>
@@ -32,100 +35,40 @@ export default {
 		logoutUser() {
 			this.$store.commit('logout');
 			this.$router.push('/');
+		},
+		navigate(path) {
+			this.$router.push(path);
 		}
 	}
 }
 </script>
 
 <style lang="sass" scoped>
-.nav-wrap
-	font-family: 'Nunito', sans-serif
-	background-color: #2de58c
-	box-shadow: 0 0 3px rgba(45, 229, 140, .2)
-	padding: 0 1rem
+.navbar
 	border-radius: .25rem
-	z-index: 2
-	a
-		font-size: 24px
-		color: rgba(255, 255, 255, .75)
-		text-decoration: none
-		transition: color .2s
-		margin: 0 .5rem
-		padding: .5rem 1rem
-		&.router-link-active
-			color: #FFF
-		&.brand
-			float: left
-			color: #FFF
-			font-weight: bold
-			padding-right: 2rem
-		&.login
-			float: right
-			width: 100px
-			float: right
-			text-align: right
-		&:hover
-			color: #FFF
-	.nav
-		display: flex
-		flex-wrap: nowrap
-		justify-content: flex-start
-	.account
-		display: table
+	font-family: 'Nunito', sans-serif
+	.navbar-brand
+		float: left
+		h1
+			color: #fff
+			margin-left: 1.5rem
+	.navbar-nav
+		text-align: center
+		.ivu-menu-item
+			float: none
+			display: inline-block
+			font-size: 1.25rem
+	.navbar-user
 		float: right
-		span
-			max-width: 200px
-			overflow: hidden
-			white-space: nowrap
-			text-overflow: ellipsis
-			display: table-cell
-			vertical-align: middle
-			font-size: 1.5rem
-			color: #FFF
-			margin: 0 .5rem
-			padding: .5rem 1rem
+		.ivu-menu-submenu
+			font-size: 1.25rem
+			float: right
+		.ivu-menu-item
+			font-size: 1.25rem
 		img
-			margin: 6.5px 0
+			margin-right: 1rem
 			vertical-align: middle
-		.arrow
-			border-style: solid
-			border-width: 5px 5px 0 5px
-			border-color: #FFF transparent transparent transparent
-			margin-left: -8px
-		.dropdown-content
-			a
-				cursor: pointer
-				box-sizing: border-box
-				display: block
-				font-size: 19px
-				text-align: center
-				width: 100%
-				padding: 3px 30px
-				margin: 0
-				transition: background-color .2s
-				&:hover
-					background-color: darken(#2de58c, 10)
-				&:last-of-type
-					border-radius: 0 0 .25rem .25rem
-	.dropdown
-		position: relative
-		&:hover
-			.dropdown-content
-				visibility: visible
-				transform: translateY(0)
-				opacity: 1
-				z-index: 2
-				transition-delay: 0s, 0s, .3s
-	.dropdown-content
-		background-color: #2de58c
-		box-shadow: 0 0 3px rgba(45, 229, 140, .2)
-		margin-top: 22px
-		border-radius: 0 0 .25rem .25rem
-		visibility: hidden
-		opacity: 0
-		position: absolute
-		z-index: 1
-		right: 0
-		transform: translateY(-2em)
-		transition: all .3s ease-in-out, visibility 0s linear .3s, z-index 0s linear .3s
+
+.ivu-menu-submenu
+	border-radius: .25rem
 </style>

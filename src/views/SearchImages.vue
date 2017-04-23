@@ -1,36 +1,42 @@
 <template>
 <div id="base">
 	<div class="search-wrapper">
-		<textarea type="text" id="tags" value="" placeholder="Tags"></textarea>
-		<br>
-		<label for="nsfw">NSFW Results</label>
-		<select id="nsfw" name="nsfw">
-			<option value="undefined">I Don't Care</option>
-			<option value="true">Only NSFW</option>
-			<option value="false" selected>Block NSFW</option>
-		</select>
-		<br>
-		<label for="sort">Sort</label>
-		<select id="sort" name="sort">
-			<option value="default" selected>Default</option>
-			<option value="recent">Recent</option>
-			<option value="likes">Likes</option>
-		</select>
-		<br>
-		<!-- posted_before -->
-		<!-- posted_after -->
-		<input type="text" id="artist" value="" placeholder="Artist">
-		<br>
-		<input type="text" id="uploader" value="" placeholder="Uploader">
-		<br>
-		<div class="button-wrapper">
-			<button type="button" @click="getResults(true)">Search</button>
-		</div>
+		<Form ref="options" :model="options" label-position="right" :label-width="110">
+			<Form-item label="Tags" label-position="top">
+				<Input v-model="options.tags" type="textarea" placeholder="Tags" :rows="3"></Input>
+			</Form-item>
+			<Form-item label="NSFW Results">
+				<Select v-model="options.nsfw">
+					<Option value="undefined">I Don't Care</Option>
+					<Option value="true">Only NSFW</Option>
+					<Option value="false" selected>Block NSFW</Option>
+				</Select>
+			</Form-item>
+			<Form-item label="Sort">
+				<Select v-model="options.sort">
+					<Option value="default">Default</Option>
+					<Option value="recent">Recent</Option>
+					<Option value="likes" selected>Likes</Option>
+				</Select>
+			</Form-item>
+			<Form-item label="Uploaded After">
+				<Date-picker v-model="options.after" type="date" placement="bottom"  format="MMMM Do, yyyy"></Date-picker>
+			</Form-item>
+			<Form-item label="Uploaded Before">
+				<Date-picker v-model="options.before" type="date" placement="bottom" format="MMMM Do, yyyy"></Date-picker>
+			</Form-item>
+			<Form-item label="Artist">
+				<Input v-model="options.artist" placeholder="Artist" icon="paintbrush"></Input>
+			</Form-item>
+			<Form-item label="Uploader">
+				<Input v-model="options.uploader" placeholder="Uploader" icon="person"></Input>
+			</Form-item>
+			<Button type="success" @click="getResults(true)" long>Search</Button>
+		</Form>
 	</div>
 	<div class="images-wrapper">
-		<div class="navigation-buttons">
-			<button @click="previous">Previous</button>
-			<button @click="next">Next</button>
+		<div class="page-wrapper">
+			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
 		</div>
 		<!-- Todo: Show match score -->
 		<div class="images">
@@ -40,9 +46,8 @@
 				</div>
 			</transition-group>
 		</div>
-		<div class="navigation-buttons">
-			<button @click="previous">Previous</button>
-			<button @click="next">Next</button>
+		<div class="page-wrapper">
+			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
 		</div>
 	</div>
 </div>
@@ -57,7 +62,17 @@ export default {
 			IMAGE_BASE_URL,
 			images: [],
 			page: 1,
-			direction: 'right'
+			direction: 'right',
+			options: {
+				tags: '',
+				nsfw: 'false',
+				sort: 'default',
+				after: null,
+				before: null,
+				artist: '',
+				uploader: '',
+			},
+			hitEnd: false
 		};
 	},
 	computed: {
@@ -66,30 +81,29 @@ export default {
 		}
 	},
 	methods: {
-		previous() {
-			if (this.page !== 1) {
+		changePage(page) {
+			if (page < this.age && page !== 1)
 				this.direction = 'left';
-				this.page--;
+			else if (page > this.page) {
+				if (page < this.images.length)
+					this.direction = 'right';
+				else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === page) {
+					this.page = page; // To make getResults work right
+					this.getResults(false);
+					this.direction = 'right';
+				} else
+					this.hitEnd = true
 			}
-		},
-		next() {
-			if (this.page < this.images.length) {
-				this.direction = 'right';
-				this.page++;
-			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === this.page) {
-				this.getResults(false);
-				this.direction = 'right';
-				this.page++;
-			}
+			this.page = page;
 		},
 		async getResults(isNew = false) {
 			this.$Progress.start();
-			let tags = document.getElementById('tags').value,
-				nsfw = {
+
+			let nsfw = {
 					'undefined': undefined,
 					'false': false,
 					'true': true
-				}[document.getElementById('nsfw').value],
+				}[this.options.nsfw],
 				blacklist = this.$store.getters.blacklist;
 
 			try {
@@ -97,12 +111,14 @@ export default {
 					nsfw,
 					limit: 27,
 					skip: !isNew && this.page !== 1 ? this.page * 9 : 0,
-					tags: tags
-						? tags + (blacklist ? ' ' + blacklist : '')
-						: this.$store.getters.blacklist,
-					sort: document.getElementById('sort').value,
-					artist: document.getElementById('artist').value,
-					uploader: document.getElementById('uploader').value
+					tags: this.options.tags
+						? this.options.tags + (blacklist ? ' ' + blacklist : '')
+						: blacklist,
+					posted_after: this.options.after ? this.options.after.valueOf() : undefined,
+					posted_before: this.options.before ? this.options.before.valueOf() : undefined,
+					sort: this.options.sort,
+					artist: this.options.artist,
+					uploader: this.options.uploader
 				}, {
 					responseType: 'json',
 					headers: { 'Authorization': localStorage.getItem('token') }
@@ -111,11 +127,17 @@ export default {
 				if (isNew) {
 					this.page = 1;
 					this.images = [];
+					this.hitEnd = false;
+				}
+
+				if (response.data.images.length === 0)
+					this.hitEnd = true;
+				else {
 					while (response.data.images.length > 0)
 						this.images.push(response.data.images.splice(0, 9));
-				} else {
-					while (response.data.images.length > 0)
-						this.images.push(response.data.images.splice(0, 9));
+
+					if (this.images[this.images.length - 1].length !== 9)
+						this.hitEnd = true;
 				}
 
 				this.$Progress.finish();
@@ -124,11 +146,10 @@ export default {
 			} catch (error) {
 				this.$Progress.fail();
 				console.error(error);
-				this.$parent.$data.modalData = {
-					title: 'Request Error',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+				this.$Modal.error({
+					title: 'Error Performing Search',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
 				return;
 			}
 		}
@@ -145,25 +166,11 @@ export default {
 	.images-wrapper
 		max-width: 1024px
 		width: 100%
-		margin-left: 1rem
 		box-sizing: border-box
-		.navigation-buttons
+		.page-wrapper
 			text-align: center
-			button
-				padding: 5px 10px
-				border-radius: 3px
-				background-color: #2de58c
-				color: #FFF
-				box-shadow: 0 0 3px rgba(45, 229, 140, .4)
-				border: none
-				font-size: 1rem
-				font-family: sans-serif
-				margin: .5rem
-				width: 100px
-				transition: background .3s
-				&:hover
-					cursor: pointer
-					background-color: darken(#2de58c, 15)
+			.page
+				display: inline-block
 		.image-page
 			display: flex
 			flex-wrap: wrap
@@ -180,51 +187,8 @@ export default {
 		.slide-in-leave-active + .image-page, .image-page + .slide-in-leave-active
 			display: none
 	.search-wrapper
+		width: 100%
+		max-width: 400px
 		margin-bottom: 1rem
-		label
-			font-family: sans-serif
-		input, textarea
-			margin: auto
-			padding: 4px 8px
-			width: 300px
-			font-size: 14px
-			border: 1px solid #CCC
-			border-radius: 3px
-			outline: #4ACFFF auto 0
-			margin-bottom: .5rem
-			&:focus
-				border-color: #4ACFFF
-				outline: #4ACFFF auto 5px
-		textarea
-			height: 36px
-			resize: vertical
-		select
-			cursor: pointer
-			margin: auto
-			padding: 4px 8px
-			font-size: 14px
-			border: 1px solid #CCC
-			border-radius: 3px
-			outline: #4ACFFF auto 0
-			margin-bottom: .5rem
-			&:focus
-				border-color: #4ACFFF
-				outline: #4ACFFF auto 5px
-			option
-				font-size: 14px
-		.button-wrapper
-			text-align: center
-			button
-				padding: 5px 10px
-				cursor: pointer
-				font-size: 16px
-				color: #FFF
-				background-color: #4ACFFF
-				box-shadow: 0 0 3px rgba(#4ACFFF, .4)
-				border: none
-				border-radius: 3px
-				transition: background .3s
-				&:hover, &:focus
-					background: darken(#4ACFFF, 15)
 
 </style>

@@ -18,14 +18,17 @@ Vue.use(VueRouter);
 const routes = [
 	{
 		path: '/',
+		name: 'home',
 		component: Home
 	},
 	{
 		path: '/search/images',
+		name: 'search-images',
 		component: SearchImages
 	},
 	{
 		path: '/upload',
+		name: 'upload',
 		component: Upload,
 		beforeEnter(to, from, next) {
 			if (store.state.hasToken)
@@ -35,18 +38,22 @@ const routes = [
 	},
 	{
 		path: '/uploading-guidelines',
+		name: 'uploading-guidelines',
 		component: UploadingGuidelines
 	},
 	{
 		path: '/post/:id',
+		name: 'post',
 		component: Post
 	},
 	{
 		path: '/user/:id',
+		name: 'profile',
 		component: Profile
 	},
 	{
 		path: '/settings',
+		name: 'settings',
 		component: Settings,
 		beforeEnter(to, from, next) {
 			if (store.state.hasToken)
@@ -56,6 +63,7 @@ const routes = [
 	},
 	{
 		path: '/login',
+		name: 'login',
 		component: Login,
 		beforeEnter(to, from, next) {
 			if (!store.state.loggedIn)
@@ -65,7 +73,17 @@ const routes = [
 		}
 	},
 	{
+		path: '/logout',
+		name: 'logout',
+		beforeEnter(to, from, next) {
+			if (store.state.loggedIn)
+				store.commit('logout');
+			return next('/');
+		}
+	},
+	{
 		path: '/register',
+		name: 'register',
 		component: Register,
 		beforeEnter(to, from, next) {
 			if (!store.state.loggedIn)
@@ -76,6 +94,7 @@ const routes = [
 	},
 	{
 		path: '*',
+		name: '404',
 		component: NotFoundComponent
 	}
 ];

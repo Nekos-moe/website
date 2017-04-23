@@ -1,18 +1,22 @@
 <template>
-<body>
-	<div id="base">
-		<div class="login">
-			<label for="user">Username: 35 characters max</label>
-			<input id="login-user" type="text" name="user" value="" placeholder="Username" maxlength="35" required>
-			<label for="pass">Password: 8-70 characters<br>Must contain lowercase and uppercase alphabetic characters and numbers</label>
-			<input id="login-pass" type="password" name="pass" value="" placeholder="Password" maxlength="70" required>
-			<label for="email">Email: 70 charcters max</label>
-			<input id="email" type="email" name="email" value="" placeholder="catgirls@neko.shop" autocomplete="on" maxlength="70" required>
-			<button @click="register">Register</button>
-			<p class="error" v-if="registerError">{{ registerError }}</p>
-		</div>
+<div id="base-register">
+	<div class="register">
+		<Form class="login-form" label-position="top">
+			<Form-item label="Username: 35 characters max">
+				<Input type="text" name="login-user" placeholder="username" icon="person"></Input>
+			</Form-item>
+			<Form-item label="Password: 8-70 characters">
+				<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
+			</Form-item>
+			<Form-item label="Email: 70 charcters max">
+				<Input name="email" placeholder="catgirls@neko.shop" icon="email"></Input>
+			</Form-item>
+			<Form-item :error="registerError">
+				<Button type="success" @click="register" long>Register</Button>
+			</Form-item>
+		</Form>
 	</div>
-</body>
+</div>
 </template>
 
 <script>
@@ -24,15 +28,15 @@ export default {
 	},
 	methods: {
 		async register() {
-			let username = document.getElementById('login-user').value, // We'll keep these universal for auto log in plugins
-				password = document.getElementById('login-pass').value,
-				email = document.getElementById('email').value;
+			let username = document.getElementsByName('login-user')[0].value, // We'll keep these universal for auto log in plugins
+				password = document.getElementsByName('login-pass')[0].value,
+				email = document.getElementsByName('email')[0].value;
 
 			if (!username || !password || !email) {
-				this.$parent.$data.modalData = {
-					body: 'You need to fill in each field',
-					type: 'warning'
-				};
+				this.$Modal.warning({
+					title: 'Incomplete Form',
+					content: 'Please fill in each field'
+				});
 				return
 			}
 
@@ -41,12 +45,14 @@ export default {
 
 				this.registerError = null;
 
-				this.$parent.$data.modalData = {
-					title: 'Account created',
-					body: `Welcome ${username}! Before you can start using your account you'll need to verify your email using the link we've sent you. It may take a minute to show up.`,
-					link: '/',
-					linkText: 'Return to home'
-				};
+				this.$Modal.success({
+					title: 'Account Created!',
+					content: `Welcome ${username}! Before you can start using your account you'll need to verify your email using the link we've sent you. It may take a minute to show up.`,
+					okText: 'Return to Home',
+					onOk: () => {
+						this.$router.push('/');
+					}
+				});
 			} catch(error) {
 				if (!error.response) {
 					console.error(error.message);
@@ -63,7 +69,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.login
+.register
 	margin: auto
 	width: 300px
 	input

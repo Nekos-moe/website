@@ -1,5 +1,5 @@
 <template>
-<div id="base">
+<div id="base-profile">
 	<div v-if="!profile">
 		<!-- In the future, a loading spinner component goes here -->
 	</div>
@@ -14,15 +14,13 @@
 		</div>
 	</div>
 	<div class="images-wrapper" v-if="profile">
-		<div class="tabs">
-			<button id="uploads" @click="changeTab" class="active-tab">Uploads</button>
-			<button id="likes" @click="changeTab">Likes</button>
-			<button id="favorites" @click="changeTab">Favorites</button>
-		</div>
-		<hr>
-		<div class="navigation-buttons">
-			<button @click="previous">Previous</button>
-			<button @click="next">Next</button>
+		<Tabs @on-click="changeTab" type="card">
+			<Tab-pane label="Uploads" name="uploads"></Tab-pane>
+			<Tab-pane label="Likes" name="likes"></Tab-pane>
+			<Tab-pane label="Favorites" name="favorites"></Tab-pane>
+		</Tabs>
+		<div class="page-wrapper">
+			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
 		</div>
 		<div class="images">
 			<transition-group name="slide-in">
@@ -31,9 +29,8 @@
 				</div>
 			</transition-group>
 		</div>
-		<div class="navigation-buttons">
-			<button @click="previous">Previous</button>
-			<button @click="next">Next</button>
+		<div class="page-wrapper">
+			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
 		</div>
 	</div>
 </div>
@@ -48,7 +45,8 @@ export default {
 			page: 1,
 			direction: 'right',
 			profile: null,
-			mode: 'uploads'
+			mode: 'uploads',
+			hitEnd: false
 		};
 	},
 	computed: {
@@ -57,24 +55,23 @@ export default {
 		}
 	},
 	methods: {
-		previous() {
-			if (this.page !== 1) {
+		changePage(page) {
+			if (page < this.age && page !== 1)
 				this.direction = 'left';
-				this.page--;
+			else if (page > this.page) {
+				if (page < this.images.length)
+					this.direction = 'right';
+				else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === page) {
+					this.page = page; // To make getXXXXX work right
+					if (this.mode === 'uploads')
+						this.getUploads();
+					else
+						this.getImages();
+					this.direction = 'right';
+				} else
+					this.hitEnd = true
 			}
-		},
-		next() {
-			if (this.page < this.images.length) {
-				this.direction = 'right';
-				this.page++;
-			} else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === this.page) {
-				if (this.mode === 'uploads')
-					this.getUploads();
-				else
-					this.getImages();
-				this.direction = 'right';
-				this.page++;
-			}
+			this.page = page;
 		},
 		async getUser() {
 			try {
@@ -91,11 +88,10 @@ export default {
 				return;
 			} catch(error) {
 				console.error(error);
-				this.$parent.$data.modalData = {
-					title: 'Request Error',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+				this.$Modal.error({
+					title: 'Error Requesting User Data',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
 			}
 		},
 		async getImages() {
@@ -112,17 +108,23 @@ export default {
 					}
 				});
 
-				while (response.data.images.length > 0)
-					this.images.push(response.data.images.splice(0, 9));
+				if (response.data.images.length === 0)
+					this.hitEnd = true;
+				else {
+					while (response.data.images.length > 0)
+						this.images.push(response.data.images.splice(0, 9));
+
+					if (this.images[this.images.length - 1].length !== 9)
+						this.hitEnd = true;
+				}
 
 				return response;
 			} catch(error) {
 				console.error(error);
-				this.$parent.$data.modalData = {
-					title: 'Request Error',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+				this.$Modal.error({
+					title: 'Error Requesting Image Data',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
 			}
 		},
 		async getUploads() {
@@ -143,8 +145,15 @@ export default {
 					}
 				});
 
-				while (response.data.images.length > 0)
-					this.images.push(response.data.images.splice(0, 9));
+				if (response.data.images.length === 0)
+					this.hitEnd = true;
+				else {
+					while (response.data.images.length > 0)
+						this.images.push(response.data.images.splice(0, 9));
+
+					if (this.images[this.images.length - 1].length !== 9)
+						this.hitEnd = true;
+				}
 
 				return response;
 			} catch(error) {
@@ -156,23 +165,24 @@ export default {
 				};
 			}
 		},
-		changeTab(e) {
-			switch (e.target.id) {
+		changeTab(name) {
+			switch (name) {
 				case 'uploads':
 					this.mode = 'uploads';
 					break;
 				case 'likes':
 					this.mode = 'likes';
 					break;
-				case 'favorties':
-					this.mode = 'favorties';
+				case 'favorites':
+					this.mode = 'favorites';
 					break;
 			}
 
-			document.getElementsByClassName('active-tab')[0].classList.remove('active-tab');
-			e.target.classList.add('active-tab');
+			// document.getElementsByClassName('active-tab')[0].classList.remove('active-tab');
+			// e.target.classList.add('active-tab');
 			this.page = 1;
 			this.images = [];
+			this.hitEnd = false;
 			this.direction = 'right';
 
 			if (this.mode === 'uploads')
@@ -200,8 +210,8 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-#base
+<style lang="sass">
+#base-profile
 	.profile
 		margin: 1rem auto
 		text-align: center
@@ -235,49 +245,14 @@ export default {
 			font-size: 2rem
 	.images-wrapper
 		margin-top: 3rem
-		.tabs
+		.ivu-tabs
+			.ivu-tabs-nav
+				text-align: center
+				float: none
+		.page-wrapper
 			text-align: center
-			button
+			.page
 				display: inline-block
-				margin: 0
-				padding: 5px 10px 3px 10px
-				border: 1px solid #666
-				border-bottom: 1px solid #FFF
-				border-radius: 6px 6px 0 0
-				background-color: #FFF
-				font-family: 'Nunito', sans-serif
-				font-size: 1.2rem
-				outline: none !important
-				&:hover
-					cursor: pointer
-				&:not(.active-tab)
-					border-bottom: 1px solid #666
-		hr
-			margin: 0 auto
-			border: none
-			border-top: 1px solid #666
-			margin-top: -1px
-			margin-bottom: 1rem
-			z-index: -1
-			max-width: 1000px
-		.navigation-buttons
-			text-align: center
-			button
-				padding: 5px 10px
-				border-radius: 3px
-				background-color: #2de58c
-				color: #FFF
-				box-shadow: 0 0 3px rgba(45, 229, 140, .4)
-				border: none
-				font-family: 'Nunito', sans-serif
-				font-size: 1rem
-				font-weight: bold
-				margin: .5rem
-				width: 100px
-				transition: background .3s
-				&:hover
-					cursor: pointer
-					background-color: darken(#2de58c, 15)
 		.image-page
 			margin: auto
 			display: flex

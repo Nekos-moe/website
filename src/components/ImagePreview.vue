@@ -1,6 +1,6 @@
 <template>
 <div class="image-preview-wrap">
-	<img :src="url" alt="">
+	<img :src="IMAGE_BASE_URL + image.id" alt="">
 	<router-link :to="'/post/' + image.id">
 		<p>Uploaded by {{ image.uploader.username }}<br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 		<p>
@@ -16,10 +16,10 @@
 <script>
 export default {
 	props: ['image'],
-	computed: {
-		url() {
-			return IMAGE_BASE_URL + this.image.id;
-		}
+	data() {
+		return {
+			IMAGE_BASE_URL
+		};
 	}
 }
 </script>
@@ -53,6 +53,7 @@ export default {
 			p
 				opacity: 1
 		p
+			margin-top: 1rem
 			padding: 0 1rem
 			opacity: 0
 			transition: opacity .3s ease-in-out

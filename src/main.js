@@ -5,6 +5,10 @@ import store from '@/store';
 import axios from 'axios';
 import * as filters from '@/filters';
 import VueProgressBar from 'vue-progressbar';
+import iView from 'iview';
+import iView_locale from 'iview/src/locale/lang/en-US'
+// import 'iview/dist/styles/iview.css';
+import '@/nekos-theme.less';
 
 import App from '@/App';
 import NavBar from '@/components/NavBar';
@@ -13,6 +17,7 @@ import Modal from '@/components/Modal';
 
 Vue.config.productionTip = false;
 
+Vue.use(iView, { locale: iView_locale });
 Vue.use(VueProgressBar, {
 	color: '#2de58c',
 	failedColor: 'red',

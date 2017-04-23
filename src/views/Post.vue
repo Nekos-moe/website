@@ -1,12 +1,12 @@
 <template>
-<div id="base">
+<div id="base-post">
 	<div class="post-info" v-if="image">
 		<div id="edit-buttons" v-if="canEdit">
-			<button v-if="!editMode" class="btn" @click="editMode = true">Edit Post</button>
-			<button v-if="!editMode" class="btn danger" @click="deletePost">Delete Post</button>
-
-			<button v-if="editMode" class="btn" @click="saveChanges">Save Changes</button>
-			<button v-if="editMode" class="btn warn" @click="editMode = false">Cancel</button>
+			<Button :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): editMode = true">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
+			<Button v-if="editMode" type="warning" @click="updateData">Discard Changes</Button>
+			<Poptip v-if="!editMode" confirm title="Are you sure you want to delete this post?" @on-ok="deletePost" ok-text="yes" cancel-text="no" placement="bottom">
+				<Button type="error">Delete Post</Button>
+			</Poptip>
 		</div>
 		<p>Uploaded by <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 		<p>
@@ -14,19 +14,18 @@
 			<strong>Likes:</strong> {{ image.likes | humanize }}
 		</p>
 		<div v-if="editMode">
-			<label for="nsfw"><strong>Adult content?</strong></label>
-			<input type="checkbox" id="nsfw" name="nsfw" :checked="image.nsfw">
+			<label for="nsfw">Adult content?</label>
+			<i-switch name="nsfw" v-model="edits.nsfw" :value="image.nsfw" size="large">
+				<span slot="open">Yes</span>
+				<span slot="close">No</span>
+			</i-switch>
 		</div>
 		<p v-if="image.artist && !editMode"><strong>Artist:</strong> {{ image.artist }}</p>
 		<div v-if="editMode">
 			<label for="artist">Artist</label>
-			<input type="text" name="artist" id="artist" :value="image.artist">
+			<Input name="artist" v-model="edits.artist" :value="image.artist"></Input>
 		</div>
-		<span v-if="!editMode" class="tag" v-for="tag of image.tags.split(',')">{{ tag }}</span>
-		<div v-if="editMode">
-			<label for="tags">Tags</label>
-			<textarea type="text" name="tags" id="tags">{{ image.tags.replace(/,/g, ', ') }}</textarea>
-		</div>
+		<Tag :closable="editMode" color="blue" class="tag" type="border" @on-close="deleteTag" v-for="tag of tags" :name="tag" :key="tag">{{ tag }}</Tag>
 	</div>
 	<div class="image-wrapper" v-if="image">
 		<img :src="IMAGE_BASE_URL + image.id">
@@ -41,7 +40,12 @@ export default {
 		return {
 			IMAGE_BASE_URL,
 			image: null,
-			editMode: false
+			tags: [],
+			editMode: false,
+			edits: {
+				nsfw: false,
+				artist: null
+			}
 		};
 	},
 	computed: {
@@ -62,63 +66,55 @@ export default {
 				});
 
 				this.image = response.data.image;
+				this.tags = response.data.image.tags.split(',');
+				this.edits.artist = response.data.image.artist;
+				this.edits.nsfw = response.data.image.nsfw;
+				this.editMode = false;
 			} catch(error) {
 				console.error(error);
-				this.$parent.$data.modalData = {
-					title: 'Request Error',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+				this.$Modal.error({
+					title: 'Error Requesting Image Data',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
 			}
 		},
-		async saveChanges() {
-			await this.$http.patch(`${API_BASE_URL}images/${this.image.id}`, {
-				artist: document.getElementById('artist').value,
-				tags: document.getElementById('tags').value,
-				nsfw: document.getElementById('nsfw').checked
+		saveChanges() {
+			let tags = [...document.getElementsByClassName('ivu-tag-text')].map(e => e.innerHTML).join(',');
+			this.$http.patch(`${API_BASE_URL}images/${this.image.id}`, {
+				tags,
+				artist: this.edits.artist,
+				nsfw: this.edits.nsfw
 			}, {
 				headers: {
 					'Authorization': localStorage.getItem('token')
 				}
-			}).catch(error => {
+			}).then(() => this.updateData()).catch(error => {
 				console.error(error);
-				this.$parent.$data.modalData = {
+				this.$Modal.error({
 					title: 'Error Editing Post',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
 			});
-
-			this.updateData();
-			this.editMode = false;
 		},
-		deletePost() {
-			this.$parent.$data.modalData = {
-				title: 'Are you sure?',
-				body: "This will remove this image from nekos.brussell.me. This action cannot be reversed.",
-				type: 'error',
-				buttons: [{ text: 'Cancel' }, { text: 'Delete', type: 'error' }],
-				callback: async e => {
-					if (e.target.innerHTML === 'Delete') {
-						try {
-							await this.$http.delete(`${API_BASE_URL}images/${this.image.id}`, {
-								headers: {
-									'Authorization': localStorage.getItem('token')
-								}
-							});
-
-							this.$router.push('/');
-						} catch(error) {
-							console.error(error);
-							this.$parent.$data.modalData = {
-								title: 'Request Error',
-								body: error.response && error.response.data.message || error.message,
-								type: 'error'
-							};
-						}
+		async deletePost() {
+			try {
+				await this.$http.delete(`${API_BASE_URL}images/${this.image.id}`, {
+					headers: {
+						'Authorization': localStorage.getItem('token')
 					}
-				}
-			};
+				});
+
+				this.$router.push('/');
+			} catch(error) {
+				console.error(error);
+				this.$Modal.error({
+					title: 'Error Deleting Image',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
+			}
+		},
+		deleteTag(e, name) {
+			this.$parent.$delete(this.tags, this.tags.indexOf(name));
 		}
 	},
 	beforeMount() {
@@ -130,39 +126,33 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-#base
+<style lang="sass">
+#base-post
 	display: flex
 	.post-info
-		flex-basis: 25%
+		flex-basis: 30%
 		min-width: 250px
 		#edit-buttons
 			text-align: center
-		.tag, input:not([type="checkbox"])
-			display: block
-			display: block
-		input[type="checkbox"]
-			width: auto
-			vertical-align: middle
-			margin-left: 5px
-			margin-top: 1rem
-		input, textarea
-			margin: .5rem 0 1rem 0
-			padding: 4px 8px
-			width: 100%
-			font-family: 'Nunito', sans-serif
-			font-size: 14px
-			border: 1px solid #CCC
-			border-radius: 3px
-			outline: #4ACFFF auto 0
-			&:focus
-				border-color: #4ACFFF
-				outline: #4ACFFF auto 5px
-		textarea
-			height: 143px
-			resize: vertical
+			margin-bottom: 1rem
+			.ivu-poptip-body
+				.ivu-icon
+					position: relative
+				.ivu-poptip-body-message
+					display: inline-block
+		p:first-of-type
+			margin-bottom: 1rem
+		.tag
+			display: inline-block
+			margin-top: 2rem
+			vertical-align: bottom
+		.tag + .tag
+			margin-top: 2px
+		label
+			font-weight: 700
+			margin-right: .5rem
 	.image-wrapper
-		flex-basis: 65%
+		flex-basis: 70%
 		display: flex
 		justify-content: center
 		align-items: flex-start

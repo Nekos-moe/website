@@ -1,26 +1,33 @@
 <template>
-<div id="base">
+<div id="base-upload">
 	<div class="image-picker">
 		<input type="file" id="image" accept=".png,.jpg,.jpeg" @change="previewImage">
 		<button :class="{ 'has-image': hasImage }" id="image-select" @click="clickImage">Select Image</button>
 		<p :class="{ 'has-image': hasImage }" id="image-details"></p>
 	</div>
-	<div class="form">
-		<h4>Details</h4>
-		<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
-		<div class="import">
-			<button v-show="!promptingUser" @click="promptingUser = true">Import data from danbooru</button>
-			<input v-show="promptingUser" id="importId" type="number" placeholder="Post ID" value="" @keyup.enter="importTags">
-			<button v-show="promptingUser" @click="importTags">Import</button>
-		</div>
-		<label for="tags"><strong>Tags:</strong> Seperate with a comma. Use spaces, not underscores or dashes</label>
-		<textarea type="text" id="tags" placeholder="cat girls, best girls" name="tags"></textarea>
-		<label for="artist"><strong>Artist:</strong> Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</label>
-		<input type="text" id="artist" placeholder="Artist" name="artist">
-		<label for="nsfw"><strong>Adult content?</strong></label>
-		<input type="checkbox" id="nsfw" name="nsfw">
-		<button type="button" @click="upload()">Upload</button>
+	<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
+	<div class="import">
+		<Button v-show="!promptingUser" @click="promptingUser = true">Import data from danbooru</Button>
+		<Input v-show="promptingUser" class="input" name="import-id" number placeholder="Post ID" value="" @enter="importTags" size="large"></Input>
+		<Button v-show="promptingUser" @click="importTags">Import</Button>
 	</div>
+	<Form ref="details" :model="details" label-position="left" class="details">
+		<Form-item label="a">
+			<p slot="label">Tags<br>Seperate with a comma. Use spaces, not underscores or dashes</p>
+			<Input v-model="details.tags" type="textarea" placeholder="cat girls, best girls" autosize></Input>
+		</Form-item>
+		<Form-item label="Artist">
+			<p style="font-size: 14px; clear: both; display: block; line-height: 16px; margin-bottom: 8px">Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</p>
+			<Input v-model="details.artist" placeholder="Artist" icon="paintbrush"></Input>
+		</Form-item>
+		<Form-item label="Adult content?" label-position="right">
+			<i-switch v-model="details.nsfw" value="details.nsfw" size="large">
+				<span slot="open">Yes</span>
+				<span slot="close">No</span>
+			</i-switch>
+		</Form-item>
+		<Button type="success" @click="upload()" long>Upload</Button>
+	</Form>
 </div>
 </template>
 
@@ -29,7 +36,12 @@ export default {
 	data() {
 		return {
 			hasImage: false,
-			promptingUser: false
+			promptingUser: false,
+			details: {
+				tags: undefined,
+				artist: undefined,
+				nsfw: false
+			}
 		};
 	},
 	computed: {
@@ -41,17 +53,17 @@ export default {
 		upload() {
 			let imageInput = document.getElementById('image');
 			if (!imageInput.files[0]) {
-				this.$parent.$data.modalData = {
-					body: 'Please select an image',
-					type: 'warning'
-				};
+				this.$Modal.warning({
+					title: 'Missing Image',
+					content: 'Please select an image to post'
+				});
 				return;
 			}
 			if (imageInput.files[0].size > 3145728) {
-				this.$parent.$data.modalData = {
-					body: 'The image you selected is too large. It must be less than 3MB',
-					type: 'warning'
-				};
+				this.$Modal.warning({
+					title: 'Image Too Large',
+					content: 'The image you selected is too large. Select an image that is less than 3MB in size.'
+				});
 				return;
 			}
 
@@ -59,9 +71,9 @@ export default {
 
 			let data = new FormData();
 			data.append('image', imageInput.files[0]);
-			data.append('artist', document.getElementById('artist').value);
-			data.append('tags', document.getElementById('tags').value);
-			if (document.getElementById('nsfw').checked)
+			data.append('artist', this.details.artist);
+			data.append('tags', this.details.tags);
+			if (this.details.nsfw)
 				data.append('nsfw', 'true');
 
 			this.$http.post(API_BASE_URL + 'images', data, {
@@ -78,6 +90,10 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
+				this.details.tags = undefined;
+				this.details.artist = undefined;
+				this.details.nsfw = false;
+
 				this.$parent.$data.modalData = {
 					title: 'Image Uploaded',
 					link: '/post/' + response.data.image.id,
@@ -134,17 +150,17 @@ export default {
 			return reader.readAsDataURL(e.target.files[0]);
 		},
 		importTags() {
-			let id = document.getElementById('importId');
+			let id = document.getElementsByName('import-id')[0];
 
 			this.$Progress.start();
 			this.$http.get(`https://danbooru.donmai.us/posts/${id.value}.json`).then(response => {
 				this.$Progress.finish();
 				this.promptingUser = false;
 
-				document.getElementById('tags').value = response.data.tag_string
+				this.details.tags = response.data.tag_string
 					.replace(response.data.tag_string_artist, '')
 					.replace(/ +/g, ', ');
-				document.getElementById('artist').value = response.data.tag_string_artist;
+				this.details.artist = response.data.tag_string_artist;
 				id.value = null;
 			}).catch(error => {
 				this.$Progress.fail();
@@ -163,6 +179,59 @@ export default {
 </script>
 
 <style lang="sass" scoped>
+#base-upload
+	& > *
+		margin: auto
+	& > p
+		text-align: center
+	.import
+		text-align: center
+		margin: 20px 0
+		.input
+			width: 160px
+			margin: 0 10px
+	.details
+		width: 100%
+		max-width: 400px
+		margin-top: 2rem
+	.image-picker
+		margin: 2rem auto
+		text-align: center
+		button
+			margin: auto
+			padding: 10px
+			width: 400px
+			height: 400px
+			cursor: pointer
+			color: #444
+			font-size: 2rem
+			font-family: 'Nunito', sans-serif
+			border: 5px dashed #4ACFFF
+			border-radius: 1rem
+			box-shadow: none
+			background-color: #FFF
+			background-size: cover
+			background-position: center
+			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s
+			outline: none !important
+			&:hover:not(.has-image)
+				border: 5px dashed darken(#4ACFFF, 25)
+			&.has-image
+				color: transparent
+				border: none
+				box-shadow: 1px 2px 5px rgba(0, 0, 0, .3)
+				&:hover
+					color: #FFF
+					text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000
+		#image
+			display: none
+		p
+			display: none
+			font-family: 'Nunito', sans-serif
+			color: #444
+			&.has-image
+				display: block
+
 .form
 	margin: auto
 	margin-top: 1rem
@@ -223,42 +292,4 @@ export default {
 		input
 			margin-right: .5rem
 			width: 100px
-
-.image-picker
-	margin: 2rem auto
-	text-align: center
-	button
-		margin: auto
-		padding: 10px
-		width: 400px
-		height: 400px
-		cursor: pointer
-		color: #444
-		font-size: 2rem
-		font-family: 'Nunito', sans-serif
-		border: 5px dashed #4ACFFF
-		border-radius: 1rem
-		box-shadow: none
-		background-color: #FFF
-		background-size: cover
-		background-position: center
-		transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s
-		outline: none !important
-		&:hover:not(.has-image)
-			border: 5px dashed darken(#4ACFFF, 25)
-		&.has-image
-			color: transparent
-			border: none
-			box-shadow: 1px 2px 5px rgba(0, 0, 0, .3)
-			&:hover
-				color: #FFF
-				text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000
-	#image
-		display: none
-	p
-		display: none
-		font-family: 'Nunito', sans-serif
-		color: #444
-		&.has-image
-			display: block
 </style>

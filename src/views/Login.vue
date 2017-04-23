@@ -1,14 +1,20 @@
 <template>
-<body>
-	<div id="base">
-		<div class="login">
-			<input id="login-user" type="text" value="" placeholder="Username" autofocus="on">
-			<input id="login-pass" type="password" value="" placeholder="Password">
-			<button type="button" @click="login">Log in</button>
-			<p class="error" v-if="loginError">{{ loginError }}</p>
-		</div>
-	</div>
-</body>
+<div id="base">
+	<Form class="login-form">
+		<Form-item label="Username" :style="{ marginBottom: '5px' }">
+			<Input type="text" name="login-user" placeholder="username" icon="person"></Input>
+		</Form-item>
+		<Form-item label="Password">
+			<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
+		</Form-item>
+		<Form-item :error="loginError">
+			<Button type="success" @click="login" long>Log in</Button>
+		</Form-item>
+		<Form-item>
+			<Button type="info" @click="$router.push('/register')" long>Register</Button>
+		</Form-item>
+	</Form>
+</div>
 </template>
 
 <script>
@@ -20,8 +26,8 @@ export default {
 	},
 	methods: {
 		async login() {
-			let username = document.getElementById('login-user').value;
-			let password = document.getElementById('login-pass').value;
+			let username = document.getElementsByName('login-user')[0].value,
+				password = document.getElementsByName('login-pass')[0].value;
 
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password });
@@ -49,34 +55,7 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.login
+.login-form
 	margin: auto
 	width: 300px
-	input
-		box-sizing: border-box
-		margin-bottom: .5rem
-		padding: 4px 8px
-		width: 100%
-		font-size: 14px
-		border: 1px solid #CCC
-		border-radius: 3px
-		outline: #4ACFFF auto 0
-		margin-bottom: .5rem
-		&:focus
-			border-color: #4ACFFF
-			outline: #4ACFFF auto 5px
-	button
-		margin-top: .5rem
-		padding: 5px 10px
-		width: 100%
-		cursor: pointer
-		font-size: 16px
-		color: #FFF
-		background-color: #4ACFFF
-		box-shadow: 0 0 3px rgba(#4ACFFF, .4)
-		border: none
-		border-radius: 3px
-		transition: background .3s
-		&:hover, &:focus
-			background: darken(#4ACFFF, 15)
 </style>
