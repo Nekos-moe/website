@@ -1,5 +1,5 @@
 <template>
-<Menu class="navbar" mode="horizontal" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
+<Menu id="navbar" mode="horizontal" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
 	<div class="navbar-brand">
 		<h1>Catgirls</h1>
 	</div>
@@ -15,7 +15,11 @@
 	</div>
 	<div class="navbar-nav">
 		<Menu-item name="/">Home</Menu-item>
-		<Menu-item name="/search/images">Search</Menu-item>
+		<Submenu name="search">
+			<template slot="title">Search</template>
+			<Menu-item name="/search/images">Images</Menu-item>
+			<Menu-item name="/search/users">Users</Menu-item>
+		</Submenu>
 		<Menu-item name="/upload">Upload</Menu-item>
 	</div>
 </Menu>
@@ -43,8 +47,8 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.navbar
+<style lang="sass">
+#navbar
 	border-radius: .25rem
 	font-family: 'Nunito', sans-serif
 	.navbar-brand
@@ -54,10 +58,16 @@ export default {
 			margin-left: 1.5rem
 	.navbar-nav
 		text-align: center
-		.ivu-menu-item
+		.ivu-menu-item, .ivu-menu-submenu
 			float: none
 			display: inline-block
 			font-size: 1.25rem
+		.ivu-menu-submenu
+			.ivu-menu-submenu-title > i
+				margin-right: 0
+			.ivu-menu-item
+				display: block
+				text-align: left
 	.navbar-user
 		float: right
 		.ivu-menu-submenu
@@ -68,7 +78,6 @@ export default {
 		img
 			margin-right: 1rem
 			vertical-align: middle
-
-.ivu-menu-submenu
-	border-radius: .25rem
+	.ivu-menu-submenu
+		border-radius: .25rem
 </style>

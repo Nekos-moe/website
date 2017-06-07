@@ -6,14 +6,14 @@ import axios from 'axios';
 import * as filters from '@/filters';
 import VueProgressBar from 'vue-progressbar';
 import iView from 'iview';
-import iView_locale from 'iview/src/locale/lang/en-US'
+import iView_locale from 'iview/src/locale/lang/en-US';
+import VueTimeago from 'vue-timeago';
 // import 'iview/dist/styles/iview.css';
 import '@/nekos-theme.less';
 
 import App from '@/App';
 import NavBar from '@/components/NavBar';
 import ImagePreview from '@/components/ImagePreview';
-import Modal from '@/components/Modal';
 
 Vue.config.productionTip = false;
 
@@ -32,7 +32,18 @@ Object.keys(filters).forEach(key => {
 
 Vue.component('NavBar', NavBar);
 Vue.component('ImagePreview', ImagePreview);
-Vue.component('Modal', Modal);
+
+function requireAll(requireContext) {
+	return requireContext.keys().reduce((current, next) => {
+		current[next.substr(2, 5)] = requireContext(next);
+		return current;
+	}, {});
+}
+
+Vue.use(VueTimeago, {
+	locale: 'en-US',
+	locales: requireAll(require.context("vue-timeago/locales", true, /\.json$/))
+});
 
 const app = new Vue({
 	el: '#app',

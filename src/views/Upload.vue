@@ -159,6 +159,7 @@ export default {
 
 				this.details.tags = response.data.tag_string
 					.replace(response.data.tag_string_artist, '')
+					.replace(/(md5 mismatch|commentary request|commentary|translation request|translated|check translation|translation check|translation note|copyright ?\w*)/g, '') // remove unwanted tags
 					.replace(/ +/g, ', ');
 				this.details.artist = response.data.tag_string_artist;
 				id.value = null;

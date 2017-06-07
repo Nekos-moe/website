@@ -1,11 +1,7 @@
 <template>
 <div id="app">
 	<vue-progress-bar></vue-progress-bar>
-	<nav-bar>
-		<router-link to="/" exact>Home</router-link>
-		<router-link to="/search/images">Search</router-link>
-		<router-link to="/upload" exact>Upload</router-link>
-	</nav-bar>
+	<nav-bar></nav-bar>
 	<div class="body-wrapper">
 		<transition name="fade" mode="out-in">
 			<router-view></router-view>

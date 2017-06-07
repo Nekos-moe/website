@@ -4,14 +4,16 @@
 		<!-- In the future, a loading spinner component goes here -->
 	</div>
 	<div class="profile" v-if="profile">
-		<img :src="profile.avatar || 'http://placehold.it/256x256'" class="avatar-profile">
+		<img :src="profile.avatar || require('@/../assets/images/404.jpg')" class="avatar-profile">
 		<p class="username">{{ profile.username }}</p>
-		<div class="icon-text-wrapper">
-			<img src="http://placehold.it/20x20">
-			<span class="likes">{{ profile.likes | humanize }} Likes</span>
-			<img src="http://placehold.it/20x20">
-			<span class="favorites">{{ profile.favorites | humanize }} Favorites</span>
+		<div class="icon-text-container">
+			<Icon type="thumbsup" size="20" color="#47dced" />
+			<span class="likes">{{ profile.likesReceived | humanize }} Likes</span>
+			<Icon type="android-favorite" size="20" color="#ed4778" />
+			<span class="favorites">{{ profile.favoritesReceived | humanize }} Favorites</span>
 		</div>
+		<p class="info">Joined <timeago :since="profile.createdAt"></timeago></p>
+		<p class="info">{{ profile.uploads | humanize }} images uploaded</p>
 	</div>
 	<div class="images-wrapper" v-if="profile">
 		<Tabs @on-click="changeTab" type="card">
@@ -219,23 +221,21 @@ export default {
 		hr
 			border: none
 			border-top: 1px solid #ECECEC
-
-		.icon-text-wrapper
-			margin: .5rem auto
-			display: table
-			margin-bottom: .5rem
-			img
-				vertical-align: middle
+		.icon-text-container
+			margin: auto
+			margin-bottom: 1rem
+			i
+				display: inline-block
 			span
-				display: table-cell
-				vertical-align: middle
-				padding-left: .5rem
+				display: inline-block
+				padding-left: 5px
+				font-size: 20px
 				&.likes
 					color: #47dced
 				&.favorites
 					color: #ed4778
-			span + img
-				margin-left: 1rem
+			i + span
+				margin-right: 1rem
 		.avatar-profile
 			max-width: 256px
 			max-height: 256px
@@ -243,6 +243,8 @@ export default {
 		.username
 			margin: 1rem
 			font-size: 2rem
+		.info
+			margin-top: 5px
 	.images-wrapper
 		margin-top: 3rem
 		.ivu-tabs

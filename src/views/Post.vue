@@ -8,6 +8,10 @@
 				<Button type="error">Delete Post</Button>
 			</Poptip>
 		</div>
+		<div v-if="loggedIn" id="like-fav-buttons">
+			<Button type="text" :loading="likeLoading" :class="{ no: !user.likes.includes(image.id) }" @click="like"><Icon type="thumbsup" size="30" color="#47dced" /></Button>
+			<Button type="text" :loading="favoriteLoading" :class="{ no: !user.favorites.includes(image.id) }" @click="favorite"><Icon type="android-favorite" size="30" color="#ed4778" /></Button>
+		</div>
 		<p>Uploaded by <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 		<p>
 			<strong>Favorites:</strong> {{ image.favorites | humanize }}<br>
@@ -45,7 +49,9 @@ export default {
 			edits: {
 				nsfw: false,
 				artist: null
-			}
+			},
+			likeLoading: false,
+			favoriteLoading: false
 		};
 	},
 	computed: {
@@ -54,6 +60,9 @@ export default {
 		},
 		canEdit() {
 			return this.image && this.user && (this.user.roles.includes('admin') || this.user.roles.includes('editPosts') || this.image.uploader.id === this.user.id);
+		},
+		loggedIn() {
+			return this.$store.state.loggedIn;
 		}
 	},
 	methods: {
@@ -115,6 +124,54 @@ export default {
 		},
 		deleteTag(e, name) {
 			this.$parent.$delete(this.tags, this.tags.indexOf(name));
+		},
+		async like() {
+			this.likeLoading = true;
+
+			try {
+				await this.$http.patch(`${API_BASE_URL}image/${this.image.id}/relationship`, {
+					type: 'like',
+					create: !this.user.likes.includes(this.image.id)
+				}, { headers: { 'Authorization': localStorage.getItem('token') } });
+
+				if (this.user.likes.includes(this.image.id))
+					this.user.likes.splice(this.user.likes.indexOf(this.image.id), 1);
+				else
+					this.user.likes.push(this.image.id);
+
+				this.likeLoading = false;
+			} catch(error) {
+				console.error(error);
+				this.$Modal.error({
+					title: 'Error Updating Image Relationship',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
+				this.likeLoading = false;
+			}
+		},
+		async favorite() {
+			this.favoriteLoading = true;
+
+			try {
+				await this.$http.patch(`${API_BASE_URL}image/${this.image.id}/relationship`, {
+					type: 'favorite',
+					create: !this.user.favorites.includes(this.image.id)
+				}, { headers: { 'Authorization': localStorage.getItem('token') } });
+
+				if (this.user.favorites.includes(this.image.id))
+					this.user.favorites.splice(this.user.favorites.indexOf(this.image.id), 1);
+				else
+					this.user.favorites.push(this.image.id);
+
+				this.favoriteLoading = false;
+			} catch(error) {
+				console.error(error);
+				this.$Modal.error({
+					title: 'Error Updating Image Relationship',
+					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
+				this.favoriteLoading = false;
+			}
 		}
 	},
 	beforeMount() {
@@ -140,6 +197,13 @@ export default {
 					position: relative
 				.ivu-poptip-body-message
 					display: inline-block
+		#like-fav-buttons
+			margin-bottom: 1rem
+			button
+				i
+					transition: color .3s ease-in-out
+				&.no i
+					color: rgb(160, 160, 160) !important
 		p:first-of-type
 			margin-bottom: 1rem
 		.tag

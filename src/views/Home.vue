@@ -11,11 +11,11 @@
 		</Row>
 
 		<Icon type="thumbsup" size="20" color="#47dced" />
-		<span class="likes">{{ user.likes | humanize }} Likes</span>
+		<span class="likes">{{ user.likesReceived | humanize }} Likes</span>
 
 		<br>
 		<Icon type="android-favorite" size="20" color="#ed4778" />
-		<span class="favorites">{{ user.favorites | humanize }} Favorites</span>
+		<span class="favorites">{{ user.favoritesReceived | humanize }} Favorites</span>
 	</div>
 	<div class="account-view" v-if="hasToken && loggedIn === null">
 		<div class="icon-text-wrapper user">
