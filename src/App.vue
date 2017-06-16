@@ -52,20 +52,18 @@ export default {
 </script>
 
 <style lang="sass">
-
 body
 	font-size: 100%
 
 #app
 	font-family: 'Nunito', sans-serif
-	max-width: 1280px
-	margin: auto
-	margin-top: 2rem
 	.fade-enter-active, .fade-leave-active
 		transition: all .2s ease
 	.fade-enter, .fade-leave-active
 		opacity: 0
 	.body-wrapper
+		max-width: 1280px
+		margin: auto
 		box-shadow: 0 0 3px #CCC
 		margin-top: 1rem
 		border-radius: .25rem

@@ -54,8 +54,6 @@
 </template>
 
 <script>
-import Vue from 'vue';
-
 export default {
 	data() {
 		return {
@@ -77,12 +75,12 @@ export default {
 	},
 	computed: {
 		user() {
-			return this.$store.state.user
+			return this.$store.state.user;
 		}
 	},
 	methods: {
 		changePage(page) {
-			if (page < this.age && page !== 1)
+			if (page < this.page && page !== 1)
 				this.direction = 'left';
 			else if (page > this.page) {
 				if (page < this.images.length)

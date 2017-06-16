@@ -9,8 +9,8 @@
 			</Poptip>
 		</div>
 		<div v-if="loggedIn" id="like-fav-buttons">
-			<Button type="text" :loading="likeLoading" :class="{ no: !user.likes.includes(image.id) }" @click="like"><Icon type="thumbsup" size="30" color="#47dced" /></Button>
-			<Button type="text" :loading="favoriteLoading" :class="{ no: !user.favorites.includes(image.id) }" @click="favorite"><Icon type="android-favorite" size="30" color="#ed4778" /></Button>
+			<Button type="text" :class="{ no: !user.likes.includes(image.id) }" @click="like"><Icon type="thumbsup" size="30" color="#47dced" /></Button>
+			<Button type="text" :class="{ no: !user.favorites.includes(image.id) }" @click="favorite"><Icon type="android-favorite" size="30" color="#ed4778" /></Button>
 		</div>
 		<p>Uploaded by <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 		<p>
@@ -126,6 +126,9 @@ export default {
 			this.$parent.$delete(this.tags, this.tags.indexOf(name));
 		},
 		async like() {
+			if (this.likeLoading)
+				return;
+
 			this.likeLoading = true;
 
 			try {
@@ -150,6 +153,9 @@ export default {
 			}
 		},
 		async favorite() {
+			if (this.favoriteLoading)
+				return;
+
 			this.favoriteLoading = true;
 
 			try {

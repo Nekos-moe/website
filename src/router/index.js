@@ -4,6 +4,7 @@ import store from '@/store';
 
 import Home from '@/views/Home';
 import SearchImages from '@/views/SearchImages';
+import SearchUsers from '@/views/SearchUsers';
 import Upload from '@/views/Upload';
 import UploadingGuidelines from '@/views/UploadingGuidelines';
 import Post from '@/views/Post';
@@ -25,6 +26,11 @@ const routes = [
 		path: '/search/images',
 		name: 'search-images',
 		component: SearchImages
+	},
+	{
+		path: '/search/users',
+		name: 'search-users',
+		component: SearchUsers
 	},
 	{
 		path: '/upload',

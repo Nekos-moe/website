@@ -3,7 +3,7 @@
 	<div class="account-view" v-if="loggedIn">
 		<Row class="user">
 			<Col span="5">
-				<img :src="user.avatar || 'http://placehold.it/32x32'" class="avatar-small">
+				<img :src="user.avatar || require('@/../assets/images/404.jpg')" class="avatar-small">
 			</Col>
 			<Col span="19">
 				<span class="username">{{ user.username }}</span>
