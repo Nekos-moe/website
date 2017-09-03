@@ -8,7 +8,7 @@
 			<Form-item label="Password: 8-70 characters">
 				<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
 			</Form-item>
-			<Form-item label="Email: 70 charcters max">
+			<Form-item label="Email: 70 characters max">
 				<Input name="email" placeholder="catgirls@neko.shop" icon="email"></Input>
 			</Form-item>
 			<Form-item :error="registerError">
@@ -81,7 +81,6 @@ export default {
 		border: 1px solid #CCC
 		border-radius: 3px
 		outline: #4ACFFF auto 0
-		margin-bottom: .5rem
 		&:focus
 			border-color: #4ACFFF
 			outline: #4ACFFF auto 5px

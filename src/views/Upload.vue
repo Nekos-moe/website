@@ -1,5 +1,13 @@
 <template>
 <div id="base-upload">
+	<Modal type="success" v-model="successModal" title="Image Uploaded">
+		<p>You image has successfully been uploaded.</p>
+		<router-link :to="'/post/' + modalLinkId">You can view it here</router-link>
+	</Modal>
+	<Modal type="warning" v-model="dupeModal" title="Image Already Uploaded">
+		<p>Sorry, someone else beat you to it :(</p>
+		<router-link :to="'/post/' + modalLinkId">View post</router-link>
+	</Modal>
 	<div class="image-picker">
 		<input type="file" id="image" accept=".png,.jpg,.jpeg" @change="previewImage">
 		<button :class="{ 'has-image': hasImage }" id="image-select" @click="clickImage">Select Image</button>
@@ -12,8 +20,8 @@
 		<Button v-show="promptingUser" @click="importTags">Import</Button>
 	</div>
 	<Form ref="details" :model="details" label-position="left" class="details">
-		<Form-item label="a">
-			<p slot="label">Tags<br>Seperate with a comma. Use spaces, not underscores or dashes</p>
+		<Form-item label="Tags">
+			<p style="font-size: 14px; clear: both; display: block; line-height: 16px; margin-bottom: 8px">Seperate with a comma. Use spaces, not underscores or dashes</p>
 			<Input v-model="details.tags" type="textarea" placeholder="cat girls, best girls" autosize></Input>
 		</Form-item>
 		<Form-item label="Artist">
@@ -38,10 +46,13 @@ export default {
 			hasImage: false,
 			promptingUser: false,
 			details: {
-				tags: undefined,
-				artist: undefined,
+				tags: '',
+				artist: '',
 				nsfw: false
-			}
+			},
+			successModal: false,
+			dupeModal: false,
+			modalLinkId: ''
 		};
 	},
 	computed: {
@@ -94,28 +105,20 @@ export default {
 				this.details.artist = undefined;
 				this.details.nsfw = false;
 
-				this.$parent.$data.modalData = {
-					title: 'Image Uploaded',
-					link: '/post/' + response.data.image.id,
-					linkText: 'View post'
-				};
+				this.modalLinkId = response.data.image.id;
+				this.successModal = true;
 			}).catch(error => {
 				this.$Progress.fail();
 				if (error.response && error.response.data.id) {
-					this.$parent.$data.modalData = {
-						title: 'Image Already Uploaded',
-						body: 'Sorry, someone else beat you to it.',
-						link: '/post/' + error.response.data.id,
-						linkText: 'View post'
-					};
+					this.modalLinkId = error.response.data.id;
+					this.dupeModal = true;
 					return;
 				}
 				console.error(error);
-				this.$parent.$data.modalData = {
+				this.$Modal.error({
 					title: 'Error Uploading Image',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+					content: error.response && error.response.data.message || error.message
+				});
 			});
 		},
 		clickImage() {
@@ -142,10 +145,13 @@ export default {
 			reader.onload = result => {
 				setTimeout(() => {
 					document.getElementById('image-select').style.backgroundImage = 'url(' + result.target.result + ')';
+					document.getElementById('image-select').style.backgroundRepeat = 'no-repeat';
+					document.getElementById('image-select').style.backgroundSize = 'cover';
+					document.getElementById('image-select').style.backgroundPosition = 'center';
 					document.getElementById('image-details').textContent = `${filename} — ${size}`;
 				}, this.hasImage ? 0 : 300);
 				this.hasImage = true;
-			}
+			};
 
 			return reader.readAsDataURL(e.target.files[0]);
 		},
@@ -168,11 +174,10 @@ export default {
 				this.promptingUser = false;
 
 				console.error(error);
-				this.$parent.$data.modalData = {
+				this.$Modal.error({
 					title: 'Error',
-					body: error.response && error.response.data.message || error.message,
-					type: 'error'
-				};
+					content: error.response && error.response.data.message || error.message
+				});
 			});
 		}
 	}
@@ -207,16 +212,14 @@ export default {
 			color: #444
 			font-size: 2rem
 			font-family: 'Nunito', sans-serif
-			border: 5px dashed #4ACFFF
+			border: 4px dashed #96abec
 			border-radius: 1rem
 			box-shadow: none
-			background-color: #FFF
-			background-size: cover
-			background-position: center
-			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s
+			background: #fff
+			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s, border-width .2s
 			outline: none !important
 			&:hover:not(.has-image)
-				border: 5px dashed darken(#4ACFFF, 25)
+				border-width: 5px
 			&.has-image
 				color: transparent
 				border: none
@@ -234,8 +237,7 @@ export default {
 				display: block
 
 .form
-	margin: auto
-	margin-top: 1rem
+	margin: 1rem auto auto
 	width: 40%
 	min-width: 300px
 	color: #222

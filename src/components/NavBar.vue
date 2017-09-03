@@ -81,6 +81,7 @@ export default {
 			display: none
 
 	.navbar
+		box-shadow: 0 0 3px #464c5b
 		.navbar-brand
 			float: left
 			margin-right: 40px
@@ -112,6 +113,7 @@ export default {
 		background: #96abec
 		padding: 4px 20px
 		width: 100% !important
+		box-shadow: 0 0 3px #464c5b
 		.toggle
 			vertical-align: middle
 			float: right

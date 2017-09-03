@@ -1,6 +1,6 @@
 <template>
 <div class="image-preview-wrap">
-	<img :src="IMAGE_BASE_URL + image.id" alt="">
+	<img :src="THUMBNAIL_BASE_URL + image.id">
 	<router-link :to="'/post/' + image.id">
 		<p>Uploaded by {{ image.uploader.username }}<br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 		<p>
@@ -18,7 +18,7 @@ export default {
 	props: ['image'],
 	data() {
 		return {
-			IMAGE_BASE_URL
+			THUMBNAIL_BASE_URL
 		};
 	}
 }

@@ -1,6 +1,6 @@
 <template>
-<div id="base">
-	
+<div id="base-settings">
+	<h1>Coming Soon™</h1>
 </div>
 </template>
 
@@ -8,7 +8,7 @@
 export default {
 	data() {
 		return {
-			IMAGE_BASE_URL
+
 		};
 	},
 	computed: {
@@ -22,7 +22,8 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-#base
-
+<style lang="sass">
+#base-settings
+	text-align: center
+	font-family: 'Nunito', sans-serif
 </style>

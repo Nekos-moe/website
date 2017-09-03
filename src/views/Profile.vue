@@ -222,8 +222,7 @@ export default {
 			border: none
 			border-top: 1px solid #ECECEC
 		.icon-text-container
-			margin: auto
-			margin-bottom: 1rem
+			margin: auto auto 1rem
 			i
 				display: inline-block
 			span

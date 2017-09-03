@@ -5,7 +5,7 @@
 		<h5>Images</h5>
 		<p>
 			<strong>Quality:</strong> You should avoid uploading images where compression is obvious.
-			If you can't find a better upload online, use <a href="https://github.com/lltcggie/waifu2x-caffe/releases" target="_blank">waifu2x</a> to denoise it.
+			If you can't find a better upload online, use <a href="https://github.com/lltcggie/waifu2x-caffe/releases" target="_blank">waifu2x</a> to de-noise it.
 		</p>
 		<p>
 			<strong>Low Effort Images:</strong> Do not upload simple or low effort drawings.
@@ -33,7 +33,7 @@
 		</p>
 		<p>
 			<strong>Format:</strong> Unlike other sites, all tags use spaces. The characters - and _ are replaced.
-			To input multiple tags seperate them with a comma. New lines and extra spaces around tags will be removed.
+			To input multiple tags separate them with a comma. New lines and extra spaces around tags will be removed.
 		</p>
 		<p>
 			<strong>Source and character(s):</strong> Including the source and characters in the tags is optional, but strongly encouraged.
@@ -52,8 +52,7 @@ export default {
 
 <style lang="sass" scoped>
 #base
-	margin: auto
-	margin-top: 1rem
+	margin: 1rem auto auto
 	width: 80%
 	min-width: 300px
 	color: #222

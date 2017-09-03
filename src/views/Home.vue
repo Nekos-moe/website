@@ -1,41 +1,43 @@
 <template>
-<div id="base">
+<div id="base-home">
 	<div class="account-view" v-if="loggedIn">
-		<Row class="user">
-			<Col span="5">
+		<div class="user">
+			<router-link :to="'/user/' + user.id">
 				<img :src="user.avatar || require('@/../assets/images/404.jpg')" class="avatar-small">
-			</Col>
-			<Col span="19">
 				<span class="username">{{ user.username }}</span>
-			</Col>
-		</Row>
+			</router-link>
+		</div>
 
-		<Icon type="thumbsup" size="20" color="#47dced" />
-		<span class="likes">{{ user.likesReceived | humanize }} Likes</span>
-
-		<br>
-		<Icon type="android-favorite" size="20" color="#ed4778" />
-		<span class="favorites">{{ user.favoritesReceived | humanize }} Favorites</span>
+		<div class="user-stats">
+			<Icon type="thumbsup" size="20" color="#47dced" />
+			<span class="likes">{{ user.likesReceived | humanize }} Like{{ user.likesReceived !== 1 ? 's' : '' }}</span>
+			<br />
+			<Icon type="android-favorite" size="20" color="#ed4778" />
+			<span class="favorites">{{ user.favoritesReceived | humanize }} Favorite{{ user.favoritesReceived !== 1 ? 's' : '' }}</span>
+		</div>
 	</div>
 	<div class="account-view" v-if="hasToken && loggedIn === null">
-		<div class="icon-text-wrapper user">
-			<img src="http://placehold.it/32x32" class="avatar-small">
+		<div class="user">
 			<span class="username">Loading...</span>
 		</div>
 	</div>
 	<div class="account-view" v-if="!hasToken || loggedIn === false">
-		<Form>
-			<Form-item label="Username" :style="{ marginBottom: '5px' }">
-				<Input type="text" name="login-user" placeholder="username" icon="person"></Input>
-			</Form-item>
-			<Form-item label="Password">
-				<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
-			</Form-item>
-			<Form-item :error="loginError">
-				<Button type="success" @click="login" long>Log in</Button>
+		<Form class="login-form" inline>
+			<Form-item>
+				<Input type="text" name="login-user" placeholder="username">
+					<Icon type="person" slot="prepend"></Icon>
+				</Input>
 			</Form-item>
 			<Form-item>
-				<Button type="info" @click="$router.push('/register')" long>Register</Button>
+				<Input type="password" name="login-pass" placeholder="password">
+					<Icon type="locked" slot="prepend"></Icon>
+				</Input>
+			</Form-item>
+			<Form-item>
+				<Button size="small" type="success" @click="login" long>Log in</Button>
+			</Form-item>
+			<Form-item>
+				<Button size="small" type="info" @click="$router.push('/register')" long>Register</Button>
 			</Form-item>
 		</Form>
 	</div>
@@ -61,10 +63,8 @@
 export default {
 	data() {
 		return {
-			IMAGE_BASE_URL,
 			images: [],
 			page: 1,
-			loginError: null,
 			direction: 'right',
 			hitEnd: false
 		};
@@ -82,12 +82,12 @@ export default {
 	},
 	methods: {
 		changePage(page) {
-			if (page < this.age && page !== 1)
+			if (page < this.page && page !== 1)
 				this.direction = 'left';
 			else if (page > this.page) {
 				if (page < this.images.length)
 					this.direction = 'right';
-				else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length === page) {
+				else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length <= page) {
 					this.getResults();
 					this.direction = 'right';
 				} else
@@ -102,19 +102,18 @@ export default {
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password }, { responseType: 'json' })
 
-				this.loginError = null;
 				this.$store.commit('hasToken', true);
 				localStorage.setItem('token', response.data.token);
 				this.$store.dispatch('getSelf');
 			} catch(error) {
 				if (!error.response) {
 					console.error(error.message);
-					this.loginError = 'Encountered an error';
+					this.$Message.error({ content: 'Encountered an error', duration: 3 });
 				} else if (!error.response.data.message) {
 					console.error(error.response);
-					this.loginError = 'Encountered an error';
+					this.$Message.error({ content: 'Encountered an error', duration: 3 });
 				} else
-					this.loginError = error.response.data.message;
+					this.$Message.error({ content: error.response.data.message, duration: 6 });
 			}
 		},
 		async getImages() {
@@ -122,7 +121,7 @@ export default {
 				let response = await this.$http.post(API_BASE_URL + 'images/search', {
 					sort: 'recent',
 					limit: 27,
-					skip: this.page !== 1 ? this.page * 9 : 0,
+					skip: this.page !== 1 ? (this.page - 1) * 9 : 0,
 					nsfw: this.$store.getters.NSFWImages,
 					tags: this.$store.getters.blacklist
 				}, {
@@ -158,40 +157,50 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-#base
-	display: flex
+<style lang="sass">
+#base-home
 	.account-view
 		box-sizing: border-box
-		flex-basis: 256px
-		padding: 1rem
 		box-shadow: 0 0 3px #CCC
 		border-radius: .25rem
 		font-family: 'Nunito', sans-serif
+		display: flex
+		justify-content: flex-start
 		.user
-			margin-bottom: 1rem
-			overflow: hidden
-			white-space: nowrap
-			text-overflow: ellipsis
+			padding: 1rem
+			border-right: 1px solid #ececec
+			a
+				display: block
 			.avatar-small
-				width: 32px
-				height: 32px
-				vertical-align: middle
+				width: 54px
+				height: 54px
+				vertical-align: top
+				border-radius: .25rem
+				margin-right: 1rem
 			.username
-				font-size: 1.2rem
-		.likes
-			color: #47dced
-			font-size: 20px
-			margin-left: 6px
-		.favorites
-			color: #ed4778
-			font-size: 20px
-			margin-left: 4.75px
+				font-size: 2em
+				line-height: 54px
+				color: #333942 !important
+
+		.user-stats
+			padding: 1rem
+			max-height: 86px
+			.likes
+				color: #47dced
+				font-size: 20px
+				margin-left: 6px
+			.favorites
+				color: #ed4778
+				font-size: 20px
+				margin-left: 4.75px
+
+		.login-form
+			margin: 1rem
+			.ivu-form-item
+				margin-bottom: 0
 	.images-wrapper
-		max-width: 1024px
-		flex-basis: 1024px
-		margin-left: 1rem
 		box-sizing: border-box
+		margin-top: 2rem
 		.page-wrapper
 			text-align: center
 			.page

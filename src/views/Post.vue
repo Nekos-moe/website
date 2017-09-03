@@ -1,13 +1,6 @@
 <template>
 <div id="base-post">
 	<div class="post-info" v-if="image">
-		<div id="edit-buttons" v-if="canEdit">
-			<Button :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): editMode = true">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
-			<Button v-if="editMode" type="warning" @click="updateData">Discard Changes</Button>
-			<Poptip v-if="!editMode" confirm title="Are you sure you want to delete this post?" @on-ok="deletePost" ok-text="yes" cancel-text="no" placement="bottom">
-				<Button type="error">Delete Post</Button>
-			</Poptip>
-		</div>
 		<div v-if="loggedIn" id="like-fav-buttons">
 			<Button type="text" :class="{ no: !user.likes.includes(image.id) }" @click="like"><Icon type="thumbsup" size="30" color="#47dced" /></Button>
 			<Button type="text" :class="{ no: !user.favorites.includes(image.id) }" @click="favorite"><Icon type="android-favorite" size="30" color="#ed4778" /></Button>
@@ -27,9 +20,24 @@
 		<p v-if="image.artist && !editMode"><strong>Artist:</strong> {{ image.artist }}</p>
 		<div v-if="editMode">
 			<label for="artist">Artist</label>
-			<Input name="artist" v-model="edits.artist" :value="image.artist"></Input>
+			<Input name="artist" v-model="edits.artist" :value="image.artist" />
 		</div>
-		<Tag :closable="editMode" color="blue" class="tag" type="border" @on-close="deleteTag" v-for="tag of tags" :name="tag" :key="tag">{{ tag }}</Tag>
+		<div v-if="tags && tags.length > 0 && tags[0]">
+			<Tag :closable="editMode" color="blue" class="tag" type="border" @on-close="deleteTag" v-for="tag of tags" :name="tag" :key="tag">{{ tag }}</Tag>
+		</div>
+		<p v-else>No tags</p>
+		<div class="new-tag-input-wrapper" v-if="editMode">
+			<Input placeholder="animal ears" v-model="newTag" :value="newTag" :maxlength="40">
+				<Button slot="append" size="small" @click="addTag">Add tag</Button>
+			</Input>
+		</div>
+		<div id="edit-buttons" v-if="canEdit">
+			<Button size="small" :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): editMode = true">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
+			<Button v-if="editMode" size="small" type="warning" @click="updateData">Discard Changes</Button>
+			<Poptip v-if="!editMode" confirm title="Are you sure you want to delete this post?" @on-ok="deletePost" ok-text="yes" cancel-text="no" placement="bottom">
+				<Button size="small" type="error">Delete Post</Button>
+			</Poptip>
+		</div>
 	</div>
 	<div class="image-wrapper" v-if="image">
 		<img :src="IMAGE_BASE_URL + image.id">
@@ -51,7 +59,8 @@ export default {
 				artist: null
 			},
 			likeLoading: false,
-			favoriteLoading: false
+			favoriteLoading: false,
+			newTag: ''
 		};
 	},
 	computed: {
@@ -59,7 +68,7 @@ export default {
 			return this.$store.state.user;
 		},
 		canEdit() {
-			return this.image && this.user && (this.user.roles.includes('admin') || this.user.roles.includes('editPosts') || this.image.uploader.id === this.user.id);
+			return this.image && this.loggedIn && (this.user.roles.includes('admin') || this.user.roles.includes('editPosts') || this.image.uploader.id === this.user.id);
 		},
 		loggedIn() {
 			return this.$store.state.loggedIn;
@@ -124,6 +133,12 @@ export default {
 		},
 		deleteTag(e, name) {
 			this.$parent.$delete(this.tags, this.tags.indexOf(name));
+		},
+		addTag() {
+			if (this.newTag) {
+				this.tags.push(this.newTag);
+				this.newTag = '';
+			}
 		},
 		async like() {
 			if (this.likeLoading)
@@ -193,11 +208,12 @@ export default {
 #base-post
 	display: flex
 	.post-info
-		flex-basis: 30%
+		flex-basis: 24%
 		min-width: 250px
 		#edit-buttons
-			text-align: center
-			margin-bottom: 1rem
+			margin-top: 2rem
+			display: flex
+			justify-content: space-around
 			.ivu-poptip-body
 				.ivu-icon
 					position: relative
@@ -221,8 +237,10 @@ export default {
 		label
 			font-weight: 700
 			margin-right: .5rem
+		.new-tag-input-wrapper
+			margin-top: 10px
 	.image-wrapper
-		flex-basis: 70%
+		flex-basis: 76%
 		display: flex
 		justify-content: center
 		align-items: flex-start

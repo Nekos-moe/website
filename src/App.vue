@@ -8,7 +8,7 @@
 		</transition>
 	</div>
 	<footer>
-		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com" target="_blank">Contact</a><br>
+		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com">Contact</a><br>
 		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="/api-docs/index.html" target="_blank">API docs here</a>
 	</footer>
 </div>
@@ -40,12 +40,12 @@ export default {
 			this.$Progress.finish();
 		});
 
-		if (this.$store.state.lastUpdateMessage !== 'beta4') {
+		if (this.$store.state.lastUpdateMessage !== 'beta6') {
 			this.$Modal.info({
 				title: 'New Update!',
-				content: "It's finally here! The site has been updated with a new UI using iview. With this re-design comes many quality of life improvements around the site. One of these is the ability to search images by upload date. Go ahead and browse around to see everything that's changed!"
+				content: "It's been two months since the website last got an update, so let's go over what's changed since then.<br><br>Most noticeable is that I've polished most of the pages. There's small things like moving and re-styling buttons, and then there's big changes like changing the layout of the home and image search page. Both pages now have much less wasted space. <br><br>Time for some fixes. I've fixed some annoying errors such as not being able to view posts while logged out. Sorting by likes no longer puts the most liked posts at the end. The default search order no-longer shows the oldest images on the site. Messages actually show up when you upload an image. Now you can actually add tags to a post instead of just removing them. How did I not catch any of that stuff before?<br><br>There's one more thing that anyone on a slow connection might like: <b>thumbnails</b>. When browsing images it now loads thumbnails instead of the full image. No more downloading 20MB every time you visit the site.<br><br>Anyways that's pretty much everything for this update. Enjoy the cat girls, and I'll see you next update.<br> - Brussell <small>(Lead Developer)</small>",
+				onOk: () => { this.$store.commit('lastUpdateMessage', 'beta6'); }
 			});
-			this.$store.commit('lastUpdateMessage', 'beta4');
 		}
 	}
 }
