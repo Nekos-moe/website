@@ -84,7 +84,7 @@ export default {
 				});
 
 				this.image = response.data.image;
-				this.tags = response.data.image.tags.split(',');
+				this.tags = response.data.image.tags;
 				this.edits.artist = response.data.image.artist;
 				this.edits.nsfw = response.data.image.nsfw;
 				this.editMode = false;
@@ -97,9 +97,8 @@ export default {
 			}
 		},
 		saveChanges() {
-			let tags = [...document.getElementsByClassName('ivu-tag-text')].map(e => e.innerHTML).join(',');
 			this.$http.patch(`${API_BASE_URL}images/${this.image.id}`, {
-				tags,
+				tags: this.tags.join(','),
 				artist: this.edits.artist,
 				nsfw: this.edits.nsfw
 			}, {

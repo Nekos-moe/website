@@ -10,6 +10,7 @@ import iView_locale from 'iview/src/locale/lang/en-US';
 import VueTimeago from 'vue-timeago';
 // import 'iview/dist/styles/iview.css';
 import '@/nekos-theme.less';
+import VueAnalytics from 'vue-analytics';
 
 import App from '@/App';
 import NavBar from '@/components/NavBar';
@@ -43,6 +44,11 @@ function requireAll(requireContext) {
 Vue.use(VueTimeago, {
 	locale: 'en-US',
 	locales: requireAll(require.context("vue-timeago/locales", true, /\.json$/))
+});
+
+Vue.use(VueAnalytics, {
+	id: 'UA-72190085-3',
+	router
 });
 
 const app = new Vue({

@@ -5,7 +5,7 @@
 	</div>
 	<div class="profile" v-if="profile">
 		<img :src="profile.avatar || require('@/../assets/images/404.jpg')" class="avatar-profile">
-		<p class="username">{{ profile.username }}</p>
+		<p class="username">{{ profile.username }} <Tag v-if="profile.roles && profile.roles.length" color="green">{{ profile.roles[0] | deCamelCase }}</Tag></p>
 		<div class="icon-text-container">
 			<Icon type="thumbsup" size="20" color="#47dced" />
 			<span class="likes">{{ profile.likesReceived | humanize }} Likes</span>
@@ -242,6 +242,8 @@ export default {
 		.username
 			margin: 1rem
 			font-size: 2rem
+			.ivu-tag
+				vertical-align: baseline
 		.info
 			margin-top: 5px
 	.images-wrapper

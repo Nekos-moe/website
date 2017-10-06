@@ -12,6 +12,7 @@
 		<input type="file" id="image" accept=".png,.jpg,.jpeg" @change="previewImage">
 		<button :class="{ 'has-image': hasImage }" id="image-select" @click="clickImage">Select Image</button>
 		<p :class="{ 'has-image': hasImage }" id="image-details"></p>
+		<p v-show="smallSize" id="small-size-warning">This image is less than 100 KB.<br>Are you sure it matches our uploading guidelines?</p>
 	</div>
 	<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
 	<div class="import">
@@ -19,22 +20,24 @@
 		<Input v-show="promptingUser" class="input" name="import-id" number placeholder="Post ID" value="" @enter="importTags" size="large"></Input>
 		<Button v-show="promptingUser" @click="importTags">Import</Button>
 	</div>
-	<Form ref="details" :model="details" label-position="left" class="details">
-		<Form-item label="Tags">
+	<Form ref="details" :model="details" :rules="rules" label-position="left" class="details">
+		<Form-item label="Tags" prop="tags">
 			<p style="font-size: 14px; clear: both; display: block; line-height: 16px; margin-bottom: 8px">Seperate with a comma. Use spaces, not underscores or dashes</p>
 			<Input v-model="details.tags" type="textarea" placeholder="cat girls, best girls" autosize></Input>
 		</Form-item>
-		<Form-item label="Artist">
+		<Form-item label="Artist" prop="artist">
 			<p style="font-size: 14px; clear: both; display: block; line-height: 16px; margin-bottom: 8px">Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</p>
 			<Input v-model="details.artist" placeholder="Artist" icon="paintbrush"></Input>
 		</Form-item>
-		<Form-item label="Adult content?" label-position="right">
+		<Form-item label="Adult content?" label-position="right" prop="nsfw">
 			<i-switch v-model="details.nsfw" value="details.nsfw" size="large">
 				<span slot="open">Yes</span>
 				<span slot="close">No</span>
 			</i-switch>
 		</Form-item>
-		<Button type="success" @click="upload()" long>Upload</Button>
+		<Form-item>
+			<Button type="success" @click="upload()" long>Upload</Button>
+		</Form-item>
 	</Form>
 </div>
 </template>
@@ -50,9 +53,13 @@ export default {
 				artist: '',
 				nsfw: false
 			},
+			rules: {
+				tags: [{ required: true, whitespace: true, message: 'All posts require tags', trigger: 'blur' }],
+			},
 			successModal: false,
 			dupeModal: false,
-			modalLinkId: ''
+			modalLinkId: '',
+			smallSize: false
 		};
 	},
 	computed: {
@@ -125,6 +132,7 @@ export default {
 			document.getElementById('image').click();
 		},
 		previewImage(e) {
+			this.smallSize = false;
 			if (!e.target.files || !e.target.files[0]) {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
@@ -139,8 +147,11 @@ export default {
 			size = size / 1024;
 			if (size >= 1024)
 				size = (size / 1024).toFixed(2) + ' MB';
-			else
+			else {
+				if (size <= 100)
+					this.smallSize = true;
 				size = size.toFixed(2) + ' KB';
+			}
 
 			reader.onload = result => {
 				setTimeout(() => {
@@ -165,7 +176,7 @@ export default {
 
 				this.details.tags = response.data.tag_string
 					.replace(response.data.tag_string_artist, '')
-					.replace(/(md5 mismatch|commentary request|commentary|translation request|translated|check translation|translation check|translation note|copyright ?\w*)/g, '') // remove unwanted tags
+					.replace(/(md5_mismatch|commentary_request|commentary|translation_request|translated|check_translation|translation_check|translation_note|copyright_?[\w_]*)/g, '') // remove unwanted tags
 					.replace(/ +/g, ', ');
 				this.details.artist = response.data.tag_string_artist;
 				id.value = null;
@@ -184,7 +195,7 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
+<style lang="sass">
 #base-upload
 	& > *
 		margin: auto
@@ -203,6 +214,7 @@ export default {
 	.image-picker
 		margin: 2rem auto
 		text-align: center
+		font-family: 'Nunito', sans-serif
 		button
 			margin: auto
 			padding: 10px
@@ -229,70 +241,58 @@ export default {
 					text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000
 		#image
 			display: none
-		p
+		#image-details
 			display: none
-			font-family: 'Nunito', sans-serif
 			color: #444
 			&.has-image
 				display: block
+		#small-size-warning
+			color: #ff3300
 
-.form
-	margin: 1rem auto auto
-	width: 40%
-	min-width: 300px
-	color: #222
-	font-family: 'Nunito', sans-serif
-	h4
-		text-align: center
-		font-size: 2rem
-		margin: 1rem
-	input:not([type="checkbox"]), button
-		display: block
-	input[type="checkbox"]
-		width: auto
-		vertical-align: middle
-		margin-left: 5px
-		margin-top: 1rem
-	input, textarea
-		margin: .5rem 0 1rem 0
-		padding: 4px 8px
+	.details
 		width: 100%
+		max-width: 400px
+		margin: 2rem auto auto
+		color: #222
 		font-family: 'Nunito', sans-serif
-		font-size: 14px
-		border: 1px solid #CCC
-		border-radius: 3px
-		outline: #4ACFFF auto 0
-		&:focus
-			border-color: #4ACFFF
-			outline: #4ACFFF auto 5px
-	textarea
-		height: 68px
-		resize: vertical
-	button
-		margin: .5rem auto
-		padding: 5px 10px
-		cursor: pointer
-		font-family: 'Nunito', sans-serif
-		font-size: 18px
-		color: #FFF
-		background-color: #4ACFFF
-		box-shadow: 0 0 3px rgba(#4ACFFF, .4)
-		border: none
-		border-radius: 3px
-		transition: background .3s
-		&:hover, &:focus
-			background: darken(#4ACFFF, 15)
-	.import
-		margin: .5rem 0 1rem 0
-		display: flex
-		align-items: center
-		*
-			margin: 0
-			display: inline-block
+		h4
+			text-align: center
+			font-size: 2rem
+			margin: 1rem
+		input:not([type="checkbox"]), button
+			display: block
+		input[type="checkbox"]
+			width: auto
+			vertical-align: middle
+			margin-left: 5px
+			//margin-top: 1rem
+		input, textarea
+			//margin: .5rem 0 1rem 0
+			padding: 4px 8px
+			width: 100%
+			font-family: 'Nunito', sans-serif
+			font-size: 14px
+			border: 1px solid #CCC
+			border-radius: 3px
+			outline: #4ACFFF auto 0
+			&:focus
+				border-color: #4ACFFF
+				outline: #4ACFFF auto 5px
+		textarea
+			height: 68px
+			resize: vertical
 		button
-			font-size: 17px
-			padding: 3px 8px
-		input
-			margin-right: .5rem
-			width: 100px
+			margin: .5rem auto
+			padding: 5px 10px
+			cursor: pointer
+			font-family: 'Nunito', sans-serif
+			font-size: 18px
+			color: #FFF
+			background-color: #96abec
+			box-shadow: 0 0 3px rgba(#96abec, .4)
+			border: none
+			border-radius: 3px
+			transition: background .3s
+			&:hover, &:focus
+				background: darken(#96abec, 5)
 </style>

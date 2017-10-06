@@ -8,7 +8,7 @@
 			<strong>Likes:</strong> {{ image.likes | humanize }}
 		</p>
 		<p v-if="image.artist"><strong>Artist:</strong> {{ image.artist }}</p>
-		<p><strong>Tags:</strong> {{ image.tags.replace(/,/g, ', ') }}</p>
+		<p><strong>Tags:</strong> {{ image.tags.join(', ') }}</p>
 	</router-link>
 </div>
 </template>

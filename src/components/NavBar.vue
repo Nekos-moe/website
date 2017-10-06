@@ -2,6 +2,7 @@
 <div id="navbar">
 	<Menu class="navbar" mode="horizontal" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
 		<div class="navbar-user">
+			<Menu-item v-if="loggedIn && user.roles.includes('admin')" name="/admin" class="admin">Admin Superpowers</Menu-item>
 			<Menu-item v-if="loggedIn" :name="'/user/' + user.id">Profile</Menu-item>
 			<Menu-item v-if="loggedIn" name="/settings">Settings</Menu-item>
 			<Menu-item v-if="loggedIn" name="/logout">Logout</Menu-item>
@@ -108,6 +109,10 @@ export default {
 				font-size: 1.25rem
 			img
 				height: 60px
+			.admin
+				background: #ff9900
+				&:hover
+					background: darken(#ff9900, 5)
 
 	.navbar-mobile
 		background: #96abec
