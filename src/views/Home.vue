@@ -81,16 +81,11 @@ export default {
 		}
 	},
 	methods: {
-		changePage(page) {
-			if (page < this.page && page !== 1)
-				this.direction = 'left';
-			else if (page > this.page) {
-				if (page < this.images.length)
-					this.direction = 'right';
-				else if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length <= page) {
-					this.getResults();
-					this.direction = 'right';
-				} else
+		async changePage(page) {
+			if (page > this.page) {
+				if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length <= page)
+					await this.getImages();
+				else if (page >= this.images.length)
 					this.hitEnd = true
 			}
 			this.page = page;
@@ -121,7 +116,7 @@ export default {
 				let response = await this.$http.post(API_BASE_URL + 'images/search', {
 					sort: 'recent',
 					limit: 27,
-					skip: this.page !== 1 ? (this.page - 1) * 9 : 0,
+					skip: this.page !== 1 ? (this.page + 1) * 9 : 0,
 					nsfw: this.$store.getters.NSFWImages,
 					tags: this.$store.getters.blacklist
 				}, {

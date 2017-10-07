@@ -5,7 +5,12 @@
 	</div>
 	<div class="profile" v-if="profile">
 		<img :src="profile.avatar || require('@/../assets/images/404.jpg')" class="avatar-profile">
-		<p class="username">{{ profile.username }} <Tag v-if="profile.roles && profile.roles.length" color="green">{{ profile.roles[0] | deCamelCase }}</Tag></p>
+		<p class="username">{{ profile.username }} <Tag v-if="profile.roles && profile.roles.length" color="green" :closable="editingRoles" @on-close="revokeRole" :name="profile.roles[0]">{{ profile.roles[0] | deCamelCase }}</Tag> <Button v-if="user && user.roles && user.roles.includes('admin')" type="warning" size="small" @click="editingRoles = !editingRoles">{{ editingRoles ? 'Stop editing roles' : 'Edit roles' }}</Button></p>
+		<div class="new-role-input-wrapper" v-if="editingRoles">
+			<Input placeholder="Role" v-model="newRole">
+				<Button slot="append" size="small" @click="grantRole">Grant</Button>
+			</Input>
+		</div>
 		<div class="icon-text-container">
 			<Icon type="thumbsup" size="20" color="#47dced" />
 			<span class="likes">{{ profile.likesReceived | humanize }} Likes</span>
@@ -48,7 +53,9 @@ export default {
 			direction: 'right',
 			profile: null,
 			mode: 'uploads',
-			hitEnd: false
+			hitEnd: false,
+			editingRoles: false,
+			newRole: ''
 		};
 	},
 	computed: {
@@ -191,6 +198,50 @@ export default {
 				this.getUploads();
 			else
 				this.getImages();
+		},
+		async revokeRole(e, name) {
+			try {
+				let resp = await this.$http.patch(`${API_BASE_URL}user/${this.profile.id}/roles`, {
+					action: 'revoke',
+					role: name
+				}, { headers: { 'Authorization': localStorage.getItem('token') } });
+
+				this.$parent.$delete(this.profile.roles, this.profile.roles.indexOf(name));
+				return this.$Notice.success({
+					title: 'Role Revoked',
+					desc: `The role "${name}" has been revoked from ${this.profile.username}`
+				});
+			} catch (error) {
+				console.error(error);
+				return this.$Notice.error({
+					title: 'Error Revoking Role',
+					desc: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
+			}
+
+		},
+		async grantRole() {
+			try {
+				let resp = await this.$http.patch(`${API_BASE_URL}user/${this.profile.id}/roles`, {
+					action: 'grant',
+					role: this.newRole
+				}, { headers: { 'Authorization': localStorage.getItem('token') } });
+
+				this.$Notice.success({
+					title: 'Role Granted',
+					desc: `The role "${this.newRole}" has been granted to ${this.profile.username}`
+				});
+
+				this.profile.roles.push(this.newRole);
+				this.newRole = '';
+				return null;
+			} catch (error) {
+				console.error(error);
+				return this.$Notice.error({
+					title: 'Error Granting Role',
+					desc: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				});
+			}
 		}
 	},
 	async mounted() {
@@ -243,7 +294,16 @@ export default {
 			margin: 1rem
 			font-size: 2rem
 			.ivu-tag
-				vertical-align: baseline
+				position: relative
+				top: -3px
+				&:first-of-type
+					margin-left: 10px
+			.ivu-btn
+				position: relative
+				top: -3px
+		.new-role-input-wrapper
+			margin: 0 auto 20px
+			width: 256px
 		.info
 			margin-top: 5px
 	.images-wrapper

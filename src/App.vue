@@ -80,7 +80,7 @@ footer
 	margin-bottom: 10px
 	height: 32px
 
-.ivu-btn
+.ivu-btn:not(.ivu-btn-small)
 	font-size: 1rem
 
 .ivu-form .ivu-form-item-label
