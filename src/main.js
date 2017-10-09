@@ -11,14 +11,18 @@ import VueTimeago from 'vue-timeago';
 // import 'iview/dist/styles/iview.css';
 import '@/nekos-theme.less';
 import VueAnalytics from 'vue-analytics';
+import Buefy from 'buefy'
+//import 'buefy/lib/buefy.css'
 
 import App from '@/App';
 import NavBar from '@/components/NavBar';
+import NavBarBue from '@/components/NavBarBue';
 import ImagePreview from '@/components/ImagePreview';
 
 Vue.config.productionTip = false;
 
 Vue.use(iView, { locale: iView_locale });
+Vue.use(Buefy);
 Vue.use(VueProgressBar, {
 	color: '#2de58c',
 	failedColor: 'red',
@@ -32,6 +36,7 @@ Object.keys(filters).forEach(key => {
 });
 
 Vue.component('NavBar', NavBar);
+Vue.component('NavBarBue', NavBarBue);
 Vue.component('ImagePreview', ImagePreview);
 
 function requireAll(requireContext) {

@@ -108,8 +108,8 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
-				this.details.tags = undefined;
-				this.details.artist = undefined;
+				this.details.tags = '';
+				this.details.artist = '';
 				this.details.nsfw = false;
 
 				this.modalLinkId = response.data.image.id;

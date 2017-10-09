@@ -8,6 +8,7 @@ import SearchUsers from '@/views/SearchUsers';
 import Upload from '@/views/Upload';
 import UploadingGuidelines from '@/views/UploadingGuidelines';
 import Post from '@/views/Post';
+import PendingPosts from '@/views/PendingPosts';
 import Profile from '@/views/Profile';
 import Settings from '@/views/Settings';
 import Login from '@/views/Login';
@@ -51,6 +52,16 @@ const routes = [
 		path: '/post/:id',
 		name: 'post',
 		component: Post
+	},
+	{
+		path: '/pending',
+		name: 'pending',
+		component: PendingPosts,
+		beforeEnter(to, from, next) {
+			if (store.state.hasToken)
+				return next();
+			return next('/login');
+		}
 	},
 	{
 		path: '/user/:id',

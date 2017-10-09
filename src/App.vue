@@ -1,7 +1,7 @@
 <template>
 <div id="app">
 	<vue-progress-bar></vue-progress-bar>
-	<nav-bar></nav-bar>
+	<nav-bar-bue></nav-bar-bue>
 	<div class="body-wrapper">
 		<transition name="fade" mode="out-in">
 			<router-view></router-view>
@@ -52,6 +52,22 @@ export default {
 </script>
 
 <style lang="sass">
+@import "~bulma/sass/utilities/_all"
+
+$primary: #96abec
+$primary-invert: findColorInvert($primary)
+
+// Setup $colors to use as bulma classes
+$colors: (white: ($white, $black), black: ($black, $white), light: ($light, $light-invert), dark: ($dark, $dark-invert), primary: ($primary, $primary-invert), info: ($info, $info-invert), success: ($success, $success-invert), warning: ($warning, $warning-invert), danger: ($danger, $danger-invert))
+
+// Links
+$link: $primary
+$link-invert: $primary-invert
+$link-focus-border: $primary
+
+@import "~bulma"
+@import "~buefy/src/scss/buefy"
+
 body
 	font-size: 100%
 
@@ -69,7 +85,7 @@ body
 		border-radius: .25rem
 		padding: 1rem 2rem
 
-footer
+#app > footer
 	text-align: center
 	color: #777
 	font-family: 'Nunito', sans-serif

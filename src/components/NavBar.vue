@@ -1,15 +1,15 @@
 <template>
 <div id="navbar">
-	<Menu class="navbar" mode="horizontal" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
+	<Menu class="_navbar" mode="horizontal" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
 		<div class="navbar-user">
-			<Menu-item v-if="loggedIn && user.roles.includes('admin')" name="/admin" class="admin">Admin Superpowers</Menu-item>
+			<Menu-item v-if="loggedIn && (user.roles.includes('admin') || user.roles.includes('approver') )" name="/pending">Pending Posts</Menu-item>
 			<Menu-item v-if="loggedIn" :name="'/user/' + user.id">Profile</Menu-item>
 			<Menu-item v-if="loggedIn" name="/settings">Settings</Menu-item>
 			<Menu-item v-if="loggedIn" name="/logout">Logout</Menu-item>
 			<img v-if="loggedIn" :src="user.avatar || require('@/../assets/images/404.jpg')">
 			<Menu-item v-if="!loggedIn" name="/login">Login</Menu-item>
 		</div>
-		<h1 class="navbar-brand">Catgirls</h1>
+		<h1 class="_navbar-brand">Catgirls</h1>
 		<div class="navbar-nav">
 			<Menu-item name="/">Home</Menu-item>
 			<Submenu name="search">
@@ -21,9 +21,9 @@
 		</div>
 	</Menu>
 
-	<Menu class="navbar-mobile" mode="vertical" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
+	<Menu class="_navbar-mobile" mode="vertical" theme="primary" :active-name="$router.currentRoute.path" @on-select="navigate">
 		<Button icon="navicon-round" size="large" type="text" class="toggle" @click="showNav = !showNav"></Button>
-		<h1 class="navbar-brand">Catgirls</h1>
+		<h1 class="_navbar-brand">Catgirls</h1>
 		<div class="navbar-nav" v-show="showNav">
 			<Menu-item name="/">Home</Menu-item>
 			<Submenu name="search">
@@ -74,20 +74,22 @@ export default {
 	font-family: 'Nunito', sans-serif
 
 	@media (max-width: 960px)
-		.navbar
+		._navbar
 			display: none
 
 	@media (min-width: 961px)
-		.navbar-mobile
+		._navbar-mobile
 			display: none
 
-	.navbar
+	._navbar
 		box-shadow: 0 0 3px #464c5b
-		.navbar-brand
+		._navbar-brand
 			float: left
 			margin-right: 40px
 			color: #FFF
 			margin-left: 1.5rem
+			font-size: 2em
+			font-weight: bold
 		.navbar-nav
 			.ivu-menu-item, .ivu-menu-submenu
 				float: none
@@ -125,7 +127,7 @@ export default {
 			color: #FFF !important
 			i
 				font-size: 30px
-		.navbar-brand
+		._navbar-brand
 			color: #FFF
 			font-size: 2rem
 		.navbar-nav

@@ -1,6 +1,6 @@
 {
 	"name": "catgirls-website",
-	"version": "0.10.1",
+	"version": "0.11.0",
 	"description": "A website filled with catgirls",
 	"author": "brussell98",
 	"license": "MIT",
@@ -23,7 +23,8 @@
 		"vue-router": "^2.7.0",
 		"vuex": "^2.4.0",
 		"vue-timeago": "^3.3.6",
-		"vue-analytics": "^5.1.1"
+		"vue-analytics": "^5.1.1",
+		"buefy": "^0.5.3"
 	},
 	"devDependencies": {
 		"autoprefixer": "^7.1.2",
