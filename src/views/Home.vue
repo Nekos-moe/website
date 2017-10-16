@@ -21,39 +21,61 @@
 			<span class="username">Loading...</span>
 		</div>
 	</div>
-	<div class="account-view" v-if="!hasToken || loggedIn === false">
-		<Form class="login-form" inline>
-			<Form-item>
-				<Input type="text" name="login-user" placeholder="username">
-					<Icon type="person" slot="prepend"></Icon>
-				</Input>
-			</Form-item>
-			<Form-item>
-				<Input type="password" name="login-pass" placeholder="password">
-					<Icon type="locked" slot="prepend"></Icon>
-				</Input>
-			</Form-item>
-			<Form-item>
-				<Button size="small" type="success" @click="login" long>Log in</Button>
-			</Form-item>
-			<Form-item>
-				<Button size="small" type="info" @click="$router.push('/register')" long>Register</Button>
-			</Form-item>
-		</Form>
-	</div>
-	<div class="images-wrapper">
-		<div class="page-wrapper">
-			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
+
+	<div class="post-grid-wrapper">
+		<div class="pagination-wrapper top">
+			<b-pagination
+				:total="hitEnd ? posts.length : posts.length + 1"
+				:current="page"
+				order="is-centered"
+				:per-page="1"
+				@change="changePage">
+			</b-pagination>
 		</div>
-		<div class="images">
-			<transition-group name="slide-in">
-				<div class="image-page" v-for="(im, i) of images" v-show="i === page - 1" v-if="Math.abs(i - (page - 1)) < 2" :key="i">
-					<image-preview v-for="image of im" :image="image" :key="image.id"></image-preview>
+		<transition-group name="slide-in">
+			<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
+				<div class="columns is-multiline is-centered">
+					<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
+						<div class="card" :id="'post-' + post.id">
+							<div class="card-image">
+								<figure class="image">
+									<img :src="THUMBNAIL_BASE_URL + post.id">
+								</figure>
+							</div>
+							<div class="card-content">
+								<div class="media">
+									<div class="media-left">
+										<figure class="image is-48x48">
+											<img class="avatar" :src="user.avatar || require('@/../assets/images/404.jpg')">
+										</figure>
+									</div>
+									<div class="media-content">
+										<p class="title is-5"><router-link :to="'/user/' + post.uploader.id" :class="{ 'has-text-danger': post.nsfw }">{{ post.uploader.username }}</router-link></p>
+										<p class="subtitle is-6">{{ new Date(post.createdAt).toLocaleString() }}</p>
+									</div>
+								</div>
+
+								<p>Artist: {{ post.artist || 'Unknown' }}</p>
+								<b-tag v-for="(tag, i) of post.tags" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
+							</div>
+							<footer class="card-footer">
+								<router-link class="card-footer-item has-text-success" :to="'/post/' + post.id">View</router-link>
+								<a v-if="loggedIn" @click="like(post.id)" class="card-footer-item">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
+								<a v-if="loggedIn" @click="like(post.id, 'favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
+							</footer>
+						</div>
+					</div>
 				</div>
-			</transition-group>
-		</div>
-		<div class="page-wrapper">
-			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? images.length : images.length + 1" @on-change="changePage"></Page>
+			</div>
+		</transition-group>
+		<div class="pagination-wrapper bottom">
+			<b-pagination
+				:total="hitEnd ? posts.length : posts.length + 1"
+				:current="page"
+				order="is-centered"
+				:per-page="1"
+				@change="changePage">
+			</b-pagination>
 		</div>
 	</div>
 </div>
@@ -63,9 +85,9 @@
 export default {
 	data() {
 		return {
-			images: [],
+			THUMBNAIL_BASE_URL,
+			posts: [],
 			page: 1,
-			direction: 'right',
 			hitEnd: false
 		};
 	},
@@ -83,33 +105,12 @@ export default {
 	methods: {
 		async changePage(page) {
 			if (page > this.page) {
-				if (this.images.length !== 0 && this.images.length % 3 === 0 && this.images[this.images.length - 1].length % 9 === 0 && this.images.length <= page)
+				if (this.posts.length !== 0 && this.posts.length % 3 === 0 && this.posts[this.posts.length - 1].length % 9 === 0 && this.posts.length <= page)
 					await this.getImages();
-				else if (page >= this.images.length)
+				else if (page >= this.posts.length)
 					this.hitEnd = true
 			}
 			this.page = page;
-		},
-		async login() {
-			let username = document.getElementsByName('login-user')[0].value,
-				password = document.getElementsByName('login-pass')[0].value;
-
-			try {
-				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password }, { responseType: 'json' })
-
-				this.$store.commit('hasToken', true);
-				localStorage.setItem('token', response.data.token);
-				this.$store.dispatch('getSelf');
-			} catch(error) {
-				if (!error.response) {
-					console.error(error.message);
-					this.$Message.error({ content: 'Encountered an error', duration: 3 });
-				} else if (!error.response.data.message) {
-					console.error(error.response);
-					this.$Message.error({ content: 'Encountered an error', duration: 3 });
-				} else
-					this.$Message.error({ content: error.response.data.message, duration: 6 });
-			}
 		},
 		async getImages() {
 			try {
@@ -117,7 +118,7 @@ export default {
 					sort: 'recent',
 					limit: 27,
 					skip: this.page !== 1 ? (this.page + 1) * 9 : 0,
-					nsfw: this.$store.getters.NSFWImages,
+					nsfw: undefined, //this.$store.getters.NSFWImages,
 					tags: this.$store.getters.blacklist
 				}, {
 					responseType: 'json',
@@ -130,18 +131,41 @@ export default {
 					this.hitEnd = true;
 				else {
 					while (response.data.images.length > 0)
-						this.images.push(response.data.images.splice(0, 9));
+						this.posts.push(response.data.images.splice(0, 9));
 
-					if (this.images[this.images.length - 1].length !== 9)
+					if (this.posts[this.posts.length - 1].length !== 9)
 						this.hitEnd = true;
 				}
 
 				return response;
-			} catch(error) {
+			} catch (error) {
 				console.error(error);
-				this.$Modal.error({
-					title: 'Error Requesting Image Data',
-					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error getting posts',
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
+				});
+			}
+		},
+		async like(id, type = 'likes') {
+			try {
+				await this.$http.patch(`${API_BASE_URL}image/${id}/relationship`, {
+					type: type.slice(0, -1),
+					create: !this.user[type].includes(id)
+				}, { headers: { 'Authorization': localStorage.getItem('token') } });
+
+				if (this.user[type].includes(id))
+					this.user[type].splice(this.user[type].indexOf(id), 1);
+				else
+					this.user[type].push(id);
+			} catch (error) {
+				console.error(error);
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error updating image relationship',
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
 				});
 			}
 		}
@@ -193,27 +217,41 @@ export default {
 			margin: 1rem
 			.ivu-form-item
 				margin-bottom: 0
-	.images-wrapper
-		box-sizing: border-box
-		margin-top: 2rem
-		.page-wrapper
-			text-align: center
-			.page
-				display: inline-block
-		.image-page
-			display: flex
-			flex-wrap: wrap
-			justify-content: space-around
-			&.slide-in-leave-active > div
-				animation: slide-out-bck-center 0.4s cubic-bezier(0.550, 0.085, 0.680, 0.530) both
 
-		// Once other element leaves, enter new element
-		.image-page:not(.slide-in-leave-active) + .image-page, .image-page:first-of-type
-			div
-				animation: slide-in-fwd-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
+	.post-grid-wrapper
+		.pagination-wrapper
+			margin: auto
+			max-width: 390px
+			&.top
+				margin: 16px auto
+			&.bottom
+				margin-top: 16px
+		.page
+			.columns
+				.column
+					.card-image
+						img
+							max-height: 420px
+							width: auto
+							margin: 0 auto
+					.card-content
+						padding: 1rem
+						.avatar
+							border-radius: 2px
+						.tag
+							margin: 2px
+							& + div.field
+								margin-top: 12px
+					footer
+						margin: 0
+						font-weight: bold
 
-		// Hide entering element until other leaves
-		.slide-in-leave-active + .image-page, .image-page + .slide-in-leave-active
-			display: none
+	// Once other element leaves, enter new element
+	.page:not(.slide-in-leave-active) + .page, .page:first-of-type
+		div
+			animation: slide-in-fwd-center 0.25s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
 
+	// Hide entering element until other leaves
+	.slide-in-leave-active + .page, .page + .slide-in-leave-active
+		display: none
 </style>

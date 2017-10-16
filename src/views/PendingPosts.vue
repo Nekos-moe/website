@@ -1,52 +1,70 @@
 <template>
 <div id="base-pending">
 	<div class="post-grid-wrapper">
-		<div class="page" v-for="(page, i) of posts" :key="i"><!-- add v-if -->
-			<div class="columns is-centered" v-for="(row, i2) of page" :key="i2">
-				<div class="column is-one-third" v-for="(post, i3) of row" :key="i3">
-					<div class="card" :id="'post-' + post.id">
-						<div class="card-image">
-							<figure class="image">
-								<img :src="THUMBNAIL_BASE_URL + post.id">
-							</figure>
-						</div>
-						<div class="card-content">
-							<div class="media">
-								<div class="media-left">
-									<figure class="image is-48x48">
-										<img class="avatar" :src="user.avatar || require('@/../assets/images/404.jpg')">
-									</figure>
-								</div>
-								<div class="media-content">
-									<p class="title is-5"><router-link :to="'/user/' + post.uploader.id" :class="{ 'has-text-danger': post.nsfw }">{{ post.uploader.username }}</router-link></p>
-									<p class="subtitle is-6">{{ new Date(post.createdAt).toLocaleString() }}</p>
-								</div>
+		<div class="pagination-wrapper top">
+			<b-pagination
+				:total="posts.length"
+				:current.sync="page"
+				order="is-centered"
+				:per-page="1">
+			</b-pagination>
+		</div>
+		<transition-group name="slide-in">
+			<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
+				<div class="columns is-multiline is-centered">
+					<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
+						<div class="card" :id="'post-' + post.id">
+							<div class="card-image">
+								<figure class="image">
+									<img :src="THUMBNAIL_BASE_URL + post.id">
+								</figure>
 							</div>
+							<div class="card-content">
+								<div class="media">
+									<div class="media-left">
+										<figure class="image is-48x48">
+											<img class="avatar" :src="user.avatar || require('@/../assets/images/404.jpg')">
+										</figure>
+									</div>
+									<div class="media-content">
+										<p class="title is-5"><router-link :to="'/user/' + post.uploader.id" :class="{ 'has-text-danger': post.nsfw }">{{ post.uploader.username }}</router-link></p>
+										<p class="subtitle is-6">{{ new Date(post.createdAt).toLocaleString() }}</p>
+									</div>
+								</div>
 
-							<p v-show="currentlyEditing !== post.id">Artist: {{ post.artist || 'Unknown' }}</p>
-							<div class="field" v-if="currentlyEditing === post.id">Artist: <b-input v-model="post.artist" :value="post.artist || ''" size="is-small"></b-input></div>
-							<div class="field" v-if="currentlyEditing === post.id"><b-switch :value="post.nsfw" v-model="post.nsfw" type="is-danger">Adult Content</b-switch></div>
-							<b-tag
-								v-for="(tag, i) of post.tags"
-								:key="i"
-								:type="post.nsfw ? 'is-danger' : 'is-primary'"
-								:closable="currentlyEditing === post.id"
-								@close="removeTag(post, tag)"
-							>{{ tag }}</b-tag>
-							<b-field v-if="currentlyEditing === post.id">
-								<b-input v-model="newTag" size="is-small" expanded></b-input>
-								<p class="control"><button class="button is-primary is-small" :class="{ 'is-danger': post.nsfw }" @click="addTag(post)">Add tag</button></p>
-							</b-field>
+								<p v-show="currentlyEditing !== post.id">Artist: {{ post.artist || 'Unknown' }}</p>
+								<div class="field" v-if="currentlyEditing === post.id">Artist: <b-input v-model="post.artist" :value="post.artist || ''" size="is-small"></b-input></div>
+								<div class="field" v-if="currentlyEditing === post.id"><b-switch :value="post.nsfw" v-model="post.nsfw" type="is-danger">Adult Content</b-switch></div>
+								<b-tag
+									v-for="(tag, i) of post.tags"
+									:key="i"
+									:type="post.nsfw ? 'is-danger' : 'is-primary'"
+									:closable="currentlyEditing === post.id"
+									@close="removeTag(post, tag)"
+								>{{ tag }}</b-tag>
+								<b-field v-if="currentlyEditing === post.id">
+									<b-input v-model="newTag" size="is-small" expanded></b-input>
+									<p class="control"><button class="button is-primary is-small" :class="{ 'is-danger': post.nsfw }" @click="addTag(post)">Add tag</button></p>
+								</b-field>
+							</div>
+							<footer class="card-footer">
+								<a v-show="currentlyEditing !== post.id" @click="approve(post.id)" class="card-footer-item has-text-success">Approve</a>
+								<a @click="currentlyEditing === post.id ? saveChanges(post) : edit(post.id)" class="card-footer-item" :class="{ 'has-text-success': currentlyEditing === post.id }">{{ currentlyEditing === post.id ? 'Save changes' : 'Edit' }}</a>
+								<a v-show="currentlyEditing === post.id" @click="discard(post, post.id)" class="card-footer-item has-text-danger">Discard changes</a>
+								<a v-show="currentlyEditing !== post.id" @click="deny(post.id)" class="card-footer-item has-text-danger">Deny</a>
+							</footer>
 						</div>
-						<footer class="card-footer">
-							<a v-show="currentlyEditing !== post.id" @click="approve(post.id)" class="card-footer-item has-text-success">Approve</a>
-							<a @click="currentlyEditing === post.id ? saveChanges() : edit(post.id)" class="card-footer-item" :class="{ 'has-text-success': currentlyEditing === post.id }">{{ currentlyEditing === post.id ? 'Save changes' : 'Edit' }}</a>
-							<a v-show="currentlyEditing === post.id" @click="discard(post.id)" class="card-footer-item has-text-danger">Discard changes</a>
-							<a v-show="currentlyEditing !== post.id" @click="deny(post.id)" class="card-footer-item has-text-danger">Deny</a>
-						</footer>
 					</div>
 				</div>
 			</div>
+		</transition-group>
+		<div class="pagination-wrapper bottom">
+			<b-pagination
+				:total="posts.length"
+				:current.sync="page"
+				order="is-centered"
+				:per-page="1">
+			</b-pagination>
 		</div>
 	</div>
 </div>
@@ -78,13 +96,8 @@ export default {
 					headers: { 'Authorization': localStorage.getItem('token') }
 				});
 
-				while (response.data.images.length > 0) {
-					let page = [];
-					while (page.length < 3 && response.data.images.length > 0)
-						page.push(response.data.images.splice(0, 3))
-
-					this.posts.push(page);
-				}
+				while (response.data.images.length > 0)
+					this.posts.push(response.data.images.splice(0, 9));
 
 				this.$Progress.finish();
 
@@ -92,27 +105,20 @@ export default {
 			} catch (error) {
 				this.$Progress.fail();
 				console.error(error);
-				return this.$Modal.error({
-					title: 'Error Getting Pending Posts',
-					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error getting pending posts',
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
 				});
 			}
 		},
-		async saveChanges() {
+		async saveChanges(post) {
 			if (!this.currentlyEditing)
 				return null;
 
 			try {
-				let post = null;
-				this.posts.find(p => p.find(r => r.find(i => {
-					if (i.id === this.currentlyEditing) {
-						post = i;
-						return true;
-					}
-					return false;
-				})));
-
-				let resp = await this.$http.patch(API_BASE_URL + 'images/' + this.currentlyEditing, {
+				let resp = await this.$http.patch(API_BASE_URL + 'images/' + post.id, {
 					tags: post.tags,
 					artist: post.artist,
 					nsfw: post.nsfw,
@@ -161,29 +167,22 @@ export default {
 			if (!this.currentlyEditing)
 				return null;
 
-			this.$delete(post.tags, post.tags.indexOf(tag));
+			return this.$delete(post.tags, post.tags.indexOf(tag));
 		},
-		async discard(id) {
+		async discard(post, id) {
 			try {
 				let response = await this.$http.get(`${API_BASE_URL}images/${id}`, { headers: { 'Authorization': localStorage.getItem('token') } });
-
-				let post = null;
-				this.posts.find(p => p.find(r => r.find(i => {
-					if (i.id === this.currentlyEditing) {
-						post = i;
-						return true;
-					}
-					return false;
-				})));
 
 				post.tags = response.data.image.tags;
 				post.artist = response.data.image.artist;
 				post.nsfw = response.data.image.nsfw;
 			} catch(error) {
 				console.error(error);
-				this.$Modal.error({
-					title: 'Error Requesting Image Data',
-					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error getting post data',
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
 				});
 			}
 
@@ -206,6 +205,13 @@ export default {
 <style lang="sass">
 #base-pending
 	.post-grid-wrapper
+		.pagination-wrapper
+			margin: auto
+			max-width: 390px
+			&.top
+				margin-bottom: 16px
+			&.bottom
+				margin-top: 16px
 		.page
 			.columns
 				.column
@@ -225,5 +231,14 @@ export default {
 					footer
 						margin: 0
 						font-weight: bold
+
+	// Once other element leaves, enter new element
+	.page:not(.slide-in-leave-active) + .page, .page:first-of-type
+		div
+			animation: slide-in-fwd-center 0.25s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
+
+	// Hide entering element until other leaves
+	.slide-in-leave-active + .page, .page + .slide-in-leave-active
+		display: none
 
 </style>

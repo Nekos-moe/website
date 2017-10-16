@@ -172,5 +172,6 @@ export default {
 					padding: .75em
 	.icon
 		margin-bottom: 2px
+		margin-right: 6px
 
 </style>
