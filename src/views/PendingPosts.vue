@@ -117,6 +117,8 @@ export default {
 			if (!this.currentlyEditing)
 				return null;
 
+			this.$Progress.start();
+
 			try {
 				let resp = await this.$http.patch(API_BASE_URL + 'images/' + post.id, {
 					tags: post.tags,
@@ -129,8 +131,18 @@ export default {
 
 				this.currentlyEditing = null;
 
+				this.$Progress.finish();
+
+				this.$snackbar.open({
+					type: 'is-success',
+					message: `Post ${post.id} edited`,
+					duration: 3000,
+					position: 'is-bottom-right'
+				});
+
 				return true;
 			} catch (error) {
+				this.$Progress.fail();
 				console.error(error);
 				this.$dialog.alert({
 					type: 'is-danger',
@@ -141,11 +153,71 @@ export default {
 				return false;
 			}
 		},
-		approve(id) {
-			console.log(id);
+		async approve(id) {
+			this.$Progress.start();
+
+			try {
+				let response = await this.$http.post(`${API_BASE_URL}pending/${id}/review`, {
+					action: 'approve'
+				}, {
+					headers: { 'Authorization': localStorage.getItem('token') }
+				});
+
+				this.$Progress.finish();
+
+				this.removePost(id);
+
+				this.$snackbar.open({
+					type: 'is-success',
+					message: `Post ${id} approved`,
+					duration: 5000,
+					position: 'is-bottom-right'
+				});
+
+				return response;
+			} catch (error) {
+				this.$Progress.fail();
+				console.error(error);
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error approving post ' + id,
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
+				});
+			}
 		},
-		deny(id) {
-			console.log(id);
+		async deny(id) {
+			this.$Progress.start();
+
+			try {
+				let response = await this.$http.post(`${API_BASE_URL}pending/${id}/review`, {
+					action: 'deny'
+				}, {
+					headers: { 'Authorization': localStorage.getItem('token') }
+				});
+
+				this.$Progress.finish();
+
+				this.removePost(id);
+
+				this.$snackbar.open({
+					type: 'is-success',
+					message: `Post ${id} denied`,
+					duration: 5000,
+					position: 'is-bottom-right'
+				});
+
+				return response;
+			} catch (error) {
+				this.$Progress.fail();
+				console.error(error);
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error denying post ' + id,
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
+				});
+			}
 		},
 		edit(id) {
 			if (this.currentlyEditing)
@@ -194,6 +266,36 @@ export default {
 
 			this.$set(post.tags, post.tags.length, this.newTag);
 			this.newTag = '';
+		},
+		removePost(id) {
+			if (!id)
+				return;
+
+			let found = false;
+			this.posts.forEach((page, i) => {
+				if (!found) {
+					let index = page.findIndex(p => p.id === id)
+					if (index >= 0) {
+						found = true;
+						this.posts[i].splice(index, 1);
+						if (this.posts.length > i + 1) {
+							this.posts[i].push(this.posts[i + 1].shift());
+							if (this.posts[i + 1].length === 0)
+								this.posts.splice(i + 1, 1);
+						}
+						return;
+					}
+					return;
+				}
+
+				if (this.posts.length > i + 1) {
+					this.posts[i].splice(page.length - 1, 1, this.posts[i + 1].shift());
+					if (this.posts[i + 1].length === 0)
+						this.posts.splice(i + 1, 1);
+					return;
+				}
+				return;
+			});
 		}
 	},
 	beforeMount() {

@@ -118,7 +118,7 @@ export default {
 					sort: 'recent',
 					limit: 27,
 					skip: this.page !== 1 ? (this.page + 1) * 9 : 0,
-					nsfw: undefined, //this.$store.getters.NSFWImages,
+					nsfw: this.$store.getters.NSFWImages === false ? false : undefined,
 					tags: this.$store.getters.blacklist
 				}, {
 					responseType: 'json',

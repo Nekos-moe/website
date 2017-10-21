@@ -1,5 +1,5 @@
 <template>
-<div id="base">
+<div id="base-images">
 	<div class="search-wrapper">
 		<Form ref="options" :model="options" label-position="top">
 			<Form-item label="Tags" label-position="top">
@@ -144,12 +144,16 @@ export default {
 				return;
 			}
 		}
+	},
+	beforeMount() {
+		if (this.$store.getters.NSFWImages === true)
+			this.options.nsfw = 'undefined';
 	}
 }
 </script>
 
-<style lang="sass" scoped>
-#base
+<style lang="sass">
+#base-images
 	display: flex
 	align-items: flex-start
 	flex-wrap: wrap
