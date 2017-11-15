@@ -11,8 +11,7 @@ import VueTimeago from 'vue-timeago';
 // import 'iview/dist/styles/iview.css';
 import '@/nekos-theme.less';
 import VueAnalytics from 'vue-analytics';
-import Buefy from 'buefy'
-//import 'buefy/lib/buefy.css'
+import Buefy from 'buefy';
 
 import App from '@/App';
 import NavBar from '@/components/NavBar';
