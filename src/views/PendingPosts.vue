@@ -306,41 +306,5 @@ export default {
 
 <style lang="sass">
 #base-pending
-	.post-grid-wrapper
-		.pagination-wrapper
-			margin: auto
-			max-width: 390px
-			&.top
-				margin-bottom: 16px
-			&.bottom
-				margin-top: 16px
-		.page
-			.columns
-				.column
-					.card-image
-						img
-							max-height: 420px
-							width: auto
-							margin: 0 auto
-					.card-content
-						padding: 1rem
-						.avatar
-							border-radius: 2px
-						.tag
-							margin: 2px
-							& + div.field
-								margin-top: 12px
-					footer
-						margin: 0
-						font-weight: bold
-
-	// Once other element leaves, enter new element
-	.page:not(.slide-in-leave-active) + .page, .page:first-of-type
-		div
-			animation: slide-in-fwd-center 0.25s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
-
-	// Hide entering element until other leaves
-	.slide-in-leave-active + .page, .page + .slide-in-leave-active
-		display: none
 
 </style>

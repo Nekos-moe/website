@@ -59,8 +59,8 @@
 								<b-tag v-for="(tag, i) of post.tags" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
 							</div>
 							<footer class="card-footer">
-								<router-link class="card-footer-item has-text-success" :to="'/post/' + post.id">View</router-link>
-								<a v-if="loggedIn" @click="like(post.id)" class="card-footer-item">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
+								<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
+								<a v-if="loggedIn" @click="like(post.id)" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
 								<a v-if="loggedIn" @click="like(post.id, 'favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
 							</footer>
 						</div>
@@ -218,40 +218,41 @@ export default {
 			.ivu-form-item
 				margin-bottom: 0
 
-	.post-grid-wrapper
-		.pagination-wrapper
-			margin: auto
-			max-width: 390px
-			&.top
-				margin: 16px auto
-			&.bottom
-				margin-top: 16px
-		.page
-			.columns
-				.column
-					.card-image
-						img
-							max-height: 420px
-							width: auto
-							margin: 0 auto
-					.card-content
-						padding: 1rem
-						.avatar
-							border-radius: 2px
-						.tag
-							margin: 2px
-							& + div.field
-								margin-top: 12px
-					footer
-						margin: 0
-						font-weight: bold
+.post-grid-wrapper
+	.pagination-wrapper
+		margin: auto
+		max-width: 390px
+		&.top
+			margin: 16px auto
+		&.bottom
+			margin-top: 16px
+	.page
+		.columns
+			.column
+				margin: auto 0
+				.card-image
+					img
+						max-height: 420px
+						width: auto
+						margin: 0 auto
+				.card-content
+					padding: 1rem
+					.avatar
+						border-radius: 2px
+					.tag
+						margin: 2px
+						& + div.field
+							margin-top: 12px
+				footer
+					margin: 0
+					font-weight: bold
 
-	// Once other element leaves, enter new element
-	.page:not(.slide-in-leave-active) + .page, .page:first-of-type
-		div
-			animation: slide-in-fwd-center 0.25s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
+	// // Once other element leaves, enter new element
+	// .page:not(.slide-in-leave-active) + .page, .page:first-of-type
+	// 	div
+	// 		animation: slide-in-fwd-center 0.25s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
 
-	// Hide entering element until other leaves
-	.slide-in-leave-active + .page, .page + .slide-in-leave-active
-		display: none
+	// // Hide entering element until other leaves
+	// .slide-in-leave-active + .page, .page + .slide-in-leave-active
+	// 	display: none
 </style>
