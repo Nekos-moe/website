@@ -1,19 +1,16 @@
 <template>
-<div id="base">
-	<Form class="login-form">
-		<Form-item label="Username" :style="{ marginBottom: '5px' }">
-			<Input type="text" name="login-user" placeholder="username" icon="person"></Input>
-		</Form-item>
-		<Form-item label="Password">
-			<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
-		</Form-item>
-		<Form-item :error="loginError">
-			<Button type="success" @click="login" long>Log in</Button>
-		</Form-item>
-		<Form-item>
-			<Button type="info" @click="$router.push('/register')" long>Register</Button>
-		</Form-item>
-	</Form>
+<div id="base-login">
+	<div class="form">
+		<b-field label="Username">
+			<b-input name='login-user' required placeholder="username" icon="account"></b-input>
+		</b-field>
+		<b-field label="Password">
+			<b-input name="login-pass" type="password" password-reveal required placeholder="password" icon="lock"></b-input>
+		</b-field>
+		<button class="button is-primary" @click="login"><b-icon icon="login"></b-icon>Login</button>
+		<button class="button is-primary is-outlined" @click="$router.push('/register')"><b-icon icon="account-plus"></b-icon>Register</button>
+		<b-message v-show="loginError" type="is-danger" id="login-error" has-icon><b>Login Error:</b><br>{{ loginError }}</b-message>
+	</div>
 </div>
 </template>
 
@@ -54,8 +51,20 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-.login-form
-	margin: auto
-	width: 300px
+<style lang="sass">
+#base-login
+	.button .icon:first-child:last-child
+		margin-left: 0
+		margin-right: 6px
+
+	.form
+		margin: auto
+		width: 400px
+		.button
+			width: 100%
+			&:first-of-type
+				margin: 30px 0 20px
+		#login-error
+			width: 100%
+			margin-top: 30px
 </style>

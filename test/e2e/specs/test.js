@@ -14,7 +14,7 @@ module.exports = {
 			.waitForElementVisible('#app', 20000)
 			.pause(5000)
 			.assert.elementPresent('.post-grid-wrapper')
-			.assert.elementCount('.page .card', 27)
+			.assert.elementCount('.page .card', 9)
 			// .click('.navigation-buttons button + button').pause(1000)
 			// .click('.navigation-buttons button + button').pause(1000)
 			// .assert.hidden('.images div:first-of-type img')

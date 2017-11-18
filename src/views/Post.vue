@@ -12,7 +12,7 @@
 		</p>
 		<div v-if="editMode">
 			<label for="nsfw">Adult content?</label>
-			<i-switch name="nsfw" v-model="edits.nsfw" :value="image.nsfw" size="large">
+			<i-switch name="nsfw" v-model="edits.nsfw" size="large">
 				<span slot="open">Yes</span>
 				<span slot="close">No</span>
 			</i-switch>
@@ -20,19 +20,19 @@
 		<p v-if="image.artist && !editMode"><strong>Artist:</strong> {{ image.artist }}</p>
 		<div v-if="editMode">
 			<label for="artist">Artist</label>
-			<Input name="artist" v-model="edits.artist" :value="image.artist" />
+			<Input name="artist" v-model="edits.artist" />
 		</div>
 		<div v-if="tags && tags.length > 0 && tags[0]">
 			<Tag :closable="editMode" color="blue" class="tag" type="border" @on-close="deleteTag" v-for="tag of tags" :name="tag" :key="tag">{{ tag }}</Tag>
 		</div>
 		<p v-else>No tags</p>
 		<div class="new-tag-input-wrapper" v-if="editMode">
-			<Input placeholder="animal ears" v-model="newTag" :value="newTag" :maxlength="40">
+			<Input placeholder="animal ears" v-model="newTag" :maxlength="40">
 				<Button slot="append" size="small" @click="addTag">Add tag</Button>
 			</Input>
 		</div>
 		<div id="edit-buttons" v-if="canEdit">
-			<Button size="small" :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): editMode = true">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
+			<Button size="small" :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): editMode()">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
 			<Button v-if="editMode" size="small" type="warning" @click="updateData">Discard Changes</Button>
 			<Poptip v-if="!editMode" confirm title="Are you sure you want to delete this post?" @on-ok="deletePost" ok-text="yes" cancel-text="no" placement="bottom">
 				<Button size="small" type="error">Delete Post</Button>
@@ -56,7 +56,8 @@ export default {
 			editMode: false,
 			edits: {
 				nsfw: false,
-				artist: null
+				artist: null,
+				needsSync: false
 			},
 			likeLoading: false,
 			favoriteLoading: false,
@@ -75,6 +76,15 @@ export default {
 		}
 	},
 	methods: {
+		editMode() {
+			if (this.edits.needsSync) {
+				this.edits.nsfw = this.image.nsfw;
+				this.edits.artist = this.image.artist;
+				this.edits.needsSync = false;
+			}
+
+			this.editMode = true;
+		},
 		async updateData() {
 			try {
 				let response = await this.$http.get(`${API_BASE_URL}images/${this.$route.params.id}`, {
@@ -87,6 +97,7 @@ export default {
 				this.tags = response.data.image.tags;
 				this.edits.artist = response.data.image.artist;
 				this.edits.nsfw = response.data.image.nsfw;
+				this.edits.needsSync = true;
 				this.editMode = false;
 			} catch(error) {
 				console.error(error);

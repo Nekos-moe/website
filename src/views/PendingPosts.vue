@@ -9,7 +9,7 @@
 				:per-page="1">
 			</b-pagination>
 		</div>
-		<transition-group name="slide-in">
+		<transition-group name="fade">
 			<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
 				<div class="columns is-multiline is-centered">
 					<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
@@ -33,8 +33,8 @@
 								</div>
 
 								<p v-show="currentlyEditing !== post.id">Artist: {{ post.artist || 'Unknown' }}</p>
-								<div class="field" v-if="currentlyEditing === post.id">Artist: <b-input v-model="post.artist" :value="post.artist || ''" size="is-small"></b-input></div>
-								<div class="field" v-if="currentlyEditing === post.id"><b-switch :value="post.nsfw" v-model="post.nsfw" type="is-danger">Adult Content</b-switch></div>
+								<div class="field" v-if="currentlyEditing === post.id">Artist: <b-input v-model="post.artist" size="is-small"></b-input></div>
+								<div class="field" v-if="currentlyEditing === post.id"><b-switch v-model="post.nsfw" type="is-danger">Adult Content</b-switch></div>
 								<b-tag
 									v-for="(tag, i) of post.tags"
 									:key="i"
@@ -122,7 +122,7 @@ export default {
 			try {
 				let resp = await this.$http.patch(API_BASE_URL + 'images/' + post.id, {
 					tags: post.tags,
-					artist: post.artist,
+					artist: post.artist || '',
 					nsfw: post.nsfw,
 					pending: true
 				}, {
@@ -306,5 +306,40 @@ export default {
 
 <style lang="sass">
 #base-pending
+	.post-grid-wrapper
+		.pagination-wrapper
+			margin: auto
+			max-width: 390px
+			&.top
+				margin: 16px auto
+			&.bottom
+				margin-top: 16px
+		.page
+			.columns
+				.column
+					margin: auto 0
+					.card-image
+						img
+							max-height: 420px
+							width: auto
+							margin: 0 auto
+					.card-content
+						padding: 1rem
+						.avatar
+							border-radius: 2px
+						.tag
+							margin: 2px
+							& + div.field
+								margin-top: 12px
+					footer
+						margin: 0
+						font-weight: bold
+		.fade-enter-active, .fade-leave-active
+			transition: opacity .2s ease-in-out both
+		.fade-enter, .fade-leave-to
+			opacity: 0
 
+		// IDK why this works, but if you remove it then changing page brings you back to the top
+		fade-enter-active + .page, .page + .fade-enter-active
+			display: none
 </style>

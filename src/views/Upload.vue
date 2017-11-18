@@ -9,7 +9,7 @@
 	<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
 
 	<div class="form">
-		<b-field label="Tags" :message="`Required - Separate tags with a comma. Use spaces, not underscores or dashes (${totalTags}/80)`" :type="validity.tags.message ? 'is-danger' : null">
+		<b-field label="Tags" :message="['Required - Separate tags with a comma. Use spaces, not underscores or dashes', `Tags: ${totalTags}/80`]" :type="validity.tags.message ? 'is-danger' : null">
 			<b-input @blur="validate" name='tags' type="textarea" v-model="details.tags" placeholder="cat ears, tail, paw pose"></b-input>
 		</b-field>
 		<b-field label="Artist" message="Use <a href='https://www.iqdb.org/' target='_blank'>iqdb</a> to find the source">
@@ -18,8 +18,8 @@
 		<b-field label="NSFW">
 			<b-switch type="is-danger" v-model="details.nsfw">This post contains adult content</b-switch>
 		</b-field>
-		<button class="button" @click="promptForImportId">Import data from danbooru</button>
-		<button class="button is-primary" @click="upload">Upload</button>
+		<button class="button" @click="promptForImportId"><b-icon icon="import"></b-icon>Import data from danbooru</button>
+		<button class="button is-primary" @click="upload"><b-icon icon="upload"></b-icon>Upload</button>
 	</div>
 </div>
 </template>
@@ -72,8 +72,7 @@ export default {
 					type: 'is-warning',
 					hasIcon: true,
 					title: 'Missing Image',
-					message: `Please select an image to post.`,
-					scroll: 'keep'
+					message: `Please select an image to post.`
 				});
 			}
 			if (imageInput.files[0].size > 3145728) {
@@ -81,8 +80,7 @@ export default {
 					type: 'is-warning',
 					hasIcon: true,
 					title: 'Image Too Large',
-					message: `The image you selected is too large. Select an image that is less than 3MB in size.`,
-					scroll: 'keep'
+					message: `The image you selected is too large. Select an image that is less than 3MB in size.`
 				});
 			}
 
@@ -123,8 +121,7 @@ export default {
 						this.$router.push('/post/' + response.data.image.id);
 					},
 					canCancel: ['escape', 'button', 'outside'],
-					cancelText: 'Close',
-					scroll: 'keep'
+					cancelText: 'Close'
 				});
 			}).catch(error => {
 				this.$Progress.fail();
@@ -139,8 +136,7 @@ export default {
 							this.$router.push('/post/' + response.data.id);
 						},
 						canCancel: ['escape', 'button', 'outside'],
-						cancelText: 'Close',
-						scroll: 'keep'
+						cancelText: 'Close'
 					});
 				}
 				console.error(error);
@@ -148,8 +144,7 @@ export default {
 					type: 'is-danger',
 					hasIcon: true,
 					title: 'Error Uploading Image',
-					message: error.response && error.response.data.message || error.message,
-					scroll: 'keep'
+					message: error.response && error.response.data.message || error.message
 				});
 			});
 		},
@@ -198,8 +193,7 @@ export default {
 					type: 'number',
 					placeholder: '/post/...',
 				},
-				onConfirm: value => this.importTags(value),
-				scroll: 'keep'
+				onConfirm: value => this.importTags(value)
 			});
 		},
 		importTags(id) {
@@ -225,8 +219,7 @@ export default {
 					type: 'is-danger',
 					hasIcon: true,
 					title: 'Error',
-					message: error.response && error.response.data.message || error.message,
-					scroll: 'keep'
+					message: error.response && error.response.data.message || error.message
 				});
 			});
 		}
@@ -236,6 +229,9 @@ export default {
 
 <style lang="sass">
 #base-upload
+	.button .icon:first-child:last-child
+		margin-left: 0
+		margin-right: 6px
 	& > *
 		margin: auto
 	& > p

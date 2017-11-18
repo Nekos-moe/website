@@ -12,25 +12,25 @@
 	<div class="navbar-menu">
 		<div class="navbar-start">
 			<router-link class="navbar-item is-size-5-desktop" to="/"><b-icon icon="home"></b-icon>Home</router-link>
-			<router-link class="navbar-item is-size-5-desktop" to="/search/images"><b-icon icon="list"></b-icon>Posts</router-link>
-			<router-link class="navbar-item is-size-5-desktop" to="/search/users"><b-icon icon="people"></b-icon>Users</router-link>
-			<router-link class="navbar-item is-size-5-desktop" to="/upload"><b-icon icon="file_upload"></b-icon>Upload</router-link>
+			<router-link class="navbar-item is-size-5-desktop" to="/search/images"><b-icon icon="format-list-bulleted"></b-icon>Posts</router-link>
+			<router-link class="navbar-item is-size-5-desktop" to="/search/users"><b-icon icon="account-multiple"></b-icon>Users</router-link>
+			<router-link class="navbar-item is-size-5-desktop" to="/upload"><b-icon icon="upload"></b-icon>Upload</router-link>
 		</div>
 
 		<div class="navbar-end">
 			<b-dropdown v-if="loggedIn && user.roles && user.roles.length" position="is-bottom-left" hoverable>
 				<a class="navbar-item has-text-white is-size-5-desktop" slot="trigger">
-					<span>Admin</span><b-icon icon="arrow_drop_down"></b-icon>
+					<span>Admin</span><b-icon icon="menu-down"></b-icon>
 				</a>
 
 				<b-dropdown-item v-if="loggedIn && user.roles && (user.roles.includes('admin') || user.roles.includes('approver'))" has-link>
-					<router-link to="/pending"><b-icon icon="playlist_add_check"></b-icon><span>Pending Posts</span></router-link>
+					<router-link to="/pending"><b-icon icon="checkbox-marked-outline"></b-icon><span>Pending Posts</span></router-link>
 				</b-dropdown-item>
 			</b-dropdown>
 
 			<b-dropdown v-if="loggedIn" position="is-bottom-left" hoverable>
 				<a class="navbar-item has-text-white is-size-5-desktop" slot="trigger">
-					<span>My Account</span><b-icon icon="arrow_drop_down"></b-icon>
+					<span>My Account</span><b-icon icon="menu-down"></b-icon>
 				</a>
 
 				<b-dropdown-item custom><b>{{ user.username }}</b></b-dropdown-item>
@@ -38,7 +38,7 @@
 				<hr class="dropdown-divider">
 
 				<b-dropdown-item has-link>
-					<router-link :to="'/user/' + user.id"><b-icon icon="person"></b-icon><span>Profile</span></router-link>
+					<router-link :to="'/user/' + user.id"><b-icon icon="account"></b-icon><span>Profile</span></router-link>
 				</b-dropdown-item>
 
 				<hr class="dropdown-divider">
@@ -47,14 +47,14 @@
 					<router-link to="/settings"><b-icon icon="settings"></b-icon><span>Settings</span></router-link>
 				</b-dropdown-item>
 				<b-dropdown-item @click="logoutUser">
-					<b-icon icon="exit_to_app"></b-icon><span>Logout</span>
+					<b-icon icon="logout"></b-icon><span>Logout</span>
 				</b-dropdown-item>
 			</b-dropdown>
 
 			<b-dropdown v-if="!loggedIn" position="is-bottom-left">
 				<a class="navbar-item has-text-white is-size-5-desktop" slot="trigger">
+					<b-icon icon="login"></b-icon>
 					<span>Login</span>
-					<b-icon icon="arrow_drop_down"></b-icon>
 				</a>
 
 				<b-dropdown-item custom paddingless>
@@ -170,8 +170,12 @@ export default {
 				margin-top: 10px
 				section
 					padding: .75em
-	.icon
-		margin-bottom: 2px
+	a > .icon
 		margin-right: 6px
+		height: 1rem
+		width: 1rem
+		vertical-align: sub
+		i::before
+			font-size: 19px
 
 </style>

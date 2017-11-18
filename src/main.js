@@ -21,7 +21,9 @@ import ImagePreview from '@/components/ImagePreview';
 Vue.config.productionTip = false;
 
 Vue.use(iView, { locale: iView_locale });
-Vue.use(Buefy);
+Vue.use(Buefy, {
+	defaultModalScroll: 'keep'
+});
 Vue.use(VueProgressBar, {
 	color: '#2de58c',
 	failedColor: 'red',

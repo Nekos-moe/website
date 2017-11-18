@@ -32,7 +32,7 @@
 				@change="changePage">
 			</b-pagination>
 		</div>
-		<transition-group name="slide-in">
+		<transition-group name="fade">
 			<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
 				<div class="columns is-multiline is-centered">
 					<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
@@ -56,7 +56,8 @@
 								</div>
 
 								<p>Artist: {{ post.artist || 'Unknown' }}</p>
-								<b-tag v-for="(tag, i) of post.tags" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
+								<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
+									<b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
 							</div>
 							<footer class="card-footer">
 								<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
@@ -213,46 +214,43 @@ export default {
 				font-size: 20px
 				margin-left: 4.75px
 
-		.login-form
-			margin: 1rem
-			.ivu-form-item
-				margin-bottom: 0
+	.post-grid-wrapper
+		.pagination-wrapper
+			margin: auto
+			max-width: 390px
+			&.top
+				margin: 16px auto
+			&.bottom
+				margin-top: 16px
+		.page
+			.columns
+				.column
+					margin: auto 0
+					.card-image
+						img
+							max-height: 420px
+							width: auto
+							margin: 0 auto
+					.card-content
+						padding: 1rem
+						.avatar
+							border-radius: 2px
+						.tag
+							margin: 2px
+							& + div.field
+								margin-top: 12px
+						.tag-more
+							margin-left: -2px
+					footer
+						margin: 0
+						font-weight: bold
 
-.post-grid-wrapper
-	.pagination-wrapper
-		margin: auto
-		max-width: 390px
-		&.top
-			margin: 16px auto
-		&.bottom
-			margin-top: 16px
-	.page
-		.columns
-			.column
-				margin: auto 0
-				.card-image
-					img
-						max-height: 420px
-						width: auto
-						margin: 0 auto
-				.card-content
-					padding: 1rem
-					.avatar
-						border-radius: 2px
-					.tag
-						margin: 2px
-						& + div.field
-							margin-top: 12px
-				footer
-					margin: 0
-					font-weight: bold
+	.fade-enter-active, .fade-leave-active
+		transition: opacity .2s ease-in-out both
+	.fade-enter, .fade-leave-to
+		opacity: 0
 
-	// // Once other element leaves, enter new element
-	// .page:not(.slide-in-leave-active) + .page, .page:first-of-type
-	// 	div
-	// 		animation: slide-in-fwd-center 0.25s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
-
-	// // Hide entering element until other leaves
-	// .slide-in-leave-active + .page, .page + .slide-in-leave-active
-	// 	display: none
+	// IDK why this works, but if you remove it then changing page brings you back to the top
+	fade-enter-active + .page, .page + .fade-enter-active
+	 	display: none
 </style>
