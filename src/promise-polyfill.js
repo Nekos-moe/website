@@ -1,2 +1,1 @@
-import Promise from 'promise-polyfill';
-window.Promise = window.Promise || Promise;
+window.Promise = window.Promise || require('promise-polyfill');
