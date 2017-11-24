@@ -1,5 +1,5 @@
 export function humanize(number) {
-	return number.toLocaleString();
+	return number ? number.toLocaleString() : 0;
 }
 
 export function deCamelCase(string) {

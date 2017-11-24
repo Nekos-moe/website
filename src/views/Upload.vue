@@ -66,13 +66,21 @@ export default {
 				this.validity[name].message = '';
 		},
 		upload() {
+			if (!this.validity.tags.check(this.details.tags))
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
+					title: 'No Tags',
+					message: 'All posts are required to have tags. If you need help tagging posts then head over to the uploading guidelines.'
+				});
+
 			let imageInput = document.getElementById('image');
 			if (!imageInput.files[0]) {
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
 					title: 'Missing Image',
-					message: `Please select an image to post.`
+					message: 'Please select an image to post.'
 				});
 			}
 			if (imageInput.files[0].size > 3145728) {
@@ -80,7 +88,7 @@ export default {
 					type: 'is-warning',
 					hasIcon: true,
 					title: 'Image Too Large',
-					message: `The image you selected is too large. Select an image that is less than 3MB in size.`
+					message: 'The image you selected is too large. Select an image that is less than 3MB in size.'
 				});
 			}
 

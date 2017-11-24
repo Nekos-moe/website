@@ -1,5 +1,23 @@
 <template>
 <div id="base-pending">
+	<b-modal :active.sync="isDenyActive" has-modal-card>
+		<div class="modal-card">
+			<header class="modal-card-head">
+				<p class="modal-card-title">Deny Post</p>
+			</header>
+			<section class="modal-card-body">
+				<p>What is your reason for denying post {{ denyId }}?</p>
+				<br>
+				<b-field label="Reason">
+					<b-input type="textarea" v-model="reason" required></b-input>
+				</b-field>
+			</section>
+			<footer class="modal-card-foot">
+				<button class="button" @click="isDenyActive = false">Cancel</button>
+				<button class="button is-primary" @click="reason && deny(denyId, reason)">Deny</button>
+			</footer>
+		</div>
+	</b-modal>
 	<div class="post-grid-wrapper">
 		<div class="pagination-wrapper top">
 			<b-pagination
@@ -16,7 +34,7 @@
 						<div class="card" :id="'post-' + post.id">
 							<div class="card-image">
 								<figure class="image">
-									<img :src="THUMBNAIL_BASE_URL + post.id">
+									<img :src="IMAGE_BASE_URL + post.id">
 								</figure>
 							</div>
 							<div class="card-content">
@@ -48,10 +66,10 @@
 								</b-field>
 							</div>
 							<footer class="card-footer">
-								<a v-show="currentlyEditing !== post.id" @click="approve(post.id)" class="card-footer-item has-text-success">Approve</a>
+								<a v-show="currentlyEditing !== post.id" @click="confirmApprove(post.id)" class="card-footer-item has-text-success">Approve</a>
 								<a @click="currentlyEditing === post.id ? saveChanges(post) : edit(post.id)" class="card-footer-item" :class="{ 'has-text-success': currentlyEditing === post.id }">{{ currentlyEditing === post.id ? 'Save changes' : 'Edit' }}</a>
 								<a v-show="currentlyEditing === post.id" @click="discard(post, post.id)" class="card-footer-item has-text-danger">Discard changes</a>
-								<a v-show="currentlyEditing !== post.id" @click="deny(post.id)" class="card-footer-item has-text-danger">Deny</a>
+								<a v-show="currentlyEditing !== post.id" @click="promptDeny(post.id)" class="card-footer-item has-text-danger">Deny</a>
 							</footer>
 						</div>
 					</div>
@@ -74,11 +92,14 @@
 export default {
 	data() {
 		return {
-			THUMBNAIL_BASE_URL,
+			IMAGE_BASE_URL,
 			posts: [],
 			page: 1,
 			currentlyEditing: null,
-			newTag: ''
+			newTag: '',
+			isDenyActive: false,
+			denyId: null,
+			reason: ''
 		};
 	},
 	computed: {
@@ -153,6 +174,14 @@ export default {
 				return false;
 			}
 		},
+		confirmApprove(id) {
+			this.$dialog.confirm({
+				title: 'Approve Post',
+				message: `Are you sure you want to approve post ${id}?`,
+				confirmText: 'Approve',
+				onConfirm: () => this.approve(id)
+			});
+		},
 		async approve(id) {
 			this.$Progress.start();
 
@@ -186,12 +215,20 @@ export default {
 				});
 			}
 		},
-		async deny(id) {
+		promptDeny(id) {
+			this.denyId = id;
+			this.isDenyActive = true;
+		},
+		async deny(id, reason) {
+			this.isDenyActive = false;
+			this.denyId = null;
+
 			this.$Progress.start();
 
 			try {
 				let response = await this.$http.post(`${API_BASE_URL}pending/${id}/review`, {
-					action: 'deny'
+					action: 'deny',
+					reason
 				}, {
 					headers: { 'Authorization': localStorage.getItem('token') }
 				});

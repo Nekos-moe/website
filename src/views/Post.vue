@@ -1,7 +1,7 @@
 <template>
 <div id="base-post">
 	<div class="post-info" v-if="image">
-		<div v-if="loggedIn" id="like-fav-buttons">
+		<div v-if="loggedIn && image.likes !== undefined" id="like-fav-buttons">
 			<Button type="text" :class="{ no: !user.likes.includes(image.id) }" @click="like"><Icon type="thumbsup" size="30" color="#47dced" /></Button>
 			<Button type="text" :class="{ no: !user.favorites.includes(image.id) }" @click="favorite"><Icon type="android-favorite" size="30" color="#ed4778" /></Button>
 		</div>
@@ -32,7 +32,7 @@
 			</Input>
 		</div>
 		<div id="edit-buttons" v-if="canEdit">
-			<Button size="small" :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): editMode()">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
+			<Button size="small" :type="editMode ? 'success' : 'info'" @click="editMode ? saveChanges(): enabledEditMode()">{{ editMode ? 'Save Changes' : 'Edit Post' }}</Button>
 			<Button v-if="editMode" size="small" type="warning" @click="updateData">Discard Changes</Button>
 			<Poptip v-if="!editMode" confirm title="Are you sure you want to delete this post?" @on-ok="deletePost" ok-text="yes" cancel-text="no" placement="bottom">
 				<Button size="small" type="error">Delete Post</Button>
@@ -76,7 +76,7 @@ export default {
 		}
 	},
 	methods: {
-		editMode() {
+		enableEditMode() {
 			if (this.edits.needsSync) {
 				this.edits.nsfw = this.image.nsfw;
 				this.edits.artist = this.image.artist;
