@@ -34,7 +34,7 @@
 						<div class="card" :id="'post-' + post.id">
 							<div class="card-image">
 								<figure class="image">
-									<img :src="IMAGE_BASE_URL + post.id">
+									<img :src="IMAGE_BASE_URL + post.id" @click="imageModal(post.id)">
 								</figure>
 							</div>
 							<div class="card-content">
@@ -134,6 +134,13 @@ export default {
 				});
 			}
 		},
+		imageModal(id) {
+			return this.$modal.open(
+				`<div class="image">
+					<img class="modal-image" src="${IMAGE_BASE_URL}${id}">
+				</div>`
+			)
+		},
 		async saveChanges(post) {
 			if (!this.currentlyEditing)
 				return null;
@@ -175,7 +182,7 @@ export default {
 			}
 		},
 		confirmApprove(id) {
-			this.$dialog.confirm({
+			return this.$dialog.confirm({
 				title: 'Approve Post',
 				message: `Are you sure you want to approve post ${id}?`,
 				confirmText: 'Approve',
@@ -343,6 +350,7 @@ export default {
 
 <style lang="sass">
 #base-pending
+	margin: 30px 0
 	.post-grid-wrapper
 		.pagination-wrapper
 			margin: auto
@@ -360,6 +368,8 @@ export default {
 							max-height: 420px
 							width: auto
 							margin: 0 auto
+							&:hover
+								cursor: pointer
 					.card-content
 						padding: 1rem
 						.avatar

@@ -21,7 +21,7 @@ shell.config.silent = true
 shell.cp('-R', 'static/*', assetsPath)
 shell.config.silent = false
 
-webpack(webpackConfig, function (err, stats) {
+webpack(webpackConfig, (err, stats) => {
   spinner.stop()
   if (err) throw err
   process.stdout.write(stats.toString({

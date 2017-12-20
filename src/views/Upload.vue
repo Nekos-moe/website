@@ -9,8 +9,8 @@
 	<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
 
 	<div class="form">
-		<b-field label="Tags" :message="['Required - Separate tags with a comma. Use spaces, not underscores or dashes', `Tags: ${totalTags}/80`]" :type="validity.tags.message ? 'is-danger' : null">
-			<b-input @blur="validate" name='tags' type="textarea" v-model="details.tags" placeholder="cat ears, tail, paw pose"></b-input>
+		<b-field label="Tags" :message="['Required - Use spaces, not underscores or dashes']">
+			<b-taginput v-model="details.tags" maxtags="80" maxlength="50" size="is-small" placeholder="tail"></b-taginput>
 		</b-field>
 		<b-field label="Artist" message="Use <a href='https://www.iqdb.org/' target='_blank'>iqdb</a> to find the source">
 			<b-input :maxlength="60" icon="brush" v-model="details.artist"></b-input>
@@ -30,18 +30,9 @@ export default {
 		return {
 			hasImage: false,
 			details: {
-				tags: '',
+				tags: [],
 				artist: '',
 				nsfw: false
-			},
-			validity: {
-				tags: {
-					check(value) {
-						return value && value.replace(/,| |\n/g, '');
-					},
-					message: '',
-					failMessage: 'All posts require tags'
-				},
 			},
 			smallSize: false
 		};
@@ -49,9 +40,6 @@ export default {
 	computed: {
 		user() {
 			return this.$store.state.user
-		},
-		totalTags() {
-			return this.details.tags ? this.details.tags.split(',').length : 0;
 		}
 	},
 	methods: {
@@ -66,7 +54,7 @@ export default {
 				this.validity[name].message = '';
 		},
 		upload() {
-			if (!this.validity.tags.check(this.details.tags))
+			if (this.details.tags.length === 0)
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
@@ -97,7 +85,8 @@ export default {
 			let data = new FormData();
 			data.append('image', imageInput.files[0]);
 			data.append('artist', this.details.artist);
-			data.append('tags', this.details.tags);
+			for (const tag of this.details.tags)
+				data.append('tags[]', tag);
 			if (this.details.nsfw)
 				data.append('nsfw', 'true');
 
@@ -115,7 +104,7 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
-				this.details.tags = '';
+				this.details.tags = [];
 				this.details.artist = '';
 				this.details.nsfw = false;
 
@@ -215,8 +204,10 @@ export default {
 				if (response.data.tag_string_character)
 					tags += ' ' + response.data.tag_string_character;
 
-				this.details.tags = tags
-					.replace(/ +/g, ', ').replace(/_/g, ' ').replace(/([0-9]\+?)(girls?|boys?|koma)/g, '$1 $2');
+				this.details.tags = tags.replace(/ +/g, ',')
+					.replace(/_/g, ' ')
+					.replace(/([0-9]\+?)(girls?|boys?|koma)/g, '$1 $2')
+					.split(',');
 				this.details.artist = response.data.tag_string_artist.replace(/_/g, ' ');
 			}).catch(error => {
 				this.$Progress.fail();
@@ -253,14 +244,14 @@ export default {
 	.form
 		width: 100%
 		max-width: 600px
-		margin: 2rem auto auto
+		margin: 40px auto
 		font-family: 'Nunito', sans-serif
 		.button
 			width: 100%
 			&:first-of-type
 				margin: 30px 0 20px
 	.image-picker
-		margin: 2rem auto
+		margin: 40px auto
 		text-align: center
 		font-family: 'Nunito', sans-serif
 		button
@@ -276,10 +267,8 @@ export default {
 			border-radius: 1rem
 			box-shadow: none
 			background: #fff
-			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s, border-width .2s
+			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s
 			outline: none !important
-			&:hover:not(.has-image)
-				border-width: 5px
 			&.has-image
 				color: transparent
 				border: none

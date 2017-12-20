@@ -74,7 +74,7 @@
 							<div class="card" :id="'post-' + post.id">
 								<div class="card-image">
 									<figure class="image">
-										<img :src="THUMBNAIL_BASE_URL + post.id">
+										<img :src="THUMBNAIL_BASE_URL + post.id" @click="imageModal(post.id)">
 									</figure>
 								</div>
 								<div class="card-content">
@@ -213,6 +213,13 @@ export default {
 				});
 			}
 		},
+		imageModal(id) {
+			return this.$modal.open(
+				`<div class="image">
+					<img class="modal-image" src="${IMAGE_BASE_URL}${id}">
+				</div>`
+			)
+		},
 		async like(id, type = 'likes') {
 			try {
 				await this.$http.patch(`${API_BASE_URL}image/${id}/relationship`, {
@@ -271,6 +278,8 @@ export default {
 								max-height: 420px
 								width: auto
 								margin: 0 auto
+								&:hover
+									cursor: pointer
 						.card-content
 							padding: 1rem
 							.avatar
@@ -290,6 +299,6 @@ export default {
 			opacity: 0
 
 		// IDK why this works, but if you remove it then changing page brings you back to the top
-		fade-enter-active + .page, .page + .fade-enter-active
+		.fade-enter-active + .page, .page + .fade-enter-active
 			display: none
 </style>

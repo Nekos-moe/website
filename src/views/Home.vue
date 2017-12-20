@@ -1,27 +1,8 @@
 <template>
 <div id="base-home">
-	<div class="account-view" v-if="loggedIn">
-		<div class="user">
-			<router-link :to="'/user/' + user.id">
-				<img :src="user.avatar || require('@/../assets/images/404.jpg')" class="avatar-small">
-				<span class="username">{{ user.username }}</span>
-			</router-link>
-		</div>
-
-		<div class="user-stats">
-			<Icon type="thumbsup" size="20" color="#47dced" />
-			<span class="likes">{{ user.likesReceived | humanize }} Like{{ user.likesReceived !== 1 ? 's' : '' }}</span>
-			<br />
-			<Icon type="android-favorite" size="20" color="#ed4778" />
-			<span class="favorites">{{ user.favoritesReceived | humanize }} Favorite{{ user.favoritesReceived !== 1 ? 's' : '' }}</span>
-		</div>
+	<div class="attention" v-if="loggedIn && !seenNotice('approval')">
+		<b-message title="Site Changes" type="is-info" has-icon @close="ackNotice('approval')">All posts now require approval before they appear on the home page and in searches. Ensure that your posts follow the uploading guidelines when you submit them!</b-message>
 	</div>
-	<div class="account-view" v-if="hasToken && loggedIn === null">
-		<div class="user">
-			<span class="username">Loading...</span>
-		</div>
-	</div>
-
 	<div class="post-grid-wrapper">
 		<div class="pagination-wrapper top">
 			<b-pagination
@@ -39,7 +20,7 @@
 						<div class="card" :id="'post-' + post.id">
 							<div class="card-image">
 								<figure class="image">
-									<img :src="THUMBNAIL_BASE_URL + post.id">
+									<img :src="THUMBNAIL_BASE_URL + post.id" @click="imageModal(post.id)">
 								</figure>
 							</div>
 							<div class="card-content">
@@ -57,7 +38,7 @@
 
 								<p>Artist: {{ post.artist || 'Unknown' }}</p>
 								<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
-									<b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
+								<b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
 							</div>
 							<footer class="card-footer">
 								<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
@@ -169,6 +150,19 @@ export default {
 					hasIcon: true
 				});
 			}
+		},
+		imageModal(id) {
+			return this.$modal.open(
+				`<div class="image">
+					<img class="modal-image" src="${IMAGE_BASE_URL}${id}">
+				</div>`
+			)
+		},
+		seenNotice(name) {
+			return localStorage.getItem('lastNotice') === name;
+		},
+		ackNotice(name) {
+			return localStorage.setItem('lastNotice', name);
 		}
 	},
 	beforeMount() {
@@ -179,41 +173,12 @@ export default {
 
 <style lang="sass">
 #base-home
-	.account-view
-		box-sizing: border-box
-		box-shadow: 0 0 3px #CCC
-		border-radius: .25rem
-		font-family: 'Nunito', sans-serif
-		display: flex
-		justify-content: flex-start
-		.user
-			padding: 1rem
-			border-right: 1px solid #ececec
-			a
-				display: block
-			.avatar-small
-				width: 54px
-				height: 54px
-				vertical-align: top
-				border-radius: .25rem
-				margin-right: 1rem
-			.username
-				font-size: 2em
-				line-height: 54px
-				color: #333942 !important
-
-		.user-stats
-			padding: 1rem
-			max-height: 86px
-			.likes
-				color: #47dced
-				font-size: 20px
-				margin-left: 6px
-			.favorites
-				color: #ed4778
-				font-size: 20px
-				margin-left: 4.75px
-
+	margin: 30px 0
+	.attention
+		margin-bottom: 30px
+		.message
+			max-width: 800px
+			margin: auto
 	.post-grid-wrapper
 		.pagination-wrapper
 			margin: auto
@@ -231,6 +196,8 @@ export default {
 							max-height: 420px
 							width: auto
 							margin: 0 auto
+							&:hover
+								cursor: pointer
 					.card-content
 						padding: 1rem
 						.avatar
@@ -251,6 +218,6 @@ export default {
 		opacity: 0
 
 	// IDK why this works, but if you remove it then changing page brings you back to the top
-	fade-enter-active + .page, .page + .fade-enter-active
+	.fade-enter-active + .page, .page + .fade-enter-active
 	 	display: none
 </style>

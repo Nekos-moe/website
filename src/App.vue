@@ -8,7 +8,7 @@
 		</transition>
 	</div>
 	<footer>
-		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="mailto:brusselldesu@gmail.com">Contact</a><br>
+		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
 		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="/api-docs/index.html" target="_blank">API docs here</a>
 	</footer>
 </div>
@@ -27,6 +27,8 @@ export default {
 		this.$Progress.finish();
 	},
 	created() {
+		console.log("%cFind something wrong? You can submit an issue or PR on these repos:\n%chttps://github.com/brussell98/catgirls-website\nhttps://github.com/brussell98/catgirls-api", 'font-size: 16px; color: #ec407a', 'text-decoration: underline; color: #039be5')
+
 		// When App.vue is first loaded start the progress bar
 		this.$Progress.start();
 		// hook the progress bar to start before we move router-view
@@ -40,13 +42,14 @@ export default {
 			this.$Progress.finish();
 		});
 
-		if (this.$store.state.lastUpdateMessage !== 'beta6') {
-			this.$Modal.info({
+		if (this.$store.state.lastUpdateMessage !== 'beta7')
+			return this.$dialog.alert({
+				type: 'is-info',
 				title: 'New Update!',
-				content: "It's been two months since the website last got an update, so let's go over what's changed since then.<br><br>Most noticeable is that I've polished most of the pages. There's small things like moving and re-styling buttons, and then there's big changes like changing the layout of the home and image search page. Both pages now have much less wasted space. <br><br>Time for some fixes. I've fixed some annoying errors such as not being able to view posts while logged out. Sorting by likes no longer puts the most liked posts at the end. The default search order no-longer shows the oldest images on the site. Messages actually show up when you upload an image. Now you can actually add tags to a post instead of just removing them. How did I not catch any of that stuff before?<br><br>There's one more thing that anyone on a slow connection might like: <b>thumbnails</b>. When browsing images it now loads thumbnails instead of the full image. No more downloading 20MB every time you visit the site.<br><br>Anyways that's pretty much everything for this update. Enjoy the cat girls, and I'll see you next update.<br> - Brussell <small>(Lead Developer)</small>",
-				onOk: () => { this.$store.commit('lastUpdateMessage', 'beta6'); }
+				message: `It's been a while since the site got updated, but it's finally done! You'll notice some significant changes, as I've re-designed the entire site using <a href="https://buefy.github.io/" target="_blank">Buefy</a>. The version you see now is very close to what the site will be like when it leaves beta.<br><br>One major change is the new <del>image previews</del> post cards. They allow you to see information and perform actions without leaving the page. Clicking the thumbnail expands the image, buttons allow liking/favoriting, the uploader is shown, and post metadata is visible.<br><br>A change that uploaders will need to know is that all posts now require approval to be listed on the site. Until they are reviewed the will just be unlisted. Make sure you include detailed tags in your post (in the correct format) or it may be denied.<br><br>Lastly, I've finally added a basic settings page. You can now decide if you'd like NSFW posts visible by default and what you never want to see. In the next update this page will be expanded to include avatar uploading, password and email changing, and more.<br> - Brussell <small>(Lead Developer)</small>`,
+				onConfirm: () => this.$store.commit('lastUpdateMessage', 'beta7'),
+				canCancel: false
 			});
-		}
 	}
 }
 </script>
@@ -68,8 +71,12 @@ $link-focus-border: $primary
 @import "~bulma"
 @import "~buefy/src/scss/buefy"
 
+html
+	background-image: url("../assets/images/60-lines.png")
+
 body
 	font-size: 100%
+	background: transparent
 
 #app
 	font-family: 'Nunito', sans-serif
@@ -84,22 +91,17 @@ body
 		margin-top: 1rem
 		border-radius: .25rem
 		padding: 1rem 2rem
+		background-color: #fff
+		& > div
+			margin: 40px 0
+	& > footer
+		text-align: center
+		color: #777
+		font-family: 'Nunito', sans-serif
+		margin: 1rem 0 2rem
 
-#app > footer
-	text-align: center
-	color: #777
-	font-family: 'Nunito', sans-serif
-	margin: 1rem 0
-
-.page-wrapper
-	margin-top: 10px
-	margin-bottom: 10px
-	height: 32px
-
-.ivu-btn:not(.ivu-btn-small)
-	font-size: 1rem
-
-.ivu-form .ivu-form-item-label
-	font-size: 14px
+.modal .modal-image
+	width: unset
+	margin: auto
 
 </style>
