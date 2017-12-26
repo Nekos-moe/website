@@ -56,7 +56,11 @@
 			</b-field>
 		</div>
 	</div>
-	<div class="results">
+	<hr>
+	<div class="no-results" v-show="!firstSearch && posts.length === 0">
+		<b-message type="is-primary">No posts matched your search. Try providing broader search parameters.</b-message>
+	</div>
+	<div class="results" v-show="posts.length !== 0">
 		<div class="post-grid-wrapper">
 			<div class="pagination-wrapper top">
 				<b-pagination
@@ -91,8 +95,8 @@
 									</div>
 
 									<p>Artist: {{ post.artist || 'Unknown' }}</p>
-									<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
-									<b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
+									<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag><!--
+									--><b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
 								</div>
 								<footer class="card-footer">
 									<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
@@ -134,7 +138,8 @@ export default {
 				artist: '',
 				uploader: '',
 			},
-			hitEnd: false
+			hitEnd: false,
+			firstSearch: true
 		};
 	},
 	computed: {
@@ -158,6 +163,8 @@ export default {
 		async getResults(isNew = false) {
 			this.$Progress.start();
 
+			this.firstSearch = false;
+
 			let nsfw = {
 					'undefined': undefined,
 					'false': false,
@@ -169,7 +176,7 @@ export default {
 				let response = await this.$http.post(API_BASE_URL + 'images/search', {
 					nsfw,
 					limit: 27,
-					skip: !isNew && this.page !== 1 ? (this.page + 1) * 9 : 0,
+					skip: !isNew ? this.posts.length * 9 : 0,
 					tags: this.options.tags
 						? this.options.tags + (blacklist ? ' ' + blacklist : '')
 						: blacklist,
@@ -257,16 +264,26 @@ export default {
 			margin-right: 6px
 		.button.submit
 			width: 100%
-			margin: 28px 0 20px
+			margin: 28px 0 0
 		textarea
 			resize: none
+	hr
+		margin: 20px 0
+		border-top: 1px solid #dbdbdb
+	.no-results
+		margin: 0 auto
+		padding-top: 12px
+		article
+			max-width: 400px
+			margin: auto
 	.results
+		padding-top: 12px
 		.post-grid-wrapper
 			.pagination-wrapper
 				margin: auto
 				max-width: 390px
 				&.top
-					margin: 16px auto
+					margin-bottom: 16px
 				&.bottom
 					margin-top: 16px
 			.page
@@ -288,8 +305,6 @@ export default {
 								margin: 2px
 								& + div.field
 									margin-top: 12px
-							.tag-more
-								margin-left: -2px
 						footer
 							margin: 0
 							font-weight: bold

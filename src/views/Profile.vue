@@ -49,8 +49,8 @@
 							<div class="card-content">
 								<p>Posted: {{ new Date(post.createdAt).toLocaleString() }}</p>
 								<p>Artist: {{ post.artist || 'Unknown' }}</p>
-								<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag>
-								<b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
+								<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag><!--
+								--><b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
 							</div>
 							<footer class="card-footer">
 								<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
@@ -412,8 +412,6 @@ export default {
 							margin: 2px
 							& + div.field
 								margin-top: 12px
-						.tag-more
-							margin-left: -2px
 					footer
 						margin: 0
 						font-weight: bold
