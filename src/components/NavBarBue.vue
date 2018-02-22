@@ -47,14 +47,14 @@
 					<router-link to="/settings"><b-icon icon="settings"></b-icon><span>Settings</span></router-link>
 				</b-dropdown-item>
 				<b-dropdown-item @click="logoutUser">
-					<b-icon icon="logout"></b-icon><span>Logout</span>
+					<b-icon icon="logout"></b-icon><span>Log Out</span>
 				</b-dropdown-item>
 			</b-dropdown>
 
 			<b-dropdown v-if="!loggedIn" position="is-bottom-left">
 				<a class="navbar-item has-text-white is-size-5-desktop" slot="trigger">
 					<b-icon icon="login"></b-icon>
-					<span>Login</span>
+					<span>Log In</span>
 				</a>
 
 				<b-dropdown-item custom paddingless>
@@ -69,7 +69,7 @@
 							</b-field>
 						</section>
 						<footer class="modal-card-foot">
-							<button id="nav-login-button" class="button is-primary" @click="loginUser">Login</button>
+							<button id="nav-login-button" class="button is-primary" @click="loginUser">Log In</button>
 							<button class="button is-primary is-outlined" @click="$router.push('/register')">Register</button>
 							<b-message :active.sync="isLoginErrorActive" type="is-danger">{{ loginError }}</b-message>
 						</footer>

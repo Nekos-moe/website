@@ -36,7 +36,7 @@ export default {
 				return;
 			this.pending = true;
 
-			let username = document.getElementsByName('login-user')[0].value, // We'll keep these universal for auto log in plugins
+			let username = document.getElementsByName('login-user')[0].value, // We'll keep these universal for auto login plugins
 				password = document.getElementsByName('login-pass')[0].value,
 				confirmPassword = document.getElementsByName('reg-confirm')[0].value,
 				email = document.getElementsByName('reg-email')[0].value;

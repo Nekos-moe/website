@@ -7,7 +7,7 @@
 		<b-field label="Password">
 			<b-input name="login-pass" type="password" password-reveal required placeholder="password" icon="lock"></b-input>
 		</b-field>
-		<button class="button is-primary" @click="login"><b-icon icon="login"></b-icon>Login</button>
+		<button class="button is-primary" @click="login"><b-icon icon="login"></b-icon>Log In</button>
 		<button class="button is-primary is-outlined" @click="$router.push('/register')"><b-icon icon="account-plus"></b-icon>Register</button>
 		<b-message v-show="loginError" type="is-danger" id="login-error" has-icon><b>Login Error:</b><br>{{ loginError }}</b-message>
 	</div>
