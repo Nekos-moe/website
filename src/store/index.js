@@ -71,6 +71,9 @@ const store = new Vuex.Store({
 		},
 		blacklist(state) {
 			return state.preferences.blacklist && state.preferences.blacklist.map(tag => `-"${tag}"`).join(',') || undefined;
+		},
+		userCanApprove(state) {
+			return state.user && state.user.roles && (state.user.roles.includes('admin') || state.user.roles.includes('approver'));
 		}
 	}
 });

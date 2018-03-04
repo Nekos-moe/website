@@ -333,7 +333,7 @@ export default {
 				}
 
 				if (this.posts.length > i + 1) {
-					this.posts[i].splice(page.length - 1, 1, this.posts[i + 1].shift());
+					this.posts[i].push(this.posts[i + 1].shift());
 					if (this.posts[i + 1].length === 0)
 						this.posts.splice(i + 1, 1);
 					return;

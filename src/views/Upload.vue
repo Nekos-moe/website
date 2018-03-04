@@ -19,7 +19,7 @@
 			<b-switch type="is-danger" v-model="details.nsfw">This post contains adult content</b-switch>
 		</b-field>
 		<button class="button" @click="promptForImportId"><b-icon icon="import"></b-icon>Import data from danbooru</button>
-		<button class="button is-primary" @click="upload"><b-icon icon="upload"></b-icon>Upload</button>
+		<button class="button is-primary" @click="upload" :class="{ isLoading: uploading }"><b-icon icon="upload"></b-icon>Upload</button>
 	</div>
 </div>
 </template>
@@ -34,7 +34,8 @@ export default {
 				artist: '',
 				nsfw: false
 			},
-			smallSize: false
+			smallSize: false,
+			uploading: false
 		};
 	},
 	computed: {
@@ -53,7 +54,10 @@ export default {
 			else if (this.validity[name].message)
 				this.validity[name].message = '';
 		},
-		upload() {
+		async upload() {
+			if (this.uploading)
+				return;
+
 			if (this.details.tags.length === 0)
 				return this.$dialog.alert({
 					type: 'is-warning',
@@ -61,6 +65,13 @@ export default {
 					title: 'No Tags',
 					message: 'All posts are required to have tags. If you need help tagging posts then head over to the uploading guidelines.'
 				});
+
+			let proceed = true;
+			if (this.details.tags.length <= 5)
+				proceed = await this.confirm('Low Tag Count', "Your post doesn't have many tags! We require all posts to have detailed tags so they can be searched easily. If you need help tagging posts then head over to the uploading guidelines.");
+
+			if (proceed === false)
+				return;
 
 			let imageInput = document.getElementById('image');
 			if (!imageInput.files[0]) {
@@ -80,6 +91,7 @@ export default {
 				});
 			}
 
+			this.uploading = true;
 			this.$Progress.start();
 
 			let data = new FormData();
@@ -108,6 +120,7 @@ export default {
 				this.details.artist = '';
 				this.details.nsfw = false;
 
+				this.uploading = false;
 				return this.$dialog.alert({
 					type: 'is-success',
 					hasIcon: true,
@@ -121,6 +134,7 @@ export default {
 					cancelText: 'Close'
 				});
 			}).catch(error => {
+				this.uploading = false;
 				this.$Progress.fail();
 				if (error.response && error.response.data.id) {
 					return this.$dialog.alert({
@@ -142,6 +156,23 @@ export default {
 					hasIcon: true,
 					title: 'Error Uploading Image',
 					message: error.response && error.response.data.message || error.message
+				});
+			});
+		},
+		confirm(title, body) {
+			return new Promise(resolve => {
+				return this.$dialog.confirm({
+					title,
+					message,
+					type: 'is-warning',
+					hasIcon: true,
+					confirmText: 'Upload anyways',
+					onConfirm() {
+						return resolve(true);
+					},
+					onCancel() {
+						return resolve(false);
+					},
 				});
 			});
 		},

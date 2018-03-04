@@ -2,10 +2,10 @@
 <div id="base-register">
 	<div class="form">
 		<b-field label="Username" message="Must not contain an @ symbol">
-			<b-input name='login-user' required :maxlength="35" has-counter placeholder="username" icon="account"></b-input>
+			<b-input name='reg-user' required :maxlength="35" has-counter placeholder="username" icon="account"></b-input>
 		</b-field>
 		<b-field label="Password" message="Min 8 characters">
-			<b-input name="login-pass" type="password" :maxlength="70" has-counter password-reveal required placeholder="password" icon="lock"></b-input>
+			<b-input name="reg-pass" type="password" :maxlength="70" has-counter password-reveal required placeholder="password" icon="lock"></b-input>
 		</b-field>
 		<b-field label="Confirm Password">
 			<b-input name="reg-confirm" type="password" required placeholder="password" icon="lock"></b-input>
@@ -36,12 +36,13 @@ export default {
 				return;
 			this.pending = true;
 
-			let username = document.getElementsByName('login-user')[0].value, // We'll keep these universal for auto login plugins
-				password = document.getElementsByName('login-pass')[0].value,
+			let username = document.getElementsByName('reg-user')[0].value, // We'll keep these universal for auto log in plugins
+				password = document.getElementsByName('reg-pass')[0].value,
 				confirmPassword = document.getElementsByName('reg-confirm')[0].value,
 				email = document.getElementsByName('reg-email')[0].value;
 
 			if (!username || !password || !email) {
+				this.pending = false;
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
@@ -50,21 +51,25 @@ export default {
 				});
 			}
 
-			if (!document.getElementsByName('old-enough')[0].checked)
+			if (!document.getElementsByName('old-enough')[0].checked) {
+				this.pending = false;
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
 					title: 'Not old enough',
 					message: 'You must be at least 13 years old to make an account.'
 				});
+			}
 
-			if (password !== confirmPassword)
+			if (password !== confirmPassword) {
+				this.pending = false;
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
 					title: 'Password does not match',
 					message: 'Make sure you typed your password right.'
 				});
+			}
 
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'register', { username, password, email });

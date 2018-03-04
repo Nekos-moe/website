@@ -1,8 +1,8 @@
 <template>
 <div id="base-home">
-	<div class="attention" v-if="loggedIn && !seenNotice('approval')">
+	<!-- <div class="attention" v-if="loggedIn && !seenNotice('approval')">
 		<b-message title="Site Changes" type="is-info" has-icon @close="ackNotice('approval')">All posts now require approval before they appear on the home page and in searches. Ensure that your posts follow the uploading guidelines when you submit them!</b-message>
-	</div>
+	</div> -->
 	<div class="post-grid-wrapper">
 		<div class="pagination-wrapper top">
 			<b-pagination

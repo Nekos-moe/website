@@ -20,11 +20,11 @@
 		<div class="navbar-end">
 			<b-dropdown v-if="loggedIn && user.roles && user.roles.length" position="is-bottom-left" hoverable>
 				<a class="navbar-item has-text-white is-size-5-desktop" slot="trigger">
-					<span>Admin</span><b-icon icon="menu-down"></b-icon>
+					<span>Moderation</span><b-icon icon="menu-down"></b-icon>
 				</a>
 
-				<b-dropdown-item v-if="loggedIn && user.roles && (user.roles.includes('admin') || user.roles.includes('approver'))" has-link>
-					<router-link to="/pending"><b-icon icon="checkbox-marked-outline"></b-icon><span>Pending Posts</span></router-link>
+				<b-dropdown-item v-if="loggedIn && userCanApprove" has-link>
+					<router-link to="/pending"><b-icon icon="checkbox-multiple-marked-outline"></b-icon><span>Pending Posts</span></router-link>
 				</b-dropdown-item>
 			</b-dropdown>
 
@@ -99,6 +99,9 @@ export default {
 		},
 		loggedIn() {
 			return this.$store.state.loggedIn;
+		},
+		userCanApprove() {
+			return this.$store.getters.userCanApprove;
 		}
 	},
 	methods: {

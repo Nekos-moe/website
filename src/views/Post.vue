@@ -2,10 +2,11 @@
 <div id="base-post">
 	<div class="columns">
 		<div class="column is-one-quarter info" v-if="image">
-			<div v-if="loggedIn && image.likes !== undefined" class="relationship-buttons">
+			<div v-if="loggedIn && !image.pending && image.likes !== undefined" class="relationship-buttons">
 				<button class="button is-info" :class="{ 'is-outlined': !user.likes.includes(image.id) }" @click="like"><b-icon icon="thumb-up"></b-icon>Like</button>
 				<button class="button is-danger" :class="{ 'is-outlined': !user.favorites.includes(image.id) }" @click="favorite"><b-icon icon="heart"></b-icon>Favorite</button>
 			</div>
+			<b-message v-if="image.pending" title="Pending Approval" type="is-warning" :closable="false">This image is still pending approval and is unlisted.</b-message>
 			<p class="block"><strong>Uploaded by</strong> <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
 			<p class="block" v-if="image.approver"><strong>Approved by</strong> <router-link :to="'/user/' + image.approver.id">{{ image.approver.username }}</router-link></p>
 			<p class="block">
@@ -115,7 +116,8 @@ export default {
 			this.$http.patch(`${API_BASE_URL}images/${this.image.id}`, {
 				tags: this.tags.join(','),
 				artist: this.edits.artist,
-				nsfw: this.edits.nsfw
+				nsfw: this.edits.nsfw,
+				pending: !!this.image.pending
 			}, {
 				headers: {
 					'Authorization': localStorage.getItem('token')

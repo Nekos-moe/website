@@ -26,6 +26,7 @@
 			<b-tab-item label="Posts" icon="format-list-bulleted"></b-tab-item>
 			<b-tab-item label="Likes" icon="thumb-up"></b-tab-item>
 			<b-tab-item label="Favorites" icon="heart"></b-tab-item>
+			<b-tab-item label="Pending" icon="checkbox-multiple-marked-outline" v-if="profile.id === user.id || userCanApprove"></b-tab-item>
 		</b-tabs>
 		<div class="pagination-wrapper top">
 			<b-pagination
@@ -54,8 +55,8 @@
 							</div>
 							<footer class="card-footer">
 								<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
-								<a v-if="loggedIn" @click="like(post.id)" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
-								<a v-if="loggedIn" @click="like(post.id, 'favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
+								<a v-if="loggedIn && mode !== 'pending'" @click="like(post.id)" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
+								<a v-if="loggedIn && mode !== 'pending'" @click="like(post.id, 'favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
 							</footer>
 						</div>
 					</div>
@@ -94,13 +95,16 @@ export default {
 		canEditRoles() {
 			return this.user && this.user.roles && this.user.roles.includes('admin')
 		},
+		canApprove() {
+			return this.$store.getters.userCanApprove;
+		},
 		loggedIn() {
 			return this.$store.state.loggedIn;
 		}
 	},
 	methods: {
 		async changePage(page) {
-			if (page > this.page) {
+			if (this.mode !== 'pending' && page > this.page) {
 				if (this.posts.length !== 0 && this.posts.length % 3 === 0 && this.posts[this.posts.length - 1].length % 9 === 0 && this.posts.length <= page) {
 					if (this.mode === 'uploads')
 						await this.getUploads();
@@ -208,6 +212,32 @@ export default {
 				});
 			}
 		},
+		async getPending() {
+			try {
+				if (!this.profile || (this.profile.id !== this.user.id && !this.canApprove))
+					return;
+
+				let response = await this.$http.get(API_BASE_URL + 'pending/list', {
+					params: { user: this.profile.id },
+					headers: { Authorization: localStorage.getItem('token') }
+				});
+
+				this.hitEnd = true;
+
+				while (response.data.images.length > 0)
+					this.posts.push(response.data.images.splice(0, 9));
+
+				return response;
+			} catch(error) {
+				console.error(error);
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error getting user uploads',
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
+				});
+			}
+		},
 		changeTab(position) {
 			switch (position) {
 				case 0:
@@ -219,14 +249,19 @@ export default {
 				case 2:
 					this.mode = 'favorites';
 					break;
+				case 3:
+					this.mode = 'pending';
+					break;
 			}
 
 			this.page = 1;
 			this.posts = [];
-			this.hitEnd = false;
+			this.hitEnd = false; // false unless pending
 
 			if (this.mode === 'uploads')
 				this.getUploads();
+			else if (this.mode === 'pending')
+				this.getPending();
 			else
 				this.getImages();
 		},

@@ -104,4 +104,7 @@ body
 	width: unset
 	margin: auto
 
+.media-content
+	overflow: inherit
+
 </style>
