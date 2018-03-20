@@ -1,20 +1,23 @@
 <template>
 <div id="base-register">
-	<div class="register">
-		<Form class="login-form" label-position="top">
-			<Form-item label="Username: 35 characters max">
-				<Input type="text" name="login-user" placeholder="username" icon="person"></Input>
-			</Form-item>
-			<Form-item label="Password: 8-70 characters">
-				<Input type="password" name="login-pass" placeholder="password" icon="locked"></Input>
-			</Form-item>
-			<Form-item label="Email: 70 characters max">
-				<Input name="email" placeholder="catgirls@neko.shop" icon="email"></Input>
-			</Form-item>
-			<Form-item :error="registerError">
-				<Button type="success" @click="register" long>Register</Button>
-			</Form-item>
-		</Form>
+	<div class="form">
+		<b-field label="Username" message="Must not contain an @ symbol">
+			<b-input name='reg-user' required :maxlength="35" has-counter placeholder="username" icon="account"></b-input>
+		</b-field>
+		<b-field label="Password" message="Min 8 characters">
+			<b-input name="reg-pass" type="password" :maxlength="70" has-counter password-reveal required placeholder="password" icon="lock"></b-input>
+		</b-field>
+		<b-field label="Confirm Password">
+			<b-input name="reg-confirm" type="password" required placeholder="password" icon="lock"></b-input>
+		</b-field>
+		<b-field label="Email">
+			<b-input name="reg-email" type="email" required :maxlength="70" has-counter placeholder="catgirls@neko.shop" icon="email"></b-input>
+		</b-field>
+		<div class="field">
+			<b-checkbox name="old-enough">I am 13+ years old</b-checkbox>
+		</div>
+		<button class="button is-primary" :class="{ 'is-loading': pending }" @click="register"><b-icon icon="account-plus"></b-icon>Register</button>
+		<b-message v-show="registerError" type="is-danger" id="register-error" has-icon><b>Register Error:</b><br>{{ registerError }}</b-message>
 	</div>
 </div>
 </template>
@@ -23,37 +26,70 @@
 export default {
 	data() {
 		return {
-			registerError: null
+			registerError: null,
+			pending: false
 		};
 	},
 	methods: {
 		async register() {
-			let username = document.getElementsByName('login-user')[0].value, // We'll keep these universal for auto log in plugins
-				password = document.getElementsByName('login-pass')[0].value,
-				email = document.getElementsByName('email')[0].value;
+			if (this.pending)
+				return;
+			this.pending = true;
+
+			let username = document.getElementsByName('reg-user')[0].value, // We'll keep these universal for auto log in plugins
+				password = document.getElementsByName('reg-pass')[0].value,
+				confirmPassword = document.getElementsByName('reg-confirm')[0].value,
+				email = document.getElementsByName('reg-email')[0].value;
 
 			if (!username || !password || !email) {
-				this.$Modal.warning({
-					title: 'Incomplete Form',
-					content: 'Please fill in each field'
+				this.pending = false;
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
+					title: 'Incomplete',
+					message: 'Please complete all fields.'
 				});
-				return
+			}
+
+			if (!document.getElementsByName('old-enough')[0].checked) {
+				this.pending = false;
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
+					title: 'Not old enough',
+					message: 'You must be at least 13 years old to make an account.'
+				});
+			}
+
+			if (password !== confirmPassword) {
+				this.pending = false;
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
+					title: 'Password does not match',
+					message: 'Make sure you typed your password right.'
+				});
 			}
 
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'register', { username, password, email });
 
 				this.registerError = null;
+				this.pending = false;
 
-				this.$Modal.success({
+				return this.$dialog.alert({
+					type: 'is-success',
+					hasIcon: true,
 					title: 'Account Created!',
-					content: `Welcome ${username}! Before you can start using your account you'll need to verify your email using the link we've sent you. It may take a minute to show up.`,
-					okText: 'Return to Home',
-					onOk: () => {
+					message: `Welcome ${username}! Before you can start using your account you'll need to verify your email using the link we've sent you. It may take a minute to show up.`,
+					confirmText: 'Return to Home',
+					onConfirm: () => {
 						this.$router.push('/');
 					}
 				});
 			} catch(error) {
+				this.pending = false;
+
 				if (!error.response) {
 					console.error(error.message);
 					this.registerError = 'Encountered an error';
@@ -69,33 +105,19 @@ export default {
 </script>
 
 <style lang="sass" scoped>
-.register
-	margin: auto
-	width: 300px
-	input
-		box-sizing: border-box
-		margin-bottom: .5rem
-		padding: 4px 8px
-		width: 100%
-		font-size: 14px
-		border: 1px solid #CCC
-		border-radius: 3px
-		outline: #4ACFFF auto 0
-		&:focus
-			border-color: #4ACFFF
-			outline: #4ACFFF auto 5px
-	button
-		margin-top: .5rem
-		padding: 5px 10px
-		width: 100%
-		cursor: pointer
-		font-size: 16px
-		color: #FFF
-		background-color: #4ACFFF
-		box-shadow: 0 0 3px rgba(#4ACFFF, .4)
-		border: none
-		border-radius: 3px
-		transition: background .3s
-		&:hover, &:focus
-			background: darken(#4ACFFF, 15)
+#base-register
+	.button .icon:first-child:last-child
+		margin-left: 0
+		margin-right: 6px
+
+	.form
+		margin: auto
+		width: 400px
+		.button
+			width: 100%
+			&:first-of-type
+				margin: 30px 0 20px
+		#register-error
+			width: 100%
+			margin: 10px 0 30px
 </style>

@@ -1,32 +1,55 @@
 <template>
 <div id="search-users">
-	<div class="search-wrapper">
-		<Input v-model="search" placeholder="Username or ID"></Input>
-		<Button type="success" @click="getResults(true)" long>Search</Button>
+	<div class="search">
+		<b-field label="Username or ID">
+			<b-input icon="account" v-model="search"></b-input>
+		</b-field>
+		<button class="submit button is-primary" @click="getResults(true)"><b-icon icon="magnify"></b-icon>Search</button>
 	</div>
-	<div class="users-wrapper">
-		<div class="page-wrapper">
-			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? users.length : users.length + 1" @on-change="changePage"></Page>
-		</div>
-		<div class="users">
-			<transition-group name="slide-in">
-				<div class="user-page" v-for="(u, i) of users" v-show="i === page - 1" v-if="Math.abs(i - (page - 1)) < 2" :key="i">
-					<div class="user" v-for="user of u" :key="user.id">
-						<img :src="user.avatar || require('@/../assets/images/404.jpg')">
-						<router-link class="username" :to="'/user/' + user.id">{{ user.username }}</router-link>
-						<Icon type="upload" size="20" title="Uploads" />
-						<span class="uploads">{{ user.uploads | humanize }}</span>
-						<Icon type="android-favorite" size="20" color="#ed4778" title="Favorites received" />
-						<span class="favorites">{{ user.favoritesReceived | humanize }}</span>
-						<Icon type="thumbsup" size="20" color="#47dced" title="Likes received" />
-						<span class="likes">{{ user.likesReceived | humanize }}</span>
-						<!-- FUTURE: Display roles like mod/admin -->
+	<div class="results">
+		<div class="user-grid-wrapper">
+			<div class="pagination-wrapper top">
+				<b-pagination
+					:total="hitEnd ? users.length : users.length + 1"
+					:current="page"
+					order="is-centered"
+					:per-page="1"
+					@change="changePage">
+				</b-pagination>
+			</div>
+			<transition-group name="fade">
+				<div class="page" v-for="(_page, i) of users" :key="i" v-if="page === i + 1">
+					<div class="columns is-multiline is-centered">
+						<div class="column is-one-third" v-for="(user, i2) of _page" :key="i2">
+							<div class="card">
+								<div class="card-content">
+									<div class="media">
+										<div class="media-left">
+											<figure class="image is-48x48">
+												<img class="avatar" :src="user.avatar || require('@/../static/images/404.jpg')">
+											</figure>
+										</div>
+										<div class="media-content">
+											<p class="title is-5"><router-link :to="'/user/' + user.id">{{ user.username }}</router-link></p>
+											<p class="subtitle is-6">Joined <timeago :since="user.createdAt"></timeago></p>
+										</div>
+									</div>
+									<p class="stats"><b-icon icon="cloud-upload"></b-icon> {{ user.uploads | humanize }} <b-icon icon="heart" type="is-danger"></b-icon> {{ user.favoritesReceived | humanize }} <b-icon icon="thumb-up" type="is-info"></b-icon> {{ user.likesReceived | humanize }}</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</transition-group>
-		</div>
-		<div class="page-wrapper">
-			<Page class-name="page" :current="page" :page-size="1" :total="hitEnd ? users.length : users.length + 1" @on-change="changePage"></Page>
+			<div class="pagination-wrapper bottom">
+				<b-pagination
+					:total="hitEnd ? users.length : users.length + 1"
+					:current="page"
+					order="is-centered"
+					:per-page="1"
+					@change="changePage">
+				</b-pagination>
+			</div>
 		</div>
 	</div>
 </div>
@@ -36,10 +59,8 @@
 export default {
 	data() {
 		return {
-			IMAGE_BASE_URL,
 			users: [],
 			page: 1,
-			direction: 'right',
 			search: '',
 			hitEnd: false
 		};
@@ -50,17 +71,11 @@ export default {
 		}
 	},
 	methods: {
-		changePage(page) {
-			if (page < this.page && page !== 1)
-				this.direction = 'left';
-			else if (page > this.page) {
-				if (page < this.users.length)
-					this.direction = 'right';
-				else if (this.users.length !== 0 && this.users.length % 3 === 0 && this.users[this.users.length - 1].length % 20 === 0 && this.users.length === page) {
-					this.page = page; // To make getResults work right
-					this.getResults(false);
-					this.direction = 'right';
-				} else
+		async changePage(page) {
+			if (page > this.page) {
+				if (this.users.length !== 0 && this.users.length % 3 === 0 && this.users[this.users.length - 1].length % 9 === 0 && this.users.length <= page)
+					await this.getResults(false);
+				else if (page >= this.users.length)
 					this.hitEnd = true
 			}
 			this.page = page;
@@ -71,7 +86,7 @@ export default {
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'users/search', {
 					limit: 60,
-					skip: !isNew && this.page !== 1 ? this.page * 20 : 0,
+					skip: !isNew && this.page !== 1 ? this.page * 30 : 0,
 					query: this.search
 				}, {
 					responseType: 'json',
@@ -88,9 +103,9 @@ export default {
 					this.hitEnd = true;
 				else {
 					while (response.data.users.length > 0)
-						this.users.push(response.data.users.splice(0, 20));
+						this.users.push(response.data.users.splice(0, 30));
 
-					if (this.users[this.users.length - 1].length !== 20)
+					if (this.users[this.users.length - 1].length !== 30)
 						this.hitEnd = true;
 				}
 
@@ -100,11 +115,12 @@ export default {
 			} catch (error) {
 				this.$Progress.fail();
 				console.error(error);
-				this.$Modal.error({
-					title: 'Error Performing Search',
-					content: error ? error.response && error.response.data.message || error.message : 'Unknown Error'
+				return this.$dialog.alert({
+					type: 'is-danger',
+					title: 'Error performing search',
+					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
+					hasIcon: true
 				});
-				return;
 			}
 		}
 	}
@@ -113,70 +129,60 @@ export default {
 
 <style lang="sass">
 #search-users
-	display: flex
-	align-items: center
-	flex-wrap: wrap
-	flex-direction: column
-	.search-wrapper
-		width: 100%
-		max-width: 600px
-		margin-bottom: 1rem
-		display: flex
-		justify-content: space-between
-		& > button
-			flex-shrink: 4
-			margin-left: 10px
-			padding: 3px 15px
+	margin: 30px 0
+	.search
+		margin: 0 auto
+		max-width: 400px
+		.button .icon:first-child:last-child
+			margin-left: 0
+			margin-right: 6px
+		.button.submit
+			width: 100%
+			margin: 10px 0 30px
+	.results .user-grid-wrapper
+		.pagination-wrapper
+			margin: auto
+			max-width: 390px
+			&.top
+				margin: 16px auto
+			&.bottom
+				margin-top: 16px
+		.page
+			margin: 10px 30px
+			.columns
+				.column
+					margin: auto 0
+					.card-image
+						img
+							max-height: 420px
+							width: auto
+							margin: 0 auto
+					.card-content
+						padding: 1rem
+						.stats
+							text-align: center
+							.icon
+								vertical-align: sub
+								&:not(.first-of-type)
+								margin: 0 5px 0 30px
+						.avatar
+							border-radius: 2px
+						.tag
+							margin: 2px
+							& + div.field
+								margin-top: 12px
+						.tag-more
+							margin-left: -2px
+					footer
+						margin: 0
+						font-weight: bold
+			.fade-enter-active, .fade-leave-active
+				transition: opacity .2s ease-in-out both
+			.fade-enter, .fade-leave-to
+				opacity: 0
 
-	.users-wrapper
-		max-width: 1024px
-		width: 100%
-		box-sizing: border-box
-		.page-wrapper
-			text-align: center
-			.page
-				display: inline-block
-		.user-page
-			display: flex
-			flex-wrap: wrap
-			justify-content: space-around
-			&.slide-in-leave-active > div
-				animation: slide-out-bck-center 0.4s cubic-bezier(0.550, 0.085, 0.680, 0.530) both
-			.user
-				box-sizing: content-box
-				width: 480px
-				margin: 5px
-				height: 64px
-				border: 1px solid #EEE
-				box-shadow: 0 0 2px #CCC
-				img
-					width: 64px
-					height: 64px
-					margin-right: 10px
-				.username
-					position: absolute
-					top: 4px
-					font-size: 22px
-					width: 385px
-					overflow: hidden
-					white-space: nowrap
-					text-overflow: ellipsis
-					color: inherit !important
-					&:hover, &:active, &:focus
-						text-decoration: underline
-				span, i
-					position: relative
-					top: -8px
-					vertical-align: middle
-				span
-					margin-right: 10px
+			// IDK why this works, but if you remove it then changing page brings you back to the top
+			fade-enter-active + .page, .page + .fade-enter-active
+				display: none
 
-		// Once other element leaves, enter new element
-		.user-page:not(.slide-in-leave-active) + .user-page, .user-page:first-of-type
-			div
-				animation: slide-in-fwd-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both
-
-		// Hide entering element until other leaves
-		.slide-in-leave-active + .user-page, .user-page + .slide-in-leave-active
-			display: none
 </style>

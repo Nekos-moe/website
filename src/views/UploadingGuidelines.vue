@@ -1,6 +1,6 @@
 <template>
 <body>
-	<div id="base">
+	<div id="base-how-to-upload">
 		<h3>Uploading Guidelines</h3>
 		<h5>Images</h5>
 		<p>
@@ -23,8 +23,8 @@
 		<p>
 			<strong>Adult Content:</strong> You are allowed to upload images containing <u>moderate</u> amounts of sexual content.
 			These are referred to as "NSFW" (Not Safe for Work).
-			If you are not sure if an image should be labeled as "NSFW", then it should.<br>
-			Any account that uploads sexual content of minors (a.k.a. lolis) will be banned.
+			If you are not sure if an image should be labeled as "NSFW", then it should.<br><!--
+			-->Any account that uploads sexual content of minors (a.k.a. lolis) will be banned.
 		</p>
 		<h5>Tags</h5>
 		<p>
@@ -50,9 +50,9 @@ export default {
 }
 </script>
 
-<style lang="sass" scoped>
-#base
-	margin: 1rem auto auto
+<style lang="sass">
+#base-how-to-upload
+	margin: 40px auto
 	width: 80%
 	min-width: 300px
 	color: #222

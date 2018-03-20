@@ -59,14 +59,21 @@ const store = new Vuex.Store({
 		lastUpdateMessage(state, value) {
 			localStorage.setItem('lastUpdateMessage', value);
 			state.lastUpdateMessage = value;
+		},
+		setPreferences(state, value) {
+			state.preferences = value;
+			localStorage.setItem('preferences', JSON.stringify(value));
 		}
 	},
 	getters: {
 		NSFWImages(state) {
-			return state.preferences.allowNSFW === true ? undefined : false;
+			return !!state.preferences.allowNSFW;
 		},
 		blacklist(state) {
-			return state.preferences.blacklist && state.preferences.blacklist.map(tag => `-"${tag}"`).join(' ') || undefined;
+			return state.preferences.blacklist && state.preferences.blacklist.map(tag => `-"${tag}"`).join(',') || undefined;
+		},
+		userCanApprove(state) {
+			return state.user && state.user.roles && (state.user.roles.includes('admin') || state.user.roles.includes('approver'));
 		}
 	}
 });

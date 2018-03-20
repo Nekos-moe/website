@@ -20,8 +20,8 @@ module.exports = {
 	// check if imports actually resolve
 	settings: {
 		'import/resolver': {
-			'webpack': {
-				'config': 'build/webpack.base.conf.js'
+			webpack: {
+				config: 'build/webpack.base.conf.js'
 			}
 		}
 	},
@@ -37,26 +37,30 @@ module.exports = {
 		// }],
 		// allow debugger during development
 		'no-debugger': process.env.NODE_ENV === 'production' ? 2 : 0,
-		"no-console": 0,
-		"no-control-regex": 0,
-		"no-alert": 1,
-		"no-else-return": 1,
-		"no-redeclare": 2,
-		"no-useless-escape": 1,
-		"no-inner-declarations": 0,
-		"array-bracket-spacing": ["warn", "never"],
-		"brace-style": ["warn", "1tbs", {
-			"allowSingleLine": true
+		'no-console': 0,
+		'no-control-regex': 0,
+		'no-alert': 1,
+		'no-else-return': 1,
+		'no-redeclare': 2,
+		'no-useless-escape': 1,
+		'no-inner-declarations': 0,
+		'array-bracket-spacing': ['warn', 'never'],
+		'brace-style': ['warn', '1tbs', {
+			allowSingleLine: true
 		}],
-		"no-trailing-spaces": 1,
-		"space-before-function-paren": ["warn", "never"],
-		"arrow-spacing": 1,
-		"comma-spacing": ["warn", {
-			"before": false,
-			"after": true
+		'no-trailing-spaces': 1,
+		'space-before-function-paren': ['warn', {
+			asyncArrow: 'always',
+			anonymous: 'never',
+			named: 'never'
 		}],
-		"indent": ["error", "tab", {
-			"SwitchCase": 1
+		'arrow-spacing': 1,
+		'comma-spacing': ['warn', {
+			before: false,
+			after: true
+		}],
+		indent: ['error', 'tab', {
+			SwitchCase: 1
 		}],
 		'array-callback-return': 'error',
 		// 'consistent-return': 'error',
