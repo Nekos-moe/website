@@ -2,7 +2,7 @@
 
 A website for cat girl lovers
 
-[API repo](https://github.com/brussell98/catgirls-api)   
+[API repo](https://github.com/brussell98/catgirls-api)
 [Trello board](https://trello.com/b/R14Gr3ae/catgirls-website)
 
 ## Build Setup
@@ -30,4 +30,4 @@ npm run e2e
 npm test
 ```
 
-For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](https://vue-loader.vuejs.org).

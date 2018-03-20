@@ -1,44 +1,26 @@
 <template>
 <div id="base-upload">
-	<Modal type="success" v-model="successModal" title="Image Uploaded">
-		<p>You image has successfully been uploaded.</p>
-		<router-link :to="'/post/' + modalLinkId">You can view it here</router-link>
-	</Modal>
-	<Modal type="warning" v-model="dupeModal" title="Image Already Uploaded">
-		<p>Sorry, someone else beat you to it :(</p>
-		<router-link :to="'/post/' + modalLinkId">View post</router-link>
-	</Modal>
 	<div class="image-picker">
 		<input type="file" id="image" accept=".png,.jpg,.jpeg" @change="previewImage">
 		<button :class="{ 'has-image': hasImage }" id="image-select" @click="clickImage">Select Image</button>
 		<p :class="{ 'has-image': hasImage }" id="image-details"></p>
-		<p v-show="smallSize" id="small-size-warning">This image is less than 100 KB.<br>Are you sure it matches our uploading guidelines?</p>
+		<b-message type="is-warning" id="small-size-warning" v-show="smallSize" has-icon>This image is less than 100 KB.<br>Are you sure it follows our uploading guidelines?</b-message>
 	</div>
 	<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
-	<div class="import">
-		<Button v-show="!promptingUser" @click="promptingUser = true">Import data from danbooru</Button>
-		<Input v-show="promptingUser" class="input" name="import-id" number placeholder="Post ID" value="" @enter="importTags" size="large"></Input>
-		<Button v-show="promptingUser" @click="importTags">Import</Button>
+
+	<div class="form">
+		<b-field label="Tags" :message="['Required - Use spaces, not underscores or dashes']">
+			<b-taginput v-model="details.tags" maxtags="80" maxlength="50" size="is-small" placeholder="tail"></b-taginput>
+		</b-field>
+		<b-field label="Artist" message="Use <a href='https://www.iqdb.org/' target='_blank'>iqdb</a> to find the source">
+			<b-input :maxlength="60" icon="brush" v-model="details.artist"></b-input>
+		</b-field>
+		<b-field label="NSFW">
+			<b-switch type="is-danger" v-model="details.nsfw">This post contains adult content</b-switch>
+		</b-field>
+		<button class="button" @click="promptForImportId"><b-icon icon="import"></b-icon>Import data from danbooru</button>
+		<button class="button is-primary" @click="upload" :class="{ 'is-loading': uploading }"><b-icon icon="upload"></b-icon>Upload</button>
 	</div>
-	<Form ref="details" :model="details" :rules="rules" label-position="left" class="details">
-		<Form-item label="Tags" prop="tags">
-			<p style="font-size: 14px; clear: both; display: block; line-height: 16px; margin-bottom: 8px">Seperate with a comma. Use spaces, not underscores or dashes</p>
-			<Input v-model="details.tags" type="textarea" placeholder="cat girls, best girls" autosize></Input>
-		</Form-item>
-		<Form-item label="Artist" prop="artist">
-			<p style="font-size: 14px; clear: both; display: block; line-height: 16px; margin-bottom: 8px">Use <a href="https://www.iqdb.org/" target="_blank">iqdb</a> to find the source</p>
-			<Input v-model="details.artist" placeholder="Artist" icon="paintbrush"></Input>
-		</Form-item>
-		<Form-item label="Adult content?" label-position="right" prop="nsfw">
-			<i-switch v-model="details.nsfw" value="details.nsfw" size="large">
-				<span slot="open">Yes</span>
-				<span slot="close">No</span>
-			</i-switch>
-		</Form-item>
-		<Form-item>
-			<Button type="success" @click="upload()" long>Upload</Button>
-		</Form-item>
-	</Form>
 </div>
 </template>
 
@@ -47,19 +29,13 @@ export default {
 	data() {
 		return {
 			hasImage: false,
-			promptingUser: false,
 			details: {
-				tags: '',
+				tags: [],
 				artist: '',
 				nsfw: false
 			},
-			rules: {
-				tags: [{ required: true, whitespace: true, message: 'All posts require tags', trigger: 'blur' }],
-			},
-			successModal: false,
-			dupeModal: false,
-			modalLinkId: '',
-			smallSize: false
+			smallSize: false,
+			uploading: false
 		};
 	},
 	computed: {
@@ -68,33 +44,65 @@ export default {
 		}
 	},
 	methods: {
-		upload() {
+		validate(e) {
+			let name = e.target.name;
+			if (!this.validity[name])
+				return;
+
+			if (!this.validity[name].check(e.target.value))
+				this.validity[name].message = this.validity[name].failMessage;
+			else if (this.validity[name].message)
+				this.validity[name].message = '';
+		},
+		async upload() {
+			if (this.uploading)
+				return;
+
+			if (this.details.tags.length === 0)
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
+					title: 'No Tags',
+					message: 'All posts are required to have tags. If you need help tagging posts then head over to the uploading guidelines.'
+				});
+
+			let proceed = true;
+			if (this.details.tags.length <= 5)
+				proceed = await this.confirm('Low Tag Count', "Your post doesn't have many tags! We require all posts to have detailed tags so they can be searched easily. If you need help tagging posts then head over to the uploading guidelines.");
+
+			if (proceed === false)
+				return;
+
 			let imageInput = document.getElementById('image');
 			if (!imageInput.files[0]) {
-				this.$Modal.warning({
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
 					title: 'Missing Image',
-					content: 'Please select an image to post'
+					message: 'Please select an image to post.'
 				});
-				return;
 			}
 			if (imageInput.files[0].size > 3145728) {
-				this.$Modal.warning({
+				return this.$dialog.alert({
+					type: 'is-warning',
+					hasIcon: true,
 					title: 'Image Too Large',
-					content: 'The image you selected is too large. Select an image that is less than 3MB in size.'
+					message: 'The image you selected is too large. Select an image that is less than 3MB in size.'
 				});
-				return;
 			}
 
+			this.uploading = true;
 			this.$Progress.start();
 
 			let data = new FormData();
 			data.append('image', imageInput.files[0]);
 			data.append('artist', this.details.artist);
-			data.append('tags', this.details.tags);
+			for (const tag of this.details.tags)
+				data.append('tags[]', tag);
 			if (this.details.nsfw)
 				data.append('nsfw', 'true');
 
-			this.$http.post(API_BASE_URL + 'images', data, {
+			return this.$http.post(API_BASE_URL + 'images', data, {
 				responseType: 'json',
 				headers: {
 					'Authorization': localStorage.getItem('token')
@@ -108,23 +116,63 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
-				this.details.tags = undefined;
-				this.details.artist = undefined;
+				this.details.tags = [];
+				this.details.artist = '';
 				this.details.nsfw = false;
 
-				this.modalLinkId = response.data.image.id;
-				this.successModal = true;
+				this.uploading = false;
+				return this.$dialog.alert({
+					type: 'is-success',
+					hasIcon: true,
+					title: 'Uploaded',
+					message: 'You image has successfully been uploaded. It is now pending approval.',
+					confirmText: 'View Post',
+					onConfirm: () => {
+						this.$router.push('/post/' + response.data.image.id);
+					},
+					canCancel: ['escape', 'button', 'outside'],
+					cancelText: 'Close'
+				});
 			}).catch(error => {
+				this.uploading = false;
 				this.$Progress.fail();
 				if (error.response && error.response.data.id) {
-					this.modalLinkId = error.response.data.id;
-					this.dupeModal = true;
-					return;
+					return this.$dialog.alert({
+						type: 'is-info',
+						hasIcon: true,
+						title: 'Image Already Uploaded',
+						message: 'Sorry, someone else beat you to it :(',
+						confirmText: 'View Post',
+						onConfirm: () => {
+							this.$router.push('/post/' + response.data.id);
+						},
+						canCancel: ['escape', 'button', 'outside'],
+						cancelText: 'Close'
+					});
 				}
 				console.error(error);
-				this.$Modal.error({
+				return this.$dialog.alert({
+					type: 'is-danger',
+					hasIcon: true,
 					title: 'Error Uploading Image',
-					content: error.response && error.response.data.message || error.message
+					message: error.response && error.response.data.message || error.message
+				});
+			});
+		},
+		confirm(title, body) {
+			return new Promise(resolve => {
+				return this.$dialog.confirm({
+					title,
+					message,
+					type: 'is-warning',
+					hasIcon: true,
+					confirmText: 'Upload anyways',
+					onConfirm() {
+						return resolve(true);
+					},
+					onCancel() {
+						return resolve(false);
+					},
 				});
 			});
 		},
@@ -141,7 +189,7 @@ export default {
 			}
 
 			let reader = new FileReader(),
-				filename = e.target.files[0].name.replace(/\..+?$/, ''),
+				filename = e.target.files[0].name,
 				size = e.target.files[0].size;
 
 			size = size / 1024;
@@ -166,28 +214,42 @@ export default {
 
 			return reader.readAsDataURL(e.target.files[0]);
 		},
-		importTags() {
-			let id = document.getElementsByName('import-id')[0];
-
+		promptForImportId() {
+			return this.$dialog.prompt({
+				message: "What is the post's ID?",
+				inputAttrs: {
+					type: 'number',
+					placeholder: '/post/...',
+				},
+				onConfirm: value => this.importTags(value)
+			});
+		},
+		importTags(id) {
 			this.$Progress.start();
-			this.$http.get(`https://danbooru.donmai.us/posts/${id.value}.json`).then(response => {
+			return this.$http.get(`https://danbooru.donmai.us/posts/${id}.json`).then(response => {
 				this.$Progress.finish();
-				this.promptingUser = false;
 
-				this.details.tags = response.data.tag_string
-					.replace(response.data.tag_string_artist, '')
-					.replace(/(md5_mismatch|commentary_request|commentary|translation_request|translated|check_translation|translation_check|translation_note|copyright_?[\w_]*)/g, '') // remove unwanted tags
-					.replace(/ +/g, ', ');
-				this.details.artist = response.data.tag_string_artist;
-				id.value = null;
+				let tags = response.data.tag_string_general;
+				if (response.data.tag_string_copyright)
+					tags += ' ' + response.data.tag_string_copyright;
+				if (response.data.tag_string_character)
+					tags += ' ' + response.data.tag_string_character;
+
+				this.details.tags = tags.replace(/ +/g, ',')
+					.replace(/_/g, ' ')
+					.replace(/([0-9]\+?)(girls?|boys?|koma)/g, '$1 $2')
+					.split(',');
+				this.details.artist = response.data.tag_string_artist.replace(/_/g, ' ');
 			}).catch(error => {
 				this.$Progress.fail();
-				this.promptingUser = false;
 
 				console.error(error);
-				this.$Modal.error({
+
+				return this.$dialog.alert({
+					type: 'is-danger',
+					hasIcon: true,
 					title: 'Error',
-					content: error.response && error.response.data.message || error.message
+					message: error.response && error.response.data.message || error.message
 				});
 			});
 		}
@@ -197,6 +259,9 @@ export default {
 
 <style lang="sass">
 #base-upload
+	.button .icon:first-child:last-child
+		margin-left: 0
+		margin-right: 6px
 	& > *
 		margin: auto
 	& > p
@@ -207,12 +272,17 @@ export default {
 		.input
 			width: 160px
 			margin: 0 10px
-	.details
+	.form
 		width: 100%
-		max-width: 400px
-		margin-top: 2rem
+		max-width: 600px
+		margin: 40px auto
+		font-family: 'Nunito', sans-serif
+		.button
+			width: 100%
+			&:first-of-type
+				margin: 30px 0 20px
 	.image-picker
-		margin: 2rem auto
+		margin: 40px auto
 		text-align: center
 		font-family: 'Nunito', sans-serif
 		button
@@ -228,10 +298,8 @@ export default {
 			border-radius: 1rem
 			box-shadow: none
 			background: #fff
-			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s, border-width .2s
+			transition: background 1.5s, box-shadow .3s, border-color .3s, color .3s, text-shadow .3s
 			outline: none !important
-			&:hover:not(.has-image)
-				border-width: 5px
 			&.has-image
 				color: transparent
 				border: none
@@ -247,52 +315,7 @@ export default {
 			&.has-image
 				display: block
 		#small-size-warning
-			color: #ff3300
+			margin: 10px auto 0
+			max-width: 600px
 
-	.details
-		width: 100%
-		max-width: 400px
-		margin: 2rem auto auto
-		color: #222
-		font-family: 'Nunito', sans-serif
-		h4
-			text-align: center
-			font-size: 2rem
-			margin: 1rem
-		input:not([type="checkbox"]), button
-			display: block
-		input[type="checkbox"]
-			width: auto
-			vertical-align: middle
-			margin-left: 5px
-			//margin-top: 1rem
-		input, textarea
-			//margin: .5rem 0 1rem 0
-			padding: 4px 8px
-			width: 100%
-			font-family: 'Nunito', sans-serif
-			font-size: 14px
-			border: 1px solid #CCC
-			border-radius: 3px
-			outline: #4ACFFF auto 0
-			&:focus
-				border-color: #4ACFFF
-				outline: #4ACFFF auto 5px
-		textarea
-			height: 68px
-			resize: vertical
-		button
-			margin: .5rem auto
-			padding: 5px 10px
-			cursor: pointer
-			font-family: 'Nunito', sans-serif
-			font-size: 18px
-			color: #FFF
-			background-color: #96abec
-			box-shadow: 0 0 3px rgba(#96abec, .4)
-			border: none
-			border-radius: 3px
-			transition: background .3s
-			&:hover, &:focus
-				background: darken(#96abec, 5)
 </style>

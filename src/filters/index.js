@@ -1,7 +1,5 @@
-const Nf = new Intl.NumberFormat('en-US');
-
 export function humanize(number) {
-	return Nf.format(number);
+	return number ? number.toLocaleString() : 0;
 }
 
 export function deCamelCase(string) {
