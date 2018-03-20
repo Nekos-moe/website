@@ -85,7 +85,7 @@
 									<div class="media">
 										<div class="media-left">
 											<figure class="image is-48x48">
-												<img class="avatar" :src="user.avatar || require('@/../assets/images/404.jpg')">
+												<img class="avatar" :src="user.avatar || require('@/../static/images/404.jpg')">
 											</figure>
 										</div>
 										<div class="media-content">

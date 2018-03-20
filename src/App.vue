@@ -72,7 +72,7 @@ $link-focus-border: $primary
 @import "~buefy/src/scss/buefy"
 
 html
-	background-image: url("../assets/images/60-lines.png")
+	background-image: url("../static/images/60-lines.png")
 
 body
 	font-size: 100%

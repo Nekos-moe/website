@@ -19,7 +19,7 @@
 			<b-switch type="is-danger" v-model="details.nsfw">This post contains adult content</b-switch>
 		</b-field>
 		<button class="button" @click="promptForImportId"><b-icon icon="import"></b-icon>Import data from danbooru</button>
-		<button class="button is-primary" @click="upload" :class="{ isLoading: uploading }"><b-icon icon="upload"></b-icon>Upload</button>
+		<button class="button is-primary" @click="upload" :class="{ 'is-loading': uploading }"><b-icon icon="upload"></b-icon>Upload</button>
 	</div>
 </div>
 </template>

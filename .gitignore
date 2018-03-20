@@ -7,3 +7,5 @@ test/e2e/reports
 selenium-debug.log
 .idea/
 .vscode/
+.yarn-error*
+.yarn-log*

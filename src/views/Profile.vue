@@ -2,7 +2,7 @@
 <div id="base-profile">
 	<b-loading :active="!profile" :canCancel="true"></b-loading>
 	<div class="profile-details" v-if="profile">
-		<img :src="profile.avatar || require('@/../assets/images/404.jpg')" class="avatar-profile">
+		<img :src="profile.avatar || require('@/../static/images/404.jpg')" class="avatar-profile">
 		<p class="username">{{ profile.username }}
 			<b-tag v-for="role of profile.roles" :key="role" type="is-info" :closable="canEditRoles" @close="revokeRole(role)">{{ role | deCamelCase }}</b-tag>
 			<button class="button is-success is-small" v-if="canEditRoles" @click="promptGrantRole">Add role</button>
