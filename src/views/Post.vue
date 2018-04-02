@@ -138,7 +138,7 @@ export default {
 				title: 'Delete Post',
 				message: 'Are you sure you want to delete this post? This action cannot be undone.',
 				confirmText: 'Delete',
-				onConfirm: () => this.approve(id),
+				onConfirm: () => this.deletePost(),
 				hasIcon: true
 			});
 		},
