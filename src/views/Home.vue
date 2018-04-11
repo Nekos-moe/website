@@ -147,7 +147,7 @@ export default {
 				}, { responseType: 'json' });
 
 				const topResponse = await this.$http.post(API_BASE_URL + 'images/search', {
-					sort: 'top',
+					sort: 'likes',
 					limit: 8,
 					skip: Math.random() * 20 | 0, // Skip a random amount
 					nsfw: this.showNsfw === true ? undefined : false,

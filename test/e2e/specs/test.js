@@ -12,7 +12,7 @@ module.exports = {
 			.maximizeWindow()
 			.url(devServer)
 			.waitForElementVisible('#app', 20000).pause(5000)
-			.click('.dialog.modal footer button').pause(1000)
+			// .click('.dialog.modal footer button').pause(1000)
 			.assert.elementCount('#randomTags .tag-list a', 20, 'Random tags present')
 			.assert.elementPresent('#topPosts .post-previews')
 			.assert.elementCount('#topPosts .post-previews img', 8, 'Post previews displaying on page')
