@@ -8,7 +8,7 @@
 			If you can't find a better upload online, use <a href="https://github.com/lltcggie/waifu2x-caffe/releases" target="_blank">waifu2x</a> to de-noise it.
 		</p>
 		<p>
-			<strong>Low Effort Images:</strong> Do not upload simple or low effort drawings.
+			<strong>Low Effort Images:</strong> Nekos.moe is intended to be a collection of high-quality images. Do not upload simple or low effort drawings. Examples include sketches, WIP images, and self-posts when learning to draw.
 		</p>
 		<p>
 			<strong>Content:</strong> This is a site mainly for cat girls, but other related images such as fox girls are allowed.
@@ -66,4 +66,6 @@ export default {
 		margin-top: 3rem
 		margin-bottom: 1rem
 		margin-left: 3rem
+	p + p
+		margin-top: 6px
 </style>

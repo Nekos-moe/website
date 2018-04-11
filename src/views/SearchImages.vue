@@ -113,7 +113,17 @@ export default {
 				uploader: '',
 			},
 			hitEnd: false,
-			firstSearch: true
+			firstSearch: true,
+			queryParsers: {
+				tags: i => i,
+				nsfw: i => i,
+				sort: i => i,
+				after: i => new Date(i),
+				before: i => new Date(i),
+				artist: i => i,
+				uploader: i => i,
+				page: i => parseInt(i, 10)
+			}
 		};
 	},
 	components: {
@@ -155,7 +165,7 @@ export default {
 					limit: 27,
 					skip: !isNew ? this.posts.length * 9 : 0,
 					tags: this.options.tags
-						? this.options.tags + (blacklist ? ' ' + blacklist : '')
+						? this.options.tags + (blacklist ? ', ' + blacklist : '')
 						: blacklist,
 					posted_after: this.options.after ? this.options.after.valueOf() : undefined,
 					posted_before: this.options.before ? this.options.before.valueOf() : undefined,
@@ -201,6 +211,24 @@ export default {
 	beforeMount() {
 		if (this.$store.getters.NSFWImages === true)
 			this.options.nsfw = 'undefined';
+
+		let doSearch = false;
+		if (Object.keys(this.$route.query).length !== 0) {
+			for (const key of Object.keys(this.options)) {
+				if (this.$route.query[key]) {
+					this.options[key] = this.queryParsers[key](this.$route.query[key]);
+					doSearch = true;
+				}
+			}
+
+			if (this.$route.query.page) {
+				this.page = this.queryParsers.page(this.$route.query.page);
+				doSearch = true;
+			}
+		}
+
+		if (doSearch)
+			this.getResults();
 	}
 }
 </script>

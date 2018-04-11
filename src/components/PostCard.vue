@@ -2,7 +2,7 @@
 	<div class="post-card-component card">
 		<div class="card-image">
 			<figure class="image">
-				<img :src="THUMBNAIL_BASE_URL + post.id" @click="imageModal">
+				<img :class="{ blur }" :src="THUMBNAIL_BASE_URL + post.id" @click="imageModal">
 			</figure>
 		</div>
 		<div class="card-content">
@@ -25,7 +25,7 @@
 		</div>
 		<footer class="card-footer">
 			<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
-			<a v-if="loggedIn" @click="like" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
+			<a v-if="loggedIn" @click="like()" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
 			<a v-if="loggedIn" @click="like('favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
 		</footer>
 	</div>
@@ -40,6 +40,7 @@ export default {
 	},
 	props: {
 		post: Object,
+		blur: Boolean
 	},
 	computed: {
 		user() {
@@ -88,12 +89,19 @@ export default {
 <style lang="sass">
 .post-card-component
 	.card-image
-		img
-			max-height: 420px
-			width: auto
-			margin: 0 auto
-			&:hover
-				cursor: pointer
+		.image
+			overflow: hidden
+			img
+				max-height: 420px
+				width: auto
+				margin: 0 auto
+				&:hover
+					cursor: pointer
+				&.blur
+					filter: blur(10px) grayscale(100%)
+					transition: filter .2s linear .15s
+					&:hover
+						filter: blur(0)
 	.card-content
 		padding: 1rem
 		.avatar

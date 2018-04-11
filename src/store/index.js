@@ -7,9 +7,10 @@ const store = new Vuex.Store({
 	state: {
 		hasToken: !!localStorage.getItem('token'),
 		loggedIn: null,
-		user: {},
-		preferences: localStorage.hasOwnProperty('preferences') ? JSON.parse(localStorage.getItem('preferences')) : {},
-		lastUpdateMessage: localStorage.getItem('lastUpdateMessage')
+		user: { },
+		preferences: localStorage.hasOwnProperty('preferences') ? JSON.parse(localStorage.getItem('preferences')) : { },
+		lastUpdateMessage: localStorage.getItem('lastUpdateMessage'),
+		tagCache: null
 	},
 	actions: {
 		async getSelf({ commit }) {
@@ -21,7 +22,7 @@ const store = new Vuex.Store({
 			}
 
 			try {
-				let response = await Vue.prototype.$http.get(API_BASE_URL + 'user/@me', {
+				const response = await Vue.prototype.$http.get(API_BASE_URL + 'user/@me', {
 					responseType: 'json',
 					headers: { 'Authorization': token }
 				});
@@ -38,6 +39,23 @@ const store = new Vuex.Store({
 					return console.error(error.response);
 				return commit('logout');
 			}
+		},
+		async getTags({ state, getters }, force = false) {
+			try {
+				if (!force && state.tagCache !== null)
+					return;
+
+				const response = await Vue.prototype.$http.get(API_BASE_URL + 'tags', {
+					params: { nsfw: getters.NSFWImages === true ? undefined : false }
+				});
+
+				state.tagCache = response.data.tags;
+				return;
+			} catch (error) {
+				if (!error.response)
+					return console.error(error.message);
+				return console.error(error.response);
+			}
 		}
 	},
 	mutations: {
@@ -53,7 +71,7 @@ const store = new Vuex.Store({
 		logout(state) {
 			state.loggedIn = false;
 			state.hasToken = false;
-			state.user = {};
+			state.user = { };
 			localStorage.removeItem('token');
 		},
 		lastUpdateMessage(state, value) {

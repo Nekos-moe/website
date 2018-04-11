@@ -41,7 +41,7 @@
 			<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
 				<div class="columns is-multiline is-centered">
 					<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
-						<post-card :post="post" />
+						<post-card :post="post" :blur="!allowNSFW && post.nsfw" />
 					</div>
 				</div>
 			</div>
@@ -88,6 +88,9 @@ export default {
 		},
 		loggedIn() {
 			return this.$store.state.loggedIn;
+		},
+		allowNSFW() {
+			return this.$store.getters.NSFWImages;
 		}
 	},
 	methods: {
@@ -132,7 +135,7 @@ export default {
 					return;
 
 				let ids = this.mode === 'likes' ? this.profile.likes : this.profile.favorites;
-				ids = ids.slice(9 * (this.page - 1), 9 * (this.page - 1) + 27);
+				ids = ids.slice(((this.posts.length || 1) - 1) * 9, (this.posts.length - 1) * 9 + 27);
 
 				let response = await this.$http.post(API_BASE_URL + 'batch/images', { ids }, {
 					headers: {
@@ -169,7 +172,7 @@ export default {
 				let response = await this.$http.post(API_BASE_URL + 'images/search', {
 					sort: 'recent',
 					limit: 27,
-					skip: this.page !== 1 ? (this.page + 1) * 9 : 0,
+					skip: this.posts.length * 9,
 					uploader: {
 						id: this.profile.id
 					}
@@ -324,6 +327,11 @@ export default {
 	watch: {
 		async $route() {
 			await this.getUser();
+
+			this.page = 1;
+			this.posts = [];
+			this.hitEnd = false;
+
 			if (this.mode === 'uploads')
 				this.getUploads();
 			else
