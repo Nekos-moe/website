@@ -75,35 +75,7 @@
 				<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
 					<div class="columns is-multiline is-centered">
 						<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
-							<div class="card" :id="'post-' + post.id">
-								<div class="card-image">
-									<figure class="image">
-										<img :src="THUMBNAIL_BASE_URL + post.id" @click="imageModal(post.id)">
-									</figure>
-								</div>
-								<div class="card-content">
-									<div class="media">
-										<div class="media-left">
-											<figure class="image is-48x48">
-												<img class="avatar" :src="user.avatar || require('@/../static/images/404.jpg')">
-											</figure>
-										</div>
-										<div class="media-content">
-											<p class="title is-5"><router-link :to="'/user/' + post.uploader.id" :class="{ 'has-text-danger': post.nsfw }">{{ post.uploader.username }}</router-link></p>
-											<p class="subtitle is-6">{{ new Date(post.createdAt).toLocaleString() }}</p>
-										</div>
-									</div>
-
-									<p>Artist: {{ post.artist || 'Unknown' }}</p>
-									<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag><!--
-									--><b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
-								</div>
-								<footer class="card-footer">
-									<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
-									<a v-if="loggedIn" @click="like(post.id)" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
-									<a v-if="loggedIn" @click="like(post.id, 'favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
-								</footer>
-							</div>
+							<post-card :post="post" />
 						</div>
 					</div>
 				</div>
@@ -123,6 +95,8 @@
 </template>
 
 <script>
+import PostCard from '@/components/PostCard';
+
 export default {
 	data() {
 		return {
@@ -139,8 +113,21 @@ export default {
 				uploader: '',
 			},
 			hitEnd: false,
-			firstSearch: true
+			firstSearch: true,
+			queryParsers: {
+				tags: i => i,
+				nsfw: i => i,
+				sort: i => i,
+				after: i => new Date(i),
+				before: i => new Date(i),
+				artist: i => i,
+				uploader: i => i,
+				page: i => parseInt(i, 10)
+			}
 		};
+	},
+	components: {
+		PostCard
 	},
 	computed: {
 		user() {
@@ -178,7 +165,7 @@ export default {
 					limit: 27,
 					skip: !isNew ? this.posts.length * 9 : 0,
 					tags: this.options.tags
-						? this.options.tags + (blacklist ? ' ' + blacklist : '')
+						? this.options.tags + (blacklist ? ', ' + blacklist : '')
 						: blacklist,
 					posted_after: this.options.after ? this.options.after.valueOf() : undefined,
 					posted_before: this.options.before ? this.options.before.valueOf() : undefined,
@@ -219,39 +206,29 @@ export default {
 					hasIcon: true
 				});
 			}
-		},
-		imageModal(id) {
-			return this.$modal.open(
-				`<div class="image">
-					<img class="modal-image" src="${IMAGE_BASE_URL}${id}">
-				</div>`
-			)
-		},
-		async like(id, type = 'likes') {
-			try {
-				await this.$http.patch(`${API_BASE_URL}image/${id}/relationship`, {
-					type: type.slice(0, -1),
-					create: !this.user[type].includes(id)
-				}, { headers: { 'Authorization': localStorage.getItem('token') } });
-
-				if (this.user[type].includes(id))
-					this.user[type].splice(this.user[type].indexOf(id), 1);
-				else
-					this.user[type].push(id);
-			} catch (error) {
-				console.error(error);
-				return this.$dialog.alert({
-					type: 'is-danger',
-					title: 'Error updating image relationship',
-					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
-					hasIcon: true
-				});
-			}
 		}
 	},
 	beforeMount() {
 		if (this.$store.getters.NSFWImages === true)
 			this.options.nsfw = 'undefined';
+
+		let doSearch = false;
+		if (Object.keys(this.$route.query).length !== 0) {
+			for (const key of Object.keys(this.options)) {
+				if (this.$route.query[key]) {
+					this.options[key] = this.queryParsers[key](this.$route.query[key]);
+					doSearch = true;
+				}
+			}
+
+			if (this.$route.query.page) {
+				this.page = this.queryParsers.page(this.$route.query.page);
+				doSearch = true;
+			}
+		}
+
+		if (doSearch)
+			this.getResults();
 	}
 }
 </script>
@@ -286,28 +263,8 @@ export default {
 					margin-bottom: 16px
 				&.bottom
 					margin-top: 16px
-			.page
-				.columns
-					.column
-						margin: auto 0
-						.card-image
-							img
-								max-height: 420px
-								width: auto
-								margin: 0 auto
-								&:hover
-									cursor: pointer
-						.card-content
-							padding: 1rem
-							.avatar
-								border-radius: 2px
-							.tag
-								margin: 2px
-								& + div.field
-									margin-top: 12px
-						footer
-							margin: 0
-							font-weight: bold
+			.page .columns .column
+				margin: auto 0
 		.fade-enter-active, .fade-leave-active
 			transition: opacity .2s ease-in-out both
 		.fade-enter, .fade-leave-to

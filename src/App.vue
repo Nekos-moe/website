@@ -8,7 +8,7 @@
 		</transition>
 	</div>
 	<footer>
-		&copy; Brussell 2017 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
+		&copy; Brussell 2018 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
 		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="/api-docs/index.html" target="_blank">API docs here</a>
 	</footer>
 </div>
@@ -42,14 +42,14 @@ export default {
 			this.$Progress.finish();
 		});
 
-		if (this.$store.state.lastUpdateMessage !== 'beta7')
-			return this.$dialog.alert({
-				type: 'is-info',
-				title: 'New Update!',
-				message: `It's been a while since the site got updated, but it's finally done! You'll notice some significant changes, as I've re-designed the entire site using <a href="https://buefy.github.io/" target="_blank">Buefy</a>. The version you see now is very close to what the site will be like when it leaves beta.<br><br>One major change is the new <del>image previews</del> post cards. They allow you to see information and perform actions without leaving the page. Clicking the thumbnail expands the image, buttons allow liking/favoriting, the uploader is shown, and post metadata is visible.<br><br>A change that uploaders will need to know is that all posts now require approval to be listed on the site. Until they are reviewed the will just be unlisted. Make sure you include detailed tags in your post (in the correct format) or it may be denied.<br><br>Lastly, I've finally added a basic settings page. You can now decide if you'd like NSFW posts visible by default and what you never want to see. In the next update this page will be expanded to include avatar uploading, password and email changing, and more.<br> - Brussell <small>(Lead Developer)</small>`,
-				onConfirm: () => this.$store.commit('lastUpdateMessage', 'beta7'),
-				canCancel: false
-			});
+		// if (this.$store.state.lastUpdateMessage !== 'beta8')
+		// 	return this.$dialog.alert({
+		// 		type: 'is-info',
+		// 		title: 'Welcome to the Nekos.moe Beta!',
+		// 		message: ` - Brussell <small>(Lead Developer)</small>`,
+		// 		onConfirm: () => this.$store.commit('lastUpdateMessage', 'beta8'),
+		// 		canCancel: false
+		// 	});
 	}
 }
 </script>
@@ -72,7 +72,8 @@ $link-focus-border: $primary
 @import "~buefy/src/scss/buefy"
 
 html
-	background-image: url("../static/images/60-lines.png")
+	// background-image: url("../static/images/60-lines.png")
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%2396abec' fill-opacity='0.3' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")
 
 body
 	font-size: 100%

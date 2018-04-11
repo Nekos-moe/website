@@ -26,7 +26,7 @@
 			<b-tab-item label="Posts" icon="format-list-bulleted"></b-tab-item>
 			<b-tab-item label="Likes" icon="thumb-up"></b-tab-item>
 			<b-tab-item label="Favorites" icon="heart"></b-tab-item>
-			<b-tab-item label="Pending" icon="checkbox-multiple-marked-outline" v-if="profile.id === user.id || userCanApprove"></b-tab-item>
+			<b-tab-item label="Pending" icon="checkbox-multiple-marked-outline" v-if="profile && profile.id === user.id || userCanApprove"></b-tab-item>
 		</b-tabs>
 		<div class="pagination-wrapper top">
 			<b-pagination
@@ -41,24 +41,7 @@
 			<div class="page" v-for="(_page, i) of posts" :key="i" v-if="page === i + 1">
 				<div class="columns is-multiline is-centered">
 					<div class="column is-one-third" v-for="(post, i2) of _page" :key="i2">
-						<div class="card" :id="'post-' + post.id">
-							<div class="card-image">
-								<figure class="image">
-									<img :src="THUMBNAIL_BASE_URL + post.id" @click="imageModal(post.id)">
-								</figure>
-							</div>
-							<div class="card-content">
-								<p>Posted: {{ new Date(post.createdAt).toLocaleString() }}</p>
-								<p>Artist: {{ post.artist || 'Unknown' }}</p>
-								<b-tag v-for="(tag, i) of post.tags.slice(0, 12)" :key="i" :type="post.nsfw ? 'is-danger' : 'is-primary'">{{ tag }}</b-tag><!--
-								--><b-tag v-if="post.tags.length > 12" class="tag-more" :type="post.nsfw ? 'is-danger' : 'is-primary'">+ {{post.tags.length - 12}} more</b-tag>
-							</div>
-							<footer class="card-footer">
-								<router-link class="card-footer-item" :to="'/post/' + post.id">View</router-link>
-								<a v-if="loggedIn && mode !== 'pending'" @click="like(post.id)" class="card-footer-item has-text-success">{{ user.likes.includes(post.id) ? 'Unlike' : 'Like' }}</a>
-								<a v-if="loggedIn && mode !== 'pending'" @click="like(post.id, 'favorites')" class="card-footer-item has-text-danger">{{ user.favorites.includes(post.id) ? 'Unfavorite' : 'Favorite' }}</a>
-							</footer>
-						</div>
+						<post-card :post="post" :blur="!allowNSFW && post.nsfw" />
 					</div>
 				</div>
 			</div>
@@ -77,6 +60,8 @@
 </template>
 
 <script>
+import PostCard from '@/components/PostCard';
+
 export default {
 	data() {
 		return {
@@ -88,6 +73,9 @@ export default {
 			hitEnd: false
 		};
 	},
+	components: {
+		PostCard
+	},
 	computed: {
 		user() {
 			return this.$store.state.user;
@@ -95,11 +83,14 @@ export default {
 		canEditRoles() {
 			return this.user && this.user.roles && this.user.roles.includes('admin')
 		},
-		canApprove() {
+		userCanApprove() {
 			return this.$store.getters.userCanApprove;
 		},
 		loggedIn() {
 			return this.$store.state.loggedIn;
+		},
+		allowNSFW() {
+			return this.$store.getters.NSFWImages;
 		}
 	},
 	methods: {
@@ -144,7 +135,7 @@ export default {
 					return;
 
 				let ids = this.mode === 'likes' ? this.profile.likes : this.profile.favorites;
-				ids = ids.slice(9 * (this.page - 1), 9 * (this.page - 1) + 27);
+				ids = ids.slice(((this.posts.length || 1) - 1) * 9, (this.posts.length - 1) * 9 + 27);
 
 				let response = await this.$http.post(API_BASE_URL + 'batch/images', { ids }, {
 					headers: {
@@ -181,7 +172,7 @@ export default {
 				let response = await this.$http.post(API_BASE_URL + 'images/search', {
 					sort: 'recent',
 					limit: 27,
-					skip: this.page !== 1 ? (this.page + 1) * 9 : 0,
+					skip: this.posts.length * 9,
 					uploader: {
 						id: this.profile.id
 					}
@@ -214,7 +205,7 @@ export default {
 		},
 		async getPending() {
 			try {
-				if (!this.profile || (this.profile.id !== this.user.id && !this.canApprove))
+				if (!this.profile || (this.profile.id !== this.user.id && !this.userCanApprove))
 					return;
 
 				let response = await this.$http.get(API_BASE_URL + 'pending/list', {
@@ -264,34 +255,6 @@ export default {
 				this.getPending();
 			else
 				this.getImages();
-		},
-		imageModal(id) {
-			return this.$modal.open(
-				`<div class="image">
-					<img class="modal-image" src="${IMAGE_BASE_URL}${id}">
-				</div>`
-			)
-		},
-		async like(id, type = 'likes') {
-			try {
-				await this.$http.patch(`${API_BASE_URL}image/${id}/relationship`, {
-					type: type.slice(0, -1),
-					create: !this.user[type].includes(id)
-				}, { headers: { 'Authorization': localStorage.getItem('token') } });
-
-				if (this.user[type].includes(id))
-					this.user[type].splice(this.user[type].indexOf(id), 1);
-				else
-					this.user[type].push(id);
-			} catch (error) {
-				console.error(error);
-				return this.$dialog.alert({
-					type: 'is-danger',
-					title: 'Error updating image relationship',
-					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
-					hasIcon: true
-				});
-			}
 		},
 		async revokeRole(role) {
 			try {
@@ -364,6 +327,11 @@ export default {
 	watch: {
 		async $route() {
 			await this.getUser();
+
+			this.page = 1;
+			this.posts = [];
+			this.hitEnd = false;
+
 			if (this.mode === 'uploads')
 				this.getUploads();
 			else
@@ -428,28 +396,8 @@ export default {
 				margin: 16px auto
 			&.bottom
 				margin-top: 16px
-		.page
-			.columns
-				.column
-					margin: auto 0
-					.card-image
-						img
-							max-height: 420px
-							width: auto
-							margin: 0 auto
-							&:hover
-								cursor: pointer
-					.card-content
-						padding: 1rem
-						.avatar
-							border-radius: 2px
-						.tag
-							margin: 2px
-							& + div.field
-								margin-top: 12px
-					footer
-						margin: 0
-						font-weight: bold
+		.page .columns .column
+			margin: auto 0
 	.fade-enter-active, .fade-leave-active
 		transition: opacity .2s ease-in-out both
 	.fade-enter, .fade-leave-to

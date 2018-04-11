@@ -1,7 +1,7 @@
 <template>
 <nav id="navbar" class="navbar is-primary">
 	<div class="navbar-brand">
-		<router-link class="navbar-item is-size-4 has-text-weight-bold" to="/">Catgirls</router-link>
+		<router-link class="navbar-item is-size-4 has-text-weight-bold" to="/">Nekos.moe</router-link>
 
 		<button class="button is-primary navbar-burger" @click="toggleMenu">
 			<span></span>

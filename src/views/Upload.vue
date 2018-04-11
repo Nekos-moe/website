@@ -10,7 +10,16 @@
 
 	<div class="form">
 		<b-field label="Tags" :message="['Required - Use spaces, not underscores or dashes']">
-			<b-taginput v-model="details.tags" maxtags="80" maxlength="50" size="is-small" placeholder="tail"></b-taginput>
+			<b-taginput
+				v-model="details.tags"
+				maxtags="80"
+				maxlength="50"
+				size="is-small"
+				placeholder="paw pose"
+				autocomplete
+				allow-new
+				:data="filteredTags"
+				@typing="getFilteredTags"></b-taginput>
 		</b-field>
 		<b-field label="Artist" message="Use <a href='https://www.iqdb.org/' target='_blank'>iqdb</a> to find the source">
 			<b-input :maxlength="60" icon="brush" v-model="details.artist"></b-input>
@@ -34,6 +43,8 @@ export default {
 				artist: '',
 				nsfw: false
 			},
+			allTags: [],
+			filteredTags: [],
 			smallSize: false,
 			uploading: false
 		};
@@ -53,6 +64,24 @@ export default {
 				this.validity[name].message = this.validity[name].failMessage;
 			else if (this.validity[name].message)
 				this.validity[name].message = '';
+		},
+		getFilteredTags(input) {
+			input = input.toLowerCase();
+
+			this.filteredTags = input ? this.allTags.filter(tag => tag.toLowerCase().indexOf(input) > -1) : this.allTags;
+			return;
+		},
+		async getTags() {
+			try {
+				const response = await this.$http.get(API_BASE_URL + 'tags');
+
+				this.allTags = response.data.tags;
+				return;
+			} catch (error) {
+				if (!error.response)
+					return console.error(error.message);
+				return console.error(error.response);
+			}
 		},
 		async upload() {
 			if (this.uploading)
@@ -144,7 +173,7 @@ export default {
 						message: 'Sorry, someone else beat you to it :(',
 						confirmText: 'View Post',
 						onConfirm: () => {
-							this.$router.push('/post/' + response.data.id);
+							this.$router.push('/post/' + error.response.data.id);
 						},
 						canCancel: ['escape', 'button', 'outside'],
 						cancelText: 'Close'
@@ -253,6 +282,9 @@ export default {
 				});
 			});
 		}
+	},
+	beforeMount() {
+		this.getTags();
 	}
 }
 </script>
