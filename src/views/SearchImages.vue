@@ -12,6 +12,7 @@
 				<b-select v-model="options.sort" placeholder="Sort order" expanded icon="sort">
 					<option value="newest" selected>New</option>
 					<option value="oldest">Old</option>
+					<option value="relevance">Relevance</option>
 					<option value="likes">Likes</option>
 				</b-select>
 			</b-field>

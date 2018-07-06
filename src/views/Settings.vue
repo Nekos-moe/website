@@ -12,7 +12,6 @@
 			<b-taginput
 				v-model="form.blacklist"
 				maxlength="50"
-				size="is-small"
 				placeholder="bad anatomy"
 				autocomplete
 				allow-new
@@ -24,7 +23,6 @@
 				v-model="form.savedTags"
 				maxtags="100"
 				maxlength="50"
-				size="is-small"
 				placeholder="paw pose"
 				autocomplete
 				allow-new

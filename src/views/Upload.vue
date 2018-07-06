@@ -14,7 +14,6 @@
 				v-model="details.tags"
 				maxtags="80"
 				maxlength="50"
-				size="is-small"
 				placeholder="paw pose"
 				autocomplete
 				allow-new

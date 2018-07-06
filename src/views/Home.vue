@@ -93,7 +93,8 @@ export default {
 			newPosts: [],
 			recPosts: [],
 			searchInput: '',
-			getRecs: true
+			getRecs: true,
+			// filteredTags: []
 		};
 	},
 	computed: {
@@ -109,6 +110,9 @@ export default {
 		blacklist() {
 			return this.$store.state.preferences.blacklist || [];
 		},
+		// allTags() {
+		// 	return (this.$store.state.tagCache || []).filter(tag => !this.blacklist.includes(tag));
+		// },
 		tags() {
 			return this.randomElements((this.$store.state.tagCache || []).filter(tag => !this.blacklist.includes(tag)), 20);
 		}
@@ -127,12 +131,18 @@ export default {
 			const array = _array.slice();
 			const elements = [];
 
-			for (let i = 0; i < length; i++) {
+			for (let i = 0; i < length && i < array.length; i++) {
 				const index = Math.random() * array.length | 0
-				elements.push(array.splice(index, 1)[0]);
+				elements.push(array.splice(index, 1)[0]); // Add element after removing it from selection
 			}
 
 			return elements;
+		},
+		getFilteredTags(input) {
+			input = input.toLowerCase();
+
+			this.filteredTags = input ? this.allTags.filter(tag => tag.toLowerCase().indexOf(input) > -1) : this.allTags;
+			return;
 		},
 		getTags() {
 			return this.$store.dispatch('getTags');
@@ -174,7 +184,7 @@ export default {
 					sort: 'recent',
 					limit: 8,
 					nsfw: this.showNsfw === true ? undefined : false,
-					tags: this.user.savedTags + (blacklist ? ', ' + blacklist : '')
+					tags: this.user.savedTags.join(',') + (blacklist ? ', ' + blacklist : '')
 				}, { responseType: 'json' });
 
 				this.recPosts = resp.data.images;

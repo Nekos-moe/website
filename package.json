@@ -17,17 +17,17 @@
 	},
 	"dependencies": {
 		"axios": "~0.18.0",
-		"buefy": "^0.6.3",
+		"buefy": "^0.6.6",
 		"promise-polyfill": "^7.1.0",
 		"vue": "^2.5.2",
-		"vue-analytics": "^5.9.0",
+		"vue-analytics": "^5.12.2",
 		"vue-progressbar": "^0.7.3",
 		"vue-router": "^3.0.1",
 		"vue-timeago": "^3.4.2",
 		"vuex": "^3.0.0"
 	},
 	"devDependencies": {
-		"autoprefixer": "^8.1.0",
+		"autoprefixer": "^8.6.4",
 		"babel-core": "^6.26.0",
 		"babel-eslint": "^8.2.2",
 		"babel-helper-vue-jsx-merge-props": "^2.0.3",
