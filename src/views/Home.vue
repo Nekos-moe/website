@@ -10,7 +10,12 @@
 		</div> -->
 		<div class="search">
 			<p class="header">Explore Nekos</p>
-			<b-input v-model="searchInput" expanded placeholder="Search by tags" icon="magnify" @keyup.enter.native="search"></b-input>
+			<div class="search-bar">
+				<b-taginput v-model="searchInput" maxlength="50" :has-counter="false"
+					autocomplete allow-new ellipsis
+					:data="filteredTags" @typing="getFilteredTags"></b-taginput>
+				<button class="button is-success" @click="search"><b-icon icon="magnify" />Search</button>
+			</div>
 			<p class="trailer">Looking for something more specific? Try our <router-link to="/search/images">Advanced Search</router-link></p>
 		</div>
 		<div v-if="loggedIn && user.savedTags && user.savedTags.length > 0" class="container-images" id="recPosts">
@@ -92,8 +97,9 @@ export default {
 			topPosts: [],
 			newPosts: [],
 			recPosts: [],
-			searchInput: '',
-			getRecs: true
+			searchInput: [],
+			getRecs: true,
+			filteredTags: []
 		};
 	},
 	computed: {
@@ -108,6 +114,9 @@ export default {
 		},
 		blacklist() {
 			return this.$store.state.preferences.blacklist || [];
+		},
+		allTags() {
+			return (this.$store.state.tagCache || []).filter(tag => !this.blacklist.includes(tag));
 		},
 		tags() {
 			return this.randomElements((this.$store.state.tagCache || []).filter(tag => !this.blacklist.includes(tag)), 20);
@@ -127,12 +136,18 @@ export default {
 			const array = _array.slice();
 			const elements = [];
 
-			for (let i = 0; i < length; i++) {
+			for (let i = 0; i < length && i < array.length; i++) {
 				const index = Math.random() * array.length | 0
-				elements.push(array.splice(index, 1)[0]);
+				elements.push(array.splice(index, 1)[0]); // Add element after removing it from selection
 			}
 
 			return elements;
+		},
+		getFilteredTags(input) {
+			input = input.toLowerCase();
+
+			this.filteredTags = input ? this.allTags.filter(tag => tag.toLowerCase().indexOf(input) > -1) : this.allTags;
+			return;
 		},
 		getTags() {
 			return this.$store.dispatch('getTags');
@@ -147,7 +162,7 @@ export default {
 				}, { responseType: 'json' });
 
 				const topResponse = await this.$http.post(API_BASE_URL + 'images/search', {
-					sort: 'top',
+					sort: 'likes',
 					limit: 8,
 					skip: Math.random() * 20 | 0, // Skip a random amount
 					nsfw: this.showNsfw === true ? undefined : false,
@@ -174,7 +189,7 @@ export default {
 					sort: 'recent',
 					limit: 8,
 					nsfw: this.showNsfw === true ? undefined : false,
-					tags: this.user.savedTags + (blacklist ? ', ' + blacklist : '')
+					tags: this.user.savedTags.join(',') + (blacklist ? ', ' + blacklist : '')
 				}, { responseType: 'json' });
 
 				this.recPosts = resp.data.images;
@@ -191,7 +206,7 @@ export default {
 			}
 		},
 		search() {
-			return this.$router.push('/search/images?tags=' + this.searchInput);
+			return this.$router.push('/search/images?tags=' + this.searchInput.map(tag => `"${tag}"`).join(', '));
 		}
 	},
 	beforeMount() {
@@ -279,7 +294,6 @@ export default {
 				border-radius: 3px
 				max-width: calc((100% - 10px * 3) / 3)
 				max-height: 300px
-				height: fit-content
 				box-shadow: 0px 0px 5px #bbb
 				align-self: center
 				&:hover
@@ -296,11 +310,24 @@ export default {
 
 	.search
 		padding: 10px
-		max-width: 800px
+		max-width: 720px
 		.header
 			padding-bottom: 4px
 			font-weight: 700
 			font-size: 26px
+		.search-bar
+			display: flex
+			flex-wrap: nowrap
+			.control
+				flex-grow: 1
+				.counter
+					display: none
+			.button
+				margin-left: 8px
+				.icon
+					margin: 0 4px 0 -4px
+					i:before
+						font-size: 22px
 		.trailer
 			padding-top: 2px
 			font-size: 14px

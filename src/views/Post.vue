@@ -2,41 +2,68 @@
 <div id="base-post">
 	<div class="columns">
 		<div class="column is-one-quarter info" v-if="image">
-			<div v-if="loggedIn && !image.pending && image.likes !== undefined" class="relationship-buttons">
-				<button class="button is-info" :class="{ 'is-outlined': !user.likes.includes(image.id) }" @click="like"><b-icon icon="thumb-up"></b-icon>Like</button>
-				<button class="button is-danger" :class="{ 'is-outlined': !user.favorites.includes(image.id) }" @click="favorite"><b-icon icon="heart"></b-icon>Favorite</button>
+			<div class="header">
+				<h2>Post Info</h2>
 			</div>
-			<b-message v-if="image.pending" title="Pending Approval" type="is-warning" :closable="false">This image is still pending approval and is unlisted.</b-message>
-			<p class="block"><strong>Uploaded by</strong> <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link><br>on {{ new Date(image.createdAt).toLocaleString() }}</p>
-			<p class="block" v-if="image.approver"><strong>Approved by</strong> <router-link :to="'/user/' + image.approver.id">{{ image.approver.username }}</router-link></p>
-			<p class="block">
-				<strong>Favorites:</strong> {{ image.favorites | humanize }}<br>
-				<strong>Likes:</strong> {{ image.likes | humanize }}
-			</p>
+
+			<div class="message is-warning" v-if="image.pending">
+				<div class="message-body">
+					This post is pending approval from a moderator. Until it is approved it will be unlisted.
+				</div>
+			</div>
+
+			<div class="upload-info">
+				<p><strong>Uploader:</strong> <router-link :to="'/user/' + image.uploader.id">{{ image.uploader.username }}</router-link></p>
+				<p v-if="image.approver"><strong>Approver:</strong> <router-link :to="'/user/' + image.approver.id">{{ image.approver.username }}</router-link></p>
+				<p><strong>Uploaded:</strong> {{ new Date(image.createdAt).toLocaleString() }}</p>
+				<p v-if="image.artist"><strong>Artist:</strong> {{ image.artist }}</p>
+			</div>
+
+			<b-field v-if="editMode" label="Artist:" horizontal size="is-small">
+				<b-input v-model="edits.artist" size="is-small"></b-input>
+			</b-field>
 			<div class="field" v-if="editMode">
-				<b-switch v-model="edits.nsfw" type="is-danger">Adult Content</b-switch>
+				<b-checkbox v-model="edits.nsfw" type="is-danger">Adult Content</b-checkbox>
 			</div>
-			<p v-if="image.artist && !editMode"><strong>Artist:</strong> {{ image.artist }}</p>
-			<b-field v-if="editMode" label="Artist">
-				<b-input v-model="edits.artist" icon="brush"></b-input>
-			</b-field>
-			<div class="tag-list" v-if="tags && tags.length > 0 && tags[0]">
-				<b-tag v-for="(tag, i) of tags"
-					:key="i"
-					:type="(editMode ? edits.nsfw : image.nsfw) ? 'is-danger' : 'is-primary'"
-					:closable="editMode"
-					@close="deleteTag(tag)">{{ tag }}
-				</b-tag>
+
+			<p class="relationship" v-if="!image.pending">
+				<button v-if="loggedIn && user" class="button is-info" :class="{ 'is-outlined': !user.likes.includes(image.id) }"
+					@click="like"><b-icon icon="thumb-up"></b-icon>{{ image.likes }} Like{{ image.likes !== 1 ? 's' : '' }}</button>
+				<button v-if="loggedIn && user" class="button is-danger" :class="{ 'is-outlined': !user.favorites.includes(image.id) }"
+					@click="favorite"><b-icon icon="heart"></b-icon>{{ image.favorites }} Favorite{{ image.favorites !== 1 ? 's' : '' }}</button>
+
+				<button v-if="!loggedIn || !user" class="button is-white"><b-icon icon="thumb-up">
+					</b-icon>{{ image.likes }} Like{{ image.likes !== 1 ? 's' : '' }}</button>
+				<button v-if="!loggedIn || !user" class="button is-white"><b-icon icon="heart">
+					</b-icon>{{ image.favorites }} Favorite{{ image.favorites !== 1 ? 's' : '' }}</button>
+			</p>
+
+			<div class="tags">
+				<div class="sub-header">
+					<p>Tags</p>
+				</div>
+				<div class="tag-list" :class="{ 'edit-mode': editMode }" v-if="tags && tags.length > 0 && tags[0]">
+					<span v-for="(tag, i) of tags" :key="i" class="tag"
+						:class="{ 'is-danger': (editMode ? edits.nsfw : image.nsfw), 'is-primary': !(editMode ? edits.nsfw : image.nsfw) }"
+						@click="!editMode && searchTag(tag)">{{ tag }}
+						<button v-show="editMode" class="delete is-small" @click="deleteTag(tag)"></button>
+					</span>
+				</div>
+				<p v-else>No tags</p>
+
+				<b-field v-if="editMode">
+					<b-input v-model="newTag" size="is-small" placeholder="paw pose" expanded></b-input>
+					<p class="control">
+						<button class="button is-small" @click="addTag">Add tag</button>
+					</p>
+				</b-field>
 			</div>
-			<p class="block" v-else>No tags</p>
-			<b-field v-if="editMode">
-				<b-input v-model="newTag" placeholder="paw pose" expanded></b-input>
-				<p class="control">
-					<button class="button" @click="addTag">Add tag</button>
-				</p>
-			</b-field>
+
 			<div class="edit-buttons" v-if="canEdit">
-				<button v-show="!editMode" class="button is-info" @click="enableEditMode"><b-icon icon="pencil"></b-icon>Edit Post</button>
+				<div class="sub-header">
+					<p>Post Options</p>
+				</div>
+				<button v-show="!editMode" class="button is-warning" @click="enableEditMode"><b-icon icon="pencil"></b-icon>Edit Post</button>
 				<button v-show="!editMode" class="button is-danger" @click="confirmDelete"><b-icon icon="delete"></b-icon>Delete Post</button>
 				<button v-show="editMode" class="button is-success" @click="saveChanges"><b-icon icon="content-save"></b-icon>Save</button>
 				<button v-show="editMode" class="button is-warning" @click="updateData"><b-icon icon="close"></b-icon>Discard</button>
@@ -184,10 +211,13 @@ export default {
 					create: !this.user.likes.includes(this.image.id)
 				}, { headers: { 'Authorization': localStorage.getItem('token') } });
 
-				if (this.user.likes.includes(this.image.id))
+				if (this.user.likes.includes(this.image.id)) {
 					this.user.likes.splice(this.user.likes.indexOf(this.image.id), 1);
-				else
+					this.image.likes--;
+				} else {
 					this.user.likes.push(this.image.id);
+					this.image.likes++;
+				}
 
 				this.likeLoading = false;
 			} catch(error) {
@@ -215,10 +245,13 @@ export default {
 					create: !this.user.favorites.includes(this.image.id)
 				}, { headers: { 'Authorization': localStorage.getItem('token') } });
 
-				if (this.user.favorites.includes(this.image.id))
+				if (this.user.favorites.includes(this.image.id)) {
 					this.user.favorites.splice(this.user.favorites.indexOf(this.image.id), 1);
-				else
+					this.image.favorites--;
+				} else {
 					this.user.favorites.push(this.image.id);
+					this.image.favorites++;
+				}
 
 				this.favoriteLoading = false;
 			} catch(error) {
@@ -231,6 +264,10 @@ export default {
 				});
 				this.favoriteLoading = false;
 			}
+		},
+		searchTag(tag) {
+			console.log(tag);
+			return this.$router.push(`/search/images?tags="${tag}"`);
 		}
 	},
 	beforeMount() {
@@ -245,28 +282,66 @@ export default {
 <style lang="sass">
 #base-post
 	.info
-		margin: 30px 0
-		.button .icon:first-child:last-child
+		.button .icon
 			margin-left: 0
 			margin-right: 6px
-		.relationship-buttons
-			text-align: center
-			margin-bottom: 20px
-			.button:first-of-type
-				margin-right: 10px
-		.block
-			margin: 10px 0
-		.tag-list
-			margin: 20px 0
-			.tag
-				margin: 2px
-				button
-					margin-left: 3px
+			i::before
+				font-size: 22px
+				vertical-align: text-bottom
+		.field
+			&:not(:last-child)
+				margin-bottom: 4px
+			& + .relationship
+				margin-top: 30px
+			.field-label
+				font-size: 16px
+				padding-top: 0
+				text-align: left
+				label
+					display: inline-block
+					vertical-align: middle
+		.header
+			border-bottom: 2px solid #4A4A4A
+			margin-bottom: 30px
+			padding-bottom: 4px
+			width: 100%
+			h2
+				font-size: 28px
+				font-weight: 700
+				line-height: 28px
+		.sub-header
+			border-bottom: 1px solid #4A4A4A
+			font-weight: 700
+			margin-bottom: 8px
+			width: 100%
+		.message .message-body
+			padding: .75em 1em
+		.upload-info, .relationship, .tags
+			margin-bottom: 30px
+		.relationship
+			display: flex
+			justify-content: space-around
+		.tags
+			.tag-list
+				margin: -2px
+				&.edit-mode .tag
+					user-select: unset
+					&:hover
+						cursor: auto
+				.tag
+					margin: 2px
+					user-select: none
+					&:hover
+						cursor: pointer
+					button
+						margin-left: 3px
+			.field
+				margin-top: 8px
+				width: 100%
 		.edit-buttons
-			text-align: center
-			margin: 30px 0
-			button
-				margin: 5px
+			display: flex
+			flex-wrap: wrap
+			justify-content: space-around
 	.image-wrapper
 		flex-basis: 76%
 		display: flex

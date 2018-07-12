@@ -61,7 +61,9 @@
 									@close="removeTag(post, tag)"
 								>{{ tag }}</b-tag>
 								<b-field v-if="currentlyEditing === post.id">
-									<b-input v-model="newTag" size="is-small" expanded></b-input>
+									<b-autocomplete v-model="newTag" size="is-small" :data="filteredTags"
+										@input="getFilteredTags" clear-on-select @select="tag => tag && addTag(post, tag)"
+										keep-first expanded></b-autocomplete>
 									<p class="control"><button class="button is-primary is-small" :class="{ 'is-danger': post.nsfw }" @click="addTag(post)">Add tag</button></p>
 								</b-field>
 							</div>
@@ -99,7 +101,9 @@ export default {
 			newTag: '',
 			isDenyActive: false,
 			denyId: null,
-			reason: ''
+			reason: '',
+			allTags: [],
+			filteredTags: [],
 		};
 	},
 	computed: {
@@ -271,7 +275,7 @@ export default {
 					confirmText: 'Save changes',
 					type: 'is-warning',
 					onConfirm: async () => {
-						let success = await this.saveChanges();
+						let success = await this.saveChanges(); // TODO: Fix undefined post
 						if (success)
 							this.currentlyEditing = id;
 					}
@@ -304,11 +308,11 @@ export default {
 
 			this.currentlyEditing = null;
 		},
-		addTag(post) {
-			if (!this.currentlyEditing || !this.newTag)
+		addTag(post, tag) {
+			if (!this.currentlyEditing || (!tag && !this.newTag))
 				return
 
-			this.$set(post.tags, post.tags.length, this.newTag);
+			this.$set(post.tags, post.tags.length, tag || this.newTag);
 			this.newTag = '';
 		},
 		removePost(id) {
@@ -340,10 +344,29 @@ export default {
 				}
 				return;
 			});
+		},
+		getFilteredTags(input) {
+			input = input.toLowerCase();
+
+			this.filteredTags = input ? this.allTags.filter(tag => tag.toLowerCase().indexOf(input) > -1) : this.allTags;
+			return;
+		},
+		async getTags() {
+			try {
+				const response = await this.$http.get(API_BASE_URL + 'tags');
+
+				this.allTags = response.data.tags;
+				return;
+			} catch (error) {
+				if (!error.response)
+					return console.error(error.message);
+				return console.error(error.response);
+			}
 		}
 	},
 	beforeMount() {
 		this.getPosts();
+		this.getTags();
 	}
 }
 </script>

@@ -5,7 +5,7 @@ describe('Hello.vue', () => {
 	it('should render correct contents', () => {
 		const Constructor = Vue.extend(Hello);
 		const vm = new Constructor().$mount();
-		expect(vm.$el.querySelector('.account-view .username').textContent)
-			.to.equal('Brussell');
+		expect(vm.$el.querySelector('.navbar-brand > a').textContent)
+			.to.equal('Nekos.moe');
 	});
 });

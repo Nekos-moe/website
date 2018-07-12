@@ -135,7 +135,7 @@ export default {
 					return;
 
 				let ids = this.mode === 'likes' ? this.profile.likes : this.profile.favorites;
-				ids = ids.slice(((this.posts.length || 1) - 1) * 9, (this.posts.length - 1) * 9 + 27);
+				ids = ids.reverse().slice(this.posts.length * 9, this.posts.length * 9 + 27);
 
 				let response = await this.$http.post(API_BASE_URL + 'batch/images', { ids }, {
 					headers: {

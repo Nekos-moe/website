@@ -9,7 +9,7 @@
 	</div>
 	<footer>
 		&copy; Brussell 2018 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
-		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="/api-docs/index.html" target="_blank">API docs here</a>
+		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="https://docs.nekos.moe/" target="_blank">API docs</a>
 	</footer>
 </div>
 </template>
@@ -72,7 +72,6 @@ $link-focus-border: $primary
 @import "~buefy/src/scss/buefy"
 
 html
-	// background-image: url("../static/images/60-lines.png")
 	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%2396abec' fill-opacity='0.3' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E")
 
 body
@@ -101,9 +100,12 @@ body
 		font-family: 'Nunito', sans-serif
 		margin: 1rem 0 2rem
 
-.modal .modal-image
-	width: unset
-	margin: auto
+.modal
+	.modal-content
+		width: unset
+	.modal-image
+		width: unset
+		margin: auto
 
 .media-content
 	overflow: inherit
