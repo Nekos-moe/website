@@ -9,7 +9,7 @@
 	</div>
 	<footer>
 		&copy; Brussell 2018 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
-		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="/api-docs/index.html" target="_blank">API docs here</a>
+		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="https://docs.nekos.moe/" target="_blank">API docs</a>
 	</footer>
 </div>
 </template>
