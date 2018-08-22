@@ -12,7 +12,7 @@
 		<b-field label="Tags" :message="['Required - Use spaces, not underscores or dashes']">
 			<b-taginput
 				v-model="details.tags"
-				maxtags="80"
+				maxtags="120"
 				maxlength="50"
 				placeholder="paw pose"
 				autocomplete
@@ -26,7 +26,7 @@
 		<b-field label="NSFW">
 			<b-switch type="is-danger" v-model="details.nsfw">This post contains adult content</b-switch>
 		</b-field>
-		<button class="button" @click="promptForImportId"><b-icon icon="import"></b-icon>Import data from danbooru</button>
+		<button class="button" @click="promptForImportId"><b-icon icon="import"></b-icon>Import from danbooru</button>
 		<button class="button is-primary" @click="upload" :class="{ 'is-loading': uploading }"><b-icon icon="upload"></b-icon>Upload</button>
 	</div>
 </div>
@@ -45,7 +45,9 @@ export default {
 			allTags: [],
 			filteredTags: [],
 			smallSize: false,
-			uploading: false
+			uploading: false,
+			importedImage: null,
+			size: null // TODO: Migrate smallSize
 		};
 	},
 	computed: {
@@ -54,16 +56,6 @@ export default {
 		}
 	},
 	methods: {
-		validate(e) {
-			let name = e.target.name;
-			if (!this.validity[name])
-				return;
-
-			if (!this.validity[name].check(e.target.value))
-				this.validity[name].message = this.validity[name].failMessage;
-			else if (this.validity[name].message)
-				this.validity[name].message = '';
-		},
 		getFilteredTags(input) {
 			input = input.toLowerCase();
 
@@ -95,14 +87,14 @@ export default {
 				});
 
 			let proceed = true;
-			if (this.details.tags.length <= 5)
+			if (this.details.tags.length <= 10)
 				proceed = await this.confirm('Low Tag Count', "Your post doesn't have many tags! We require all posts to have detailed tags so they can be searched easily. If you need help tagging posts then head over to the uploading guidelines.");
 
 			if (proceed === false)
 				return;
 
 			let imageInput = document.getElementById('image');
-			if (!imageInput.files[0]) {
+			if (!imageInput.files[0] && !this.importedImage) {
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
@@ -110,7 +102,7 @@ export default {
 					message: 'Please select an image to post.'
 				});
 			}
-			if (imageInput.files[0].size > 3145728) {
+			if (this.size > 3145728) {
 				return this.$dialog.alert({
 					type: 'is-warning',
 					hasIcon: true,
@@ -123,7 +115,8 @@ export default {
 			this.$Progress.start();
 
 			let data = new FormData();
-			data.append('image', imageInput.files[0]);
+			data.append('image', this.importedImage || imageInput.files[0]);
+			console.log(data.get('image'))
 			data.append('artist', this.details.artist);
 			for (const tag of this.details.tags)
 				data.append('tags[]', tag);
@@ -144,6 +137,9 @@ export default {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
 				this.hasImage = false;
+				this.importedImage = null;
+				this.smallSize = false;
+				this.size = null;
 				this.details.tags = [];
 				this.details.artist = '';
 				this.details.nsfw = false;
@@ -187,7 +183,7 @@ export default {
 				});
 			});
 		},
-		confirm(title, body) {
+		confirm(title, message) {
 			return new Promise(resolve => {
 				return this.$dialog.confirm({
 					title,
@@ -208,26 +204,25 @@ export default {
 			document.getElementById('image').click();
 		},
 		previewImage(e) {
-			this.smallSize = false;
 			if (!e.target.files || !e.target.files[0]) {
 				document.getElementById('image-select').style.backgroundImage = '';
 				document.getElementById('image-details').textContent = '';
-				this.hasImage = false;
+
+				if (!this.importedImage) {
+					this.hasImage = false;
+					this.smallSize = false;
+					this.size = null;
+				}
 				return;
 			}
 
-			let reader = new FileReader(),
-				filename = e.target.files[0].name,
-				size = e.target.files[0].size;
+			this.smallSize = false;
+			this.importedImage = null; // Only delete imported image if a local one was selected
 
-			size = size / 1024;
-			if (size >= 1024)
-				size = (size / 1024).toFixed(2) + ' MB';
-			else {
-				if (size <= 100)
-					this.smallSize = true;
-				size = size.toFixed(2) + ' KB';
-			}
+			const reader = new FileReader();
+			const filename = e.target.files[0].name;
+			const size = this.formatFileSize(e.target.files[0].size);
+			this.size = e.target.files[0].size;
 
 			reader.onload = result => {
 				setTimeout(() => {
@@ -236,7 +231,7 @@ export default {
 					document.getElementById('image-select').style.backgroundSize = 'cover';
 					document.getElementById('image-select').style.backgroundPosition = 'center';
 					document.getElementById('image-details').textContent = `${filename} — ${size}`;
-				}, this.hasImage ? 0 : 300);
+				}, 300);
 				this.hasImage = true;
 			};
 
@@ -252,9 +247,13 @@ export default {
 				onConfirm: value => this.importTags(value)
 			});
 		},
-		importTags(id) {
+		async importTags(id) {
 			this.$Progress.start();
-			return this.$http.get(`https://danbooru.donmai.us/posts/${id}.json`).then(response => {
+
+			this.importedImage = null;
+
+			try {
+				const response = await this.$http.get(`https://danbooru.donmai.us/posts/${id}.json`);
 				this.$Progress.finish();
 
 				let tags = response.data.tag_string_general;
@@ -268,7 +267,49 @@ export default {
 					.replace(/([0-9]\+?)(girls?|boys?|koma)/g, '$1 $2')
 					.split(',');
 				this.details.artist = response.data.tag_string_artist.replace(/_/g, ' ');
-			}).catch(error => {
+
+				if (response.data.rating !== 's')
+					this.details.nsfw = true;
+
+				if (!['jpg', 'png', 'jpeg'].includes(response.data.file_ext))
+					return this.$snackbar.open({
+						message: 'Imported image was not a jpg or png',
+						type: 'is-warning'
+					});
+
+				if (response.data.file_size > 3145728) {
+					return this.$dialog.alert({
+						type: 'is-warning',
+						hasIcon: true,
+						title: 'Image Too Large',
+						message: 'This image was unable to be imported because it exceeds the size limit of 3MB. Please resize the image down to a maximum of 2,000 pixels or convert it to a high-quality JPG.'
+					});
+				}
+
+				const imageRes = await this.$http.get(API_BASE_URL + 'proxy/danbooru', {
+					params: { url: response.data.file_url },
+					headers: { 'Authorization': localStorage.getItem('token') }
+				});
+
+				const bstr = atob(imageRes.data.data);
+				let i = bstr.length;
+				const u8arr = new Uint8Array(i);
+				while (i--)
+					u8arr[i] = bstr.charCodeAt(i);
+
+				this.importedImage = new File([u8arr], `${response.data.md5}.${response.data.file_ext}`, { type: imageRes.data.type });
+				this.hasImage = true;
+
+				this.smallSize = false;
+				this.size = response.data.file_size;
+				const size = this.formatFileSize(response.data.file_size);
+
+				document.getElementById('image-select').style.backgroundImage = `url(data:${imageRes.data.type};base64,${imageRes.data.data})`;
+				document.getElementById('image-select').style.backgroundRepeat = 'no-repeat';
+				document.getElementById('image-select').style.backgroundSize = 'cover';
+				document.getElementById('image-select').style.backgroundPosition = 'center';
+				document.getElementById('image-details').textContent = `danbooru:${response.data.id} — ${size}`;
+			} catch (error) {
 				this.$Progress.fail();
 
 				console.error(error);
@@ -279,7 +320,19 @@ export default {
 					title: 'Error',
 					message: error.response && error.response.data.message || error.message
 				});
-			});
+			}
+		},
+		formatFileSize(size) {
+			size = size / 1024;
+			if (size >= 1024)
+				size = (size / 1024).toFixed(2) + ' MB';
+			else {
+				if (size <= 100)
+					this.smallSize = true;
+				size = size.toFixed(2) + ' KB';
+			}
+
+			return size;
 		}
 	},
 	beforeMount() {

@@ -309,7 +309,7 @@ export default {
 			this.currentlyEditing = null;
 		},
 		addTag(post, tag) {
-			if (!this.currentlyEditing || (!tag && !this.newTag))
+			if (!this.currentlyEditing || (!tag && !this.newTag) || post.tags.includes(tag || this.newTag))
 				return
 
 			this.$set(post.tags, post.tags.length, tag || this.newTag);
