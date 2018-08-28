@@ -9,7 +9,7 @@
 	<p>New to uploading? <router-link to="/uploading-guidelines">Read our uploading guidelines</router-link></p>
 
 	<div class="form">
-		<b-field label="Tags" :message="['Required - Use spaces, not underscores or dashes']">
+		<b-field label="Tags" :message="['Required - Be detailed! There\'s a tag for almost every element of an image']">
 			<b-taginput
 				v-model="details.tags"
 				maxtags="120"
@@ -205,10 +205,10 @@ export default {
 		},
 		previewImage(e) {
 			if (!e.target.files || !e.target.files[0]) {
-				document.getElementById('image-select').style.backgroundImage = '';
-				document.getElementById('image-details').textContent = '';
-
 				if (!this.importedImage) {
+					document.getElementById('image-select').style.backgroundImage = '';
+					document.getElementById('image-details').textContent = '';
+
 					this.hasImage = false;
 					this.smallSize = false;
 					this.size = null;
@@ -285,6 +285,10 @@ export default {
 						message: 'This image was unable to be imported because it exceeds the size limit of 3MB. Please resize the image down to a maximum of 2,000 pixels or convert it to a high-quality JPG.'
 					});
 				}
+
+				document.getElementById('image').value = '';
+				document.getElementById('image-select').style.backgroundImage = '';
+				document.getElementById('image-details').textContent = '';
 
 				const imageRes = await this.$http.get(API_BASE_URL + 'proxy/danbooru', {
 					params: { url: response.data.file_url },
@@ -366,7 +370,7 @@ export default {
 			&:first-of-type
 				margin: 30px 0 20px
 	.image-picker
-		margin: 40px auto
+		margin: 40px auto 20px
 		text-align: center
 		font-family: 'Nunito', sans-serif
 		button
@@ -396,6 +400,7 @@ export default {
 		#image-details
 			display: none
 			color: #444
+			padding-top: 4px
 			&.has-image
 				display: block
 		#small-size-warning

@@ -172,9 +172,8 @@ export default {
 		async deletePost() {
 			try {
 				await this.$http.delete(`${API_BASE_URL}images/${this.image.id}`, {
-					headers: {
-						'Authorization': localStorage.getItem('token')
-					}
+					params: { pending: !!this.image.pending },
+					headers: { Authorization: localStorage.getItem('token') }
 				});
 
 				this.$router.push('/');
@@ -266,7 +265,6 @@ export default {
 			}
 		},
 		searchTag(tag) {
-			console.log(tag);
 			return this.$router.push(`/search/images?tags="${tag}"`);
 		}
 	},

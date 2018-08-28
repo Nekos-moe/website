@@ -14,7 +14,7 @@
 			</section>
 			<footer class="modal-card-foot">
 				<button class="button" @click="isDenyActive = false">Cancel</button>
-				<button class="button is-primary" @click="reason && deny(denyId, reason)">Deny</button>
+				<button class="button is-primary" @click="reason && deny()">Deny</button>
 			</footer>
 		</div>
 	</b-modal>
@@ -230,16 +230,15 @@ export default {
 			this.denyId = id;
 			this.isDenyActive = true;
 		},
-		async deny(id, reason) {
+		async deny() {
 			this.isDenyActive = false;
-			this.denyId = null;
 
 			this.$Progress.start();
 
 			try {
-				let response = await this.$http.post(`${API_BASE_URL}pending/${id}/review`, {
+				let response = await this.$http.post(`${API_BASE_URL}pending/${this.denyId}/review`, {
 					action: 'deny',
-					reason
+					reason: this.reason
 				}, {
 					headers: { 'Authorization': localStorage.getItem('token') }
 				});
@@ -255,9 +254,15 @@ export default {
 					position: 'is-bottom-right'
 				});
 
+				this.denyId = null;
+				this.reason = '';
 				return response;
 			} catch (error) {
 				this.$Progress.fail();
+
+				this.denyId = null;
+				this.reason = '';
+
 				console.error(error);
 				return this.$dialog.alert({
 					type: 'is-danger',
