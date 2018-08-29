@@ -184,12 +184,12 @@ export default {
 		},
 		async getRecommendedPosts() {
 			try {
-				const blacklist = this.$store.getters.blacklist;
-				const resp = await this.$http.post(API_BASE_URL + 'images/search', {
+				const resp = await this.$http.post(API_BASE_URL + 'images/recommended', {
 					sort: 'recent',
 					limit: 8,
 					nsfw: this.showNsfw === true ? undefined : false,
-					tags: this.user.savedTags.join(',') + (blacklist ? ', ' + blacklist : '')
+					tags: this.user.savedTags,
+					blacklist: this.$store.getters.blacklistArray
 				}, { responseType: 'json' });
 
 				this.recPosts = resp.data.images;

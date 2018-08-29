@@ -1,1 +1,1 @@
-window.Promise = window.Promise || require('promise-polyfill');
+window.Promise = window.Promise || require('promise-polyfill').default;

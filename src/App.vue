@@ -9,16 +9,13 @@
 	</div>
 	<footer>
 		&copy; Brussell 2018 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
-		Made with <a href="https://vuejs.org/" target="_blank">vuejs</a>. No Bootstrap, no jQuery. <a href="https://docs.nekos.moe/" target="_blank">API docs</a>
+		GitHub: <a href="https://github.com/brussell98/catgirls-website" target="_blank">Website</a>, <a href="https://github.com/brussell98/catgirls-api" target="_blank">API</a> &nbsp;|&nbsp; <a href="https://docs.nekos.moe/" target="_blank">API docs</a>
 	</footer>
 </div>
 </template>
 
 <script>
 export default {
-	data() {
-		return { };
-	},
 	beforeMount() {
 		this.$store.dispatch('getSelf');
 	},
@@ -27,7 +24,7 @@ export default {
 		this.$Progress.finish();
 	},
 	created() {
-		console.log("%cFind something wrong? You can submit an issue or PR on these repos:\n%chttps://github.com/brussell98/catgirls-website\nhttps://github.com/brussell98/catgirls-api", 'font-size: 16px; color: #ec407a', 'text-decoration: underline; color: #039be5')
+		console.log('%cHey you! Interested in contributing to Nekos.moe? Check out our repos:\n%chttps://github.com/brussell98/catgirls-website\nhttps://github.com/brussell98/catgirls-api\nhttps://github.com/Nekos-moe/docs', 'font-size: 16px; color: #F66D9B', 'text-decoration: underline; color: #039be5')
 
 		// When App.vue is first loaded start the progress bar
 		this.$Progress.start();
@@ -41,15 +38,6 @@ export default {
 		this.$router.afterEach((to, from) => {
 			this.$Progress.finish();
 		});
-
-		// if (this.$store.state.lastUpdateMessage !== 'beta8')
-		// 	return this.$dialog.alert({
-		// 		type: 'is-info',
-		// 		title: 'Welcome to the Nekos.moe Beta!',
-		// 		message: ` - Brussell <small>(Lead Developer)</small>`,
-		// 		onConfirm: () => this.$store.commit('lastUpdateMessage', 'beta8'),
-		// 		canCancel: false
-		// 	});
 	}
 }
 </script>

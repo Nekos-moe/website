@@ -2,10 +2,10 @@
 <div id="base-login">
 	<div class="form">
 		<b-field label="Username">
-			<b-input name='login-user' required placeholder="username" icon="account"></b-input>
+			<b-input v-model="login.username" name="login-user" required placeholder="username" icon="account"></b-input>
 		</b-field>
 		<b-field label="Password">
-			<b-input name="login-pass" type="password" password-reveal required placeholder="password" icon="lock"></b-input>
+			<b-input v-model="login.password" name="login-pass" type="password" password-reveal required placeholder="password" icon="lock"></b-input>
 		</b-field>
 		<button class="button is-primary" @click="login"><b-icon icon="login"></b-icon>Log In</button>
 		<button class="button is-primary is-outlined" @click="$router.push('/register')"><b-icon icon="account-plus"></b-icon>Register</button>
@@ -18,16 +18,20 @@
 export default {
 	data() {
 		return {
+			login: {
+				username: '',
+				password: ''
+			},
 			loginError: null
 		};
 	},
 	methods: {
 		async login() {
-			let username = document.getElementsByName('login-user')[0].value,
-				password = document.getElementsByName('login-pass')[0].value;
-
 			try {
-				let response = await this.$http.post(API_BASE_URL + 'auth', { username, password });
+				let response = await this.$http.post(API_BASE_URL + 'auth', {
+					username: this.login.username,
+					password: this.login.password
+				});
 
 				this.loginError = null;
 				this.$store.commit('hasToken', true);

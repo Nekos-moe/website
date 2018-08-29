@@ -6,7 +6,11 @@
 		</b-field>
 		<button class="submit button is-primary" @click="getResults(true)"><b-icon icon="magnify"></b-icon>Search</button>
 	</div>
-	<div class="results">
+	<div class="no-results" v-show="users.length === 0">
+		<b-message v-show="firstSearch" type="is-primary">Type a username or search all users.</b-message>
+		<b-message v-show="!firstSearch" type="is-primary">No users matched your search.</b-message>
+	</div>
+	<div class="results" v-show="users.length !== 0">
 		<div class="user-grid-wrapper">
 			<div class="pagination-wrapper top">
 				<b-pagination
@@ -62,7 +66,8 @@ export default {
 			users: [],
 			page: 1,
 			search: '',
-			hitEnd: false
+			hitEnd: false,
+			firstSearch: true
 		};
 	},
 	computed: {
@@ -82,6 +87,8 @@ export default {
 		},
 		async getResults(isNew = false) {
 			this.$Progress.start();
+
+			this.firstSearch = false;
 
 			try {
 				let response = await this.$http.post(API_BASE_URL + 'users/search', {
@@ -139,6 +146,12 @@ export default {
 		.button.submit
 			width: 100%
 			margin: 10px 0 30px
+	.no-results
+		margin: 0 auto
+		padding-top: 12px
+		article
+			max-width: 400px
+			margin: auto
 	.results .user-grid-wrapper
 		.pagination-wrapper
 			margin: auto
