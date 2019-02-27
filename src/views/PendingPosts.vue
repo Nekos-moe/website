@@ -13,7 +13,7 @@
 				</b-field>
 			</section>
 			<footer class="modal-card-foot">
-				<button class="button" @click="isDenyActive = false">Cancel</button>
+				<button class="button" @click="isDenyActive = false, this.reason = ''">Cancel</button>
 				<button class="button is-primary" @click="reason && deny()">Deny</button>
 			</footer>
 		</div>
@@ -245,11 +245,11 @@ export default {
 
 				this.$Progress.finish();
 
-				this.removePost(id);
+				this.removePost(this.denyId);
 
 				this.$snackbar.open({
 					type: 'is-success',
-					message: `Post ${id} denied`,
+					message: `Post ${this.denyId} denied`,
 					duration: 5000,
 					position: 'is-bottom-right'
 				});
@@ -260,16 +260,17 @@ export default {
 			} catch (error) {
 				this.$Progress.fail();
 
-				this.denyId = null;
-				this.reason = '';
-
 				console.error(error);
-				return this.$dialog.alert({
+				this.$dialog.alert({
 					type: 'is-danger',
-					title: 'Error denying post ' + id,
+					title: 'Error denying post ' + this.denyId,
 					message: error ? error.response && error.response.data.message || error.message : 'Unknown Error',
 					hasIcon: true
 				});
+
+				this.denyId = null;
+				this.reason = '';
+				return;
 			}
 		},
 		edit(id) {
