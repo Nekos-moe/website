@@ -116,7 +116,6 @@ export default {
 
 			let data = new FormData();
 			data.append('image', this.importedImage || imageInput.files[0]);
-			console.log(data.get('image'))
 			data.append('artist', this.details.artist);
 			for (const tag of this.details.tags)
 				data.append('tags[]', tag);

@@ -1,7 +1,7 @@
 {
-	"name": "catgirls-website",
-	"version": "0.15.0",
-	"description": "A website filled with catgirls",
+	"name": "nekos-website",
+	"version": "0.15.1",
+	"description": "A website for art of characters with cat-like appearances",
 	"author": "brussell98",
 	"license": "MIT",
 	"private": true,

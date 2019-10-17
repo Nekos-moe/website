@@ -9,7 +9,7 @@
 	</div>
 	<footer>
 		&copy; Brussell 2018 &nbsp;|&nbsp; <a href="https://brussell.me">brussell.me</a><br>
-		GitHub: <a href="https://github.com/brussell98/catgirls-website" target="_blank">Website</a>, <a href="https://github.com/brussell98/catgirls-api" target="_blank">API</a> &nbsp;|&nbsp; <a href="https://docs.nekos.moe/" target="_blank">API docs</a>
+		GitHub: <a href="https://github.com/Nekos-moe/website" target="_blank">Website</a>, <a href="https://github.com/Nekos-moe/api" target="_blank">API</a> &nbsp;|&nbsp; <a href="https://docs.nekos.moe/" target="_blank">API docs</a>
 	</footer>
 </div>
 </template>
@@ -24,7 +24,7 @@ export default {
 		this.$Progress.finish();
 	},
 	created() {
-		console.log('%cHey you! Interested in contributing to Nekos.moe? Check out our repos:\n%chttps://github.com/brussell98/catgirls-website\nhttps://github.com/brussell98/catgirls-api\nhttps://github.com/Nekos-moe/docs', 'font-size: 16px; color: #F66D9B', 'text-decoration: underline; color: #039be5')
+		console.log('%cHey you! Interested in contributing to Nekos.moe? Check out our repos:\n%chttps://github.com/Nekos-moe/website\nhttps://github.com/Nekos-moe/api\nhttps://github.com/Nekos-moe/docs', 'font-size: 16px; color: #F66D9B', 'text-decoration: underline; color: #039be5')
 
 		// When App.vue is first loaded start the progress bar
 		this.$Progress.start();
