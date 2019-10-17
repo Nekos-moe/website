@@ -16,7 +16,7 @@
 		"travis": "node test/e2e/runner.js --env travis"
 	},
 	"dependencies": {
-		"axios": "~0.18.0",
+		"axios": "~0.18.1",
 		"buefy": "^0.6.6",
 		"promise-polyfill": "^8.1.0",
 		"vue": "^2.5.17",
